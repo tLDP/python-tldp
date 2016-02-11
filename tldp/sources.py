@@ -7,7 +7,7 @@ import sys
 import logging
 
 from .utils import logger
-from .guess import knownextensions
+from .guess import guess, knownextensions
 
 # class SourceTree(object):
 #
@@ -18,7 +18,8 @@ from .guess import knownextensions
 class SourceDir(object):
 
     def __repr__(self):
-        return self.dirname
+        return '<%s:%s (%s docs)>' % \
+               (self.__class__.__name__, self.dirname, len(self.docs))
 
     def __init__(self, dirname):
         self.dirname = os.path.abspath(dirname)
@@ -46,7 +47,8 @@ class SourceDir(object):
 class SourceDocument(object):
 
     def __repr__(self):
-        return self.filename
+        return '<%s:%s (%s)>' % \
+               (self.__class__.__name__, self.filename, self.doctype)
 
     def __init__(self, filename):
         # -- canonicalize the pathname we are given.
@@ -54,11 +56,11 @@ class SourceDocument(object):
         if not os.path.exists(self.filename):
             raise OSError("Missing source document: " + self.filename)
 
+        logger.info("Found existing %s", self.filename)
         self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = os.path.splitext(self.basename)
         self.stat = os.stat(self.filename)
 
-        self.doctype = None
         self.resources = False  # -- assume no ./images/, ./resources/
         self.singlefile = True  # -- assume only one file
         parentdir = os.path.basename(self.dirname)
@@ -68,10 +70,9 @@ class SourceDocument(object):
                 if os.path.exists(os.path.join(self.dirname, rdir)):
                     self.resources = True
 
+    @property
     def doctype(self):
-        if self.doctype is None:
-            self.doctype = guess(self.filename)
-        return self.doctype
+        return guess(self.filename)
 
 
 class OutputDocument(object):
