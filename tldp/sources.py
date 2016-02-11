@@ -4,38 +4,46 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import sys
-import logging
 
 from .utils import logger
 from .guess import guess, knownextensions
 
 
-class SourceDir(object):
+class Sources(object):
 
     def __repr__(self):
-        return '<%s:%s (%s docs)>' % \
-               (self.__class__.__name__, self.sourcedir, len(self.docs))
+        return '<%s:(%s docs)>' % \
+               (self.__class__.__name__, len(self.docs))
 
-    def __init__(self, sourcedir):
-        self.sourcedir = os.path.abspath(sourcedir)
+    def __init__(self, args):
+        self.sourcedirs = [os.path.abspath(x) for x in args]
         self.docs = list()
-        if not os.path.exists(sourcedir):
-            raise OSError("[Errno 2] No such file or directory: " + sourcedir)
+        self.validateDirs()
         self.enumerateDocuments()
 
+    def validateDirs(self):
+        results = [os.path.exists(x) for x in self.sourcedirs]
+        if not all(results):
+            for result, sourcedir in zip(results, self.sourcedir):
+                logger.critical("[Errno 2] No such file or directory: " + sourcedir)
+            raise OSError("[Errno 2] No such file or directory: " + sourcedir)
+
     def enumerateDocuments(self):
-        for fname in os.listdir(self.sourcedir):
-            possible = os.path.join(self.sourcedir, fname)
-            if os.path.isfile(possible):
-                self.docs.append(SourceDocument(possible))
-            elif os.path.isdir(fname):
-                stem = os.path.basename(fname)
-                for ext in knownextensions:
-                    possible = os.path.join(self.sourcedir, fname, stem + ext)
-                    if os.path.isfile(possible):
-                        self.docs.append(SourceDocument(possible))
-        logger.info("Discovered %s documents in %s",
-                    len(self.docs), self.sourcedir)
+        for sdir in self.sourcedirs:
+            docs = list()
+            for fname in os.listdir(sdir):
+                possible = os.path.join(sdir, fname)
+                if os.path.isfile(possible):
+                    docs.append(SourceDocument(possible))
+                elif os.path.isdir(fname):
+                    stem = os.path.basename(fname)
+                    for ext in knownextensions:
+                        possible = os.path.join(sdir, fname, stem + ext)
+                        if os.path.isfile(possible):
+                            docs.append(SourceDocument(possible))
+            logger.debug("Discovered %s documents in %s", len(docs), sdir)
+            self.docs.extend(docs)
+        logger.info("Discovered %s documents total", len(self.docs))
 
 
 class SourceDocument(object):
@@ -51,17 +59,17 @@ class SourceDocument(object):
             raise OSError("Missing source document: " + self.filename)
 
         logger.debug("Found existing %s", self.filename)
-        self.sourcedir, self.basename = os.path.split(self.filename)
+        self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = os.path.splitext(self.basename)
         self.stat = os.stat(self.filename)
 
         self.resources = False  # -- assume no ./images/, ./resources/
         self.singlefile = True  # -- assume only one file
-        parentdir = os.path.basename(self.sourcedir)
+        parentdir = os.path.basename(self.dirname)
         if parentdir == self.stem:
             self.singlefile = False
             for rdir in ('resources', 'images'):
-                if os.path.exists(os.path.join(self.sourcedir, rdir)):
+                if os.path.exists(os.path.join(self.dirname, rdir)):
                     self.resources = True
 
     @property
