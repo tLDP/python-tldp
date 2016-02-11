@@ -26,7 +26,6 @@ class SourceDir(object):
         self.docs = list()
         if not os.path.exists(dirname):
             raise OSError("[Errno 2] No such file or directory: " + dirname)
-        logger.info("Time to go for an enumeration stroll in %s", dirname)
         self.enumerateDocuments()
 
     def enumerateDocuments(self):
@@ -56,7 +55,7 @@ class SourceDocument(object):
         if not os.path.exists(self.filename):
             raise OSError("Missing source document: " + self.filename)
 
-        logger.info("Found existing %s", self.filename)
+        logger.debug("Found existing %s", self.filename)
         self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = os.path.splitext(self.basename)
         self.stat = os.stat(self.filename)

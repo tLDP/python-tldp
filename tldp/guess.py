@@ -23,7 +23,7 @@ def makefh(thing):
 def listDoctypes():
     knowndoctypes = list()
     for name, member in inspect.getmembers(doctypes, inspect.isclass):
-        logger.info("Located class %s (%r).", name, member)
+        logger.debug("Located class %s (%r).", name, member)
         knowndoctypes.append(member)
     logger.info("Capable of handling %s document classes.", len(knowndoctypes))
     return knowndoctypes
