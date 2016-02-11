@@ -9,11 +9,6 @@ import logging
 from .utils import logger
 from .guess import guess, knownextensions
 
-# class SourceTree(object):
-#
-#     def __init__(self, root, config):
-#         pass
-
 
 class SourceDir(object):
 
@@ -72,47 +67,5 @@ class SourceDocument(object):
     @property
     def doctype(self):
         return guess(self.filename)
-
-
-class OutputDocument(object):
-
-    formats = {'pdf':  '.pdf',
-               'txt':  '.txt',
-               'html':  '.html',
-               'htmls':  '-single.html', }
-
-    def __init__(self, filename):
-        pass
-
-    @property
-    def txt(self):
-        return os.path.join(self.dirname, self.stem, '.txt')
-
-
-class OutputDir(object):
-
-    def __init__(self, dirname):
-        self.dirname = os.path.abspath(dirname)
-        self.parent = os.path.dirname(dirname)
-        self.stem = os.path.basename(dirname)
-        self.members = list()
-
-    def mkdir(self):
-        if not os.path.exists(self.parent):
-            raise OSError("Missing parent directory: " + self.parent)
-        os.mkdir(self.dirname)
-        return os.path.exists(self.dirname)
-
-    @property
-    def members(self):
-        return os.path.exists(self.dirname)
-
-    @property
-    def exists(self):
-        return os.path.exists(self.dirname)
-
-    @property
-    def isComplete(self):
-        return all(self.pdf, self.html, self.htmls, self.txt)
 
 # -- end of file
