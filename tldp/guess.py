@@ -45,7 +45,7 @@ def guess(thing):
 
     # -- for this extension, multiple document types, probably SGML, XML
     #
-    logger.info("Extension is %s for %s; multiple possible document types.",
+    logger.debug("Extension is %s for %s; multiple possible document types.",
                 ext, fin.name)
     for doctype in possible:
         logger.debug("Extension is %s for %s; %s.", ext, fin.name, doctype)
@@ -57,7 +57,7 @@ def guess(thing):
             guesses.append((sindex, doctype))
 
     if not guesses:
-        logger.info("Extension is %s for %s; but no matching signature found.",
+        logger.warning("Extension is %s for %s; no matching signature found.",
                     ext, fin.name)
         return None
     if len(guesses) == 1:
