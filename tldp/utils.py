@@ -1,5 +1,7 @@
 #! /usr/bin/python
 
+from __future__ import absolute_import, division, print_function
+
 import sys
 import logging
 
@@ -11,6 +13,10 @@ def getLogger(**opts):
     return logger
 
 logger = getLogger()
+
+
+def runner(cmd, env, stdin, stdout, stderr):
+    pass
 
 #
 # -- end of file

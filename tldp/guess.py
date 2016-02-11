@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import os
 import inspect
@@ -46,7 +46,7 @@ def guess(thing):
     # -- for this extension, multiple document types, probably SGML, XML
     #
     logger.debug("Extension is %s for %s; multiple possible document types.",
-                ext, fin.name)
+                 ext, fin.name)
     for doctype in possible:
         logger.debug("Extension is %s for %s; %s.", ext, fin.name, doctype)
 
@@ -58,7 +58,7 @@ def guess(thing):
 
     if not guesses:
         logger.warning("Extension is %s for %s; no matching signature found.",
-                    ext, fin.name)
+                       ext, fin.name)
         return None
     if len(guesses) == 1:
         _, doctype = guesses.pop()
