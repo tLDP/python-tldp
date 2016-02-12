@@ -20,11 +20,11 @@ def listDoctypes():
 
 def guess(thing):
     try:
-        fin = makefh(thing)
+        f = makefh(thing)
     except TypeError:
         return None
 
-    _, ext = os.path.splitext(fin.name)
+    _, ext = os.path.splitext(f.name)
     possible = [t for t in knowndoctypes if ext in t.extensions]
     if not possible:
         return None
@@ -35,19 +35,19 @@ def guess(thing):
     # -- for this extension, multiple document types, probably SGML, XML
     #
     logger.debug("Extension is %s for %s; multiple possible document types.",
-                 ext, fin.name)
+                 ext, f.name)
     for doctype in possible:
-        logger.debug("Extension is %s for %s; %s.", ext, fin.name, doctype)
+        logger.debug("Extension is %s for %s; %s.", ext, f.name, doctype)
 
     guesses = list()
     for doctype in possible:
-        sindex = doctype.signatureLocation(fin.name, fin)
+        sindex = doctype.signatureLocation(f)
         if sindex is not None:
             guesses.append((sindex, doctype))
 
     if not guesses:
         logger.warning("Extension is %s for %s; no matching signature found.",
-                       ext, fin.name)
+                       ext, f.name)
         return None
     if len(guesses) == 1:
         _, doctype = guesses.pop()
@@ -58,7 +58,7 @@ def guess(thing):
     #    first signature in the file as the more likely document type.
     #
     guesses.sort()
-    logger.info("Multiple guesses for file %s", fin.name)
+    logger.info("Multiple guesses for file %s", f.name)
     for sindex, doctype in guesses:
         logger.info("Could be %s (file position %s)", doctype, sindex)
     logger.info("Going to guess that it is %s", doctype)
