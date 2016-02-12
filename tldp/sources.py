@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-import sys
 import operator
 
 from .utils import logger
@@ -26,9 +25,9 @@ class Sources(object):
     def validateDirs(self):
         results = [os.path.exists(x) for x in self.sourcedirs]
         if not all(results):
-            for result, sourcedir in zip(results, self.sourcedir):
-                logger.critical("[Errno 2] No such file or directory: " + sourcedir)
-            raise OSError("[Errno 2] No such file or directory: " + sourcedir)
+            for result, sdir in zip(results, self.sourcedir):
+                logger.critical("[Errno 2] No such file or directory: " + sdir)
+            raise OSError("[Errno 2] No such file or directory: " + sdir)
 
     def enumerateDocuments(self):
         for sdir in self.sourcedirs:
