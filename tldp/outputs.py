@@ -9,6 +9,9 @@ from .utils import logger
 
 class OutputDir(object):
 
+    def __repr__(self):
+        return '<%s:%s>' % (self.__class__.__name__, self.outputdir)
+
     def __init__(self, outputdir):
         self.outputdir = os.path.abspath(outputdir)
         self.stem = os.path.basename(outputdir)
