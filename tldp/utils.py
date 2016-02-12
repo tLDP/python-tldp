@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import io
 import sys
 import logging
 
@@ -37,7 +38,7 @@ http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python/37
 
 
 def makefh(thing):
-    if isinstance(thing, file):
+    if isinstance(thing, io.IOBase):
         f = thing
     elif isinstance(thing, str) and os.path.isfile(thing):
         f = open(thing)
