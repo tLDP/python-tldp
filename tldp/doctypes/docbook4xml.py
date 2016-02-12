@@ -6,7 +6,7 @@ from .common import SignatureChecker
 
 
 class Docbook4XML(SignatureChecker):
-    formatname = ['DocBook 4.x XML']
+    formatname = 'DocBook 4.x XML'
     extensions = ['.xml']
     signatures = ['-//OASIS//DTD DocBook XML V4.1.2//EN',
                   '-//OASIS//DTD DocBook XML V4.2//EN',
