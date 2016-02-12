@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-import operator
 
 from .utils import logger
 from .guess import guess, knownextensions
@@ -20,7 +19,7 @@ class Sources(object):
         self.docs = list()
         self.validateDirs()
         self.enumerateDocuments()
-        self.docs.sort(key=operator.attrgetter('stem'))
+        self.docs.sort(key=lambda x: x.stem.lower())
 
     def validateDirs(self):
         results = [os.path.exists(x) for x in self.sourcedirs]
