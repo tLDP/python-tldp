@@ -5,19 +5,8 @@ from __future__ import absolute_import, division, print_function
 import os
 import inspect
 
+from .utils import logger, makefh
 from . import doctypes
-from .utils import logger
-
-
-def makefh(thing):
-    if isinstance(thing, file):
-        f = thing
-    elif isinstance(thing, str) and os.path.isfile(thing):
-        f = open(thing)
-    else:
-        raise TypeError("Cannot make file from type %s of %r" %
-                        (type(thing), thing,))
-    return f
 
 
 def listDoctypes():
