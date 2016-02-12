@@ -9,18 +9,18 @@ from ..utils import logger
 class SignatureChecker(object):
 
     @classmethod
-    def signatureLocation(cls, name, fin):
-        fin.seek(0)
-        buf = fin.read(1024)
+    def signatureLocation(cls, f):
+        f.seek(0)
+        buf = f.read(1024)
         for sig in cls.signatures:
             try:
                 sindex = string.index(buf.lower(), sig.lower())
-                logger.debug("In file %s, signature %s found at %s; doctype %s found",
-                             name, sig, sindex, cls)
+                logger.debug("Found signature %s in %s at %s; doctype %s.",
+                             sig, f.name, sindex, cls)
                 return sindex
             except ValueError:
-                logger.debug("In file %s, signature %s not found for document type %s",
-                             name, sig, cls.__name__)
+                logger.debug("Signature %s not found in %s for type %s",
+                             sig, f.name, cls.__name__)
         return None
 
 #
