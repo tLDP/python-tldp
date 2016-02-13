@@ -24,7 +24,7 @@ class Sources(object):
     def validateDirs(self):
         results = [os.path.exists(x) for x in self.sourcedirs]
         if not all(results):
-            for result, sdir in zip(results, self.sourcedir):
+            for result, sdir in zip(results, self.sourcedirs):
                 logger.critical("[Errno 2] No such file or directory: " + sdir)
             raise OSError("[Errno 2] No such file or directory: " + sdir)
 
