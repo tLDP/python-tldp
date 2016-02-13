@@ -62,7 +62,7 @@ def guess(thing):
     for sindex, doctype in guesses:
         logger.info("Could be %s (file position %s)", doctype, sindex)
     logger.info("Going to guess that it is %s", doctype)
-    _, doctype = guesses.pop()
+    _, doctype = guesses.pop(0)
     return doctype
 
 
