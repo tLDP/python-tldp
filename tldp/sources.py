@@ -57,6 +57,8 @@ class SourceDocument(object):
         self.filename = os.path.abspath(filename)
         if not os.path.exists(self.filename):
             raise OSError("Missing source document: " + self.filename)
+        if not os.path.isfile(self.filename):
+            raise OSError("Wrong type, not a plain file: " + self.filename)
 
         logger.debug("Found existing %s", self.filename)
         self.dirname, self.basename = os.path.split(self.filename)
