@@ -27,15 +27,15 @@ class TestDoctypes(unittest.TestCase):
 
     def testDetectionBySignature(self):
         for ex in examples.examples:
-            if isinstance(ex['type'], SignatureChecker):
-                dt = genericGuessTest(ex['content'], ex['ext'])
-                self.assertEqual(ex['type'], dt)
+            if isinstance(ex.type, SignatureChecker):
+                dt = genericGuessTest(ex.content, ex['ext'])
+                self.assertEqual(ex.type, dt)
 
     def testDetectionByExtension(self):
         for ex in examples.examples:
-            if not isinstance(ex['type'], SignatureChecker):
-                dt = genericGuessTest(ex['content'], ex['ext'])
-                self.assertEqual(ex['type'], dt)
+            if not isinstance(ex.type, SignatureChecker):
+                dt = genericGuessTest(ex.content, ex.ext)
+                self.assertEqual(ex.type, dt)
 
     def testDetectionBogusExtension(self):
         dt = genericGuessTest('franks-cheese-shop', '.wmix')
@@ -53,12 +53,12 @@ class TestDoctypes(unittest.TestCase):
         self.assertIsNone(dt)
 
     def testGuessTooManyMatches(self):
-        a = examples.ex_docbook4xml['content']
-        b = examples.ex_docbook5xml['content']
-        four, fourdt = a + b, examples.ex_docbook4xml['type']
+        a = examples.ex_docbook4xml.content
+        b = examples.ex_docbook5xml.content
+        four, fourdt = a + b, examples.ex_docbook4xml.type
         dt = genericGuessTest(four, '.xml')
         self.assertIs(dt, fourdt)
-        five, fivedt = b + a, examples.ex_docbook5xml['type']
+        five, fivedt = b + a, examples.ex_docbook5xml.type
         dt = genericGuessTest(five, '.xml')
         self.assertIs(dt, fivedt)
 
