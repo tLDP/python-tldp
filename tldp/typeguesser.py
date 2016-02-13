@@ -25,9 +25,16 @@ def guess(thing):
         return None
 
     _, ext = os.path.splitext(f.name)
-    possible = [t for t in knowndoctypes if ext in t.extensions]
-    if not possible:
+    if not ext:
+        logger.debug("No file extension for %s, skipping.", ext)
         return None
+
+    possible = [t for t in knowndoctypes if ext in t.extensions]
+    logger.debug("Possible:  %r", possible)
+    if not possible:
+        logger.debug("Found no possible doctypes for extension %s.", ext)
+        return None
+
     if len(possible) == 1:
         doctype = possible.pop()
         return doctype
