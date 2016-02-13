@@ -44,5 +44,19 @@ class TestInvalidSources(TestSources):
         self.assertEquals(0, len(s.docs))
         
 
+class TestMissingSourceDocuments(TestSources):
+
+    def test_init_missing(self):
+        missing = os.path.join(self.tempdir, 'vanishing')
+        with self.assertRaises(OSError) as ecm:
+            SourceDocument(missing)
+        e = ecm.exception
+        self.assertTrue('Missing' in e.message)
+
+        with self.assertRaises(OSError) as ecm:
+            SourceDocument(self.tempdir)
+        e = ecm.exception
+        self.assertTrue('Wrong type' in e.message)
+
 #
 # -- end of file
