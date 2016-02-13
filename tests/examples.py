@@ -11,7 +11,9 @@ except ImportError:
 import tldp.doctypes
 
 opj = os.path.join
-testdatadir = os.path.join(os.path.dirname(__file__), 'testdata')
+opd = os.path.dirname
+opa = os.path.abspath
+testdatadir = opa(opj(opd(__file__), 'testdata'))
 
 ex_linuxdoc = SimpleNamespace(
                ext='.sgml',
