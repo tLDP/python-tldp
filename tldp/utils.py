@@ -43,7 +43,7 @@ def makefh(thing):
     elif isinstance(thing, str) and os.path.isfile(thing):
         f = open(thing)
     else:
-        raise TypeError("Cannot make file from type %s of %r" %
+        raise TypeError("Cannot make file from %s of %r" %
                         (type(thing), thing,))
     return f
 
