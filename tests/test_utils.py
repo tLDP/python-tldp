@@ -32,6 +32,7 @@ class Test_which(unittest.TestCase):
         self.assertEqual(f.name, found)
         os.unlink(f.name)
 
+
 class Test_makefh(unittest.TestCase):
 
     def test_makefh(self):

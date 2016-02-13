@@ -5,48 +5,49 @@ import os
 
 import tldp.doctypes
 
-datadir = os.path.join(os.path.dirname(__file__), 'testdata')
+opj = os.path.join
+testdatadir = os.path.join(os.path.dirname(__file__), 'testdata')
 
 ex_linuxdoc = {
                'ext': '.sgml',
                'type': tldp.doctypes.linuxdoc.Linuxdoc,
-               'filename': os.path.join(datadir, 'linuxdoc-simple.sgml'),
+               'filename': opj(testdatadir, 'linuxdoc-simple.sgml'),
               }
 
 ex_docbooksgml = {
                   'ext': '.sgml',
                   'type': tldp.doctypes.docbooksgml.DocbookSGML,
-                  'filename': os.path.join(datadir, 'docbooksgml-simple.sgml'),
+                  'filename': opj(testdatadir, 'docbooksgml-simple.sgml'),
                  }
 
 ex_docbook4xml = {
                  'ext': '.xml',
                  'type': tldp.doctypes.docbook4xml.Docbook4XML,
-                 'filename': os.path.join(datadir, 'docbook4xml-simple.xml'),
+                 'filename': opj(testdatadir, 'docbook4xml-simple.xml'),
                 }
 
 ex_docbook5xml = {
                  'ext': '.xml',
                  'type': tldp.doctypes.docbook5xml.Docbook5XML,
-                 'filename': os.path.join(datadir, 'docbook5xml-simple.xml'),
+                 'filename': opj(testdatadir, 'docbook5xml-simple.xml'),
                 }
 
 ex_rst = {
           'ext': '.rst',
           'type': tldp.doctypes.rst.RestructuredText,
-          'filename': os.path.join(datadir, 'restructuredtext-simple.rst'),
+          'filename': opj(testdatadir, 'restructuredtext-simple.rst'),
          }
 
 ex_text = {
            'ext': '.txt',
            'type': tldp.doctypes.text.Text,
-           'filename': os.path.join(datadir, 'text-simple.txt'),
+           'filename': opj(testdatadir, 'text-simple.txt'),
           }
 
 ex_markdown = {
                'ext': '.md',
                'type': tldp.doctypes.markdown.Markdown,
-               'filename': os.path.join(datadir, 'markdown-simple.md'),
+               'filename': opj(testdatadir, 'markdown-simple.md'),
               }
 
 
