@@ -3,40 +3,82 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import errno
 
 from .utils import logger
 
 
-class OutputDir(object):
+class OutputNamingConvention(object):
+
+    expected = ['name_txt', 'name_pdf', 'name_htmls', 'name_html']
+
+    def __init__(self, stem, dirname):
+        self.stem = stem
+        self.dirname = dirname
+
+    @property
+    def name_txt(self):
+        return os.path.join(self.dirname, self.stem + '.txt')
+
+    @property
+    def name_pdf(self):
+        return os.path.join(self.dirname, self.stem + '.pdf')
+
+    @property
+    def name_html(self):
+        return os.path.join(self.dirname, self.stem + '.html')
+
+    @property
+    def name_htmls(self):
+        return os.path.join(self.dirname, self.stem + '-single.html')
+
+
+class OutputDirectory(OutputNamingConvention):
+
+    def __init__(self, dirname):
+        self.dirname = os.path.abspath(dirname)
+        self.stem = os.path.basename(self.dirname)
+        parent = os.path.dirname(self.dirname)
+        if not os.path.isdir(parent):
+            logger.critical("Missing output tree %s.", parent)
+            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), parent)
+        if not os.path.isdir(self.dirname):
+            logger.info("Creating output directory %s.", dirname)
+            os.mkdir(dirname)
+        super(OutputDirectory, self).__init__(self.stem, self.dirname)
+
+    def clear(self):
+        logger.info("%s clearing directory", self.stem, self.dirname)
+        for oformat in self.expected:
+            name = getattr(self, oformat, None)
+            assert name is not None
+            if os.path.exists(name):
+                logger.info("%s removing file %s", self.stem, name)
+                os.unlink(name)
+
+
+class OutputTree(object):
 
     def __repr__(self):
-        return '<%s:%s>' % (self.__class__.__name__, self.outputdir)
+        return '<%s:(%s docs)>' % \
+               (self.__class__.__name__, len(self.docs))
 
-    def __init__(self, outputdir):
-        self.outputdir = os.path.abspath(outputdir)
-        self.stem = os.path.basename(outputdir)
-        self.parent = os.path.dirname(self.outputdir)
+    def __init__(self, dirname):
+        if not os.path.isdir(dirname):
+            logger.critical("Directory %s must already exist.", dirname)
+            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), dirname)
+        self.dirname = dirname
+        self.docs = list()
+        self.enumerateDocuments()
 
-    def mkdir(self):
-        if not os.path.exists(self.parent):
-            raise OSError("Missing parent directory: " + self.parent)
-        os.mkdir(self.outputdir)
-
-    @property
-    def txt_name(self):
-        return os.path.join(self.outputdir, self.stem, '.txt')
-
-    @property
-    def pdf_name(self):
-        return os.path.join(self.outputdir, self.stem, '.pdf')
-
-    @property
-    def html_name(self):
-        return os.path.join(self.outputdir, self.stem, '.html')
-
-    @property
-    def htmls_name(self):
-        return os.path.join(self.outputdir, self.stem, '-single.html')
+    def enumerateDocuments(self):
+        for fname in os.listdir(self.dirname):
+            name = os.path.join(self.dirname, fname)
+            if not os.path.isdir(name):
+                logger.warning("Skipping non-directory %s (in %s)",
+                               name, self.dirname)
+            self.docs.append(OutputDirectory(name))
 
 
+#
 # -- end of file
