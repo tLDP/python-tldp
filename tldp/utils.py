@@ -5,16 +5,45 @@ from __future__ import absolute_import, division, print_function
 import os
 import io
 import sys
+import subprocess
+from tempfile import mkstemp
 import logging
 
 
 def getLogger(**opts):
-    level = opts.get('level', logging.INFO)
+    level = opts.get('level', logging.DEBUG)
     logging.basicConfig(stream=sys.stderr, level=level)
     logger = logging.getLogger()
     return logger
 
 logger = getLogger()
+
+
+def execute(cmd, stdin=None, stdout=None, stderr=None,
+            logdir=None, env=os.environ):
+    prefix = os.path.basename(cmd[0]) + '.' + str(os.getpid()) + '-'
+
+    if logdir is None:
+        raise Exception("Missing, required parameter: logdir.")
+    assert os.path.isdir(logdir)
+
+    # -- not remapping STDIN, because that doesn't make sense here
+    if stdout is None:
+        stdout, stdoutname = mkstemp(prefix=prefix, suffix='.stdout',
+                                     dir=logdir)
+    if stderr is None:
+        stderr, stderrname = mkstemp(prefix=prefix, suffix='.stderr',
+                                     dir=logdir)
+
+    logger.debug("About to execute: %r", cmd)
+    proc = subprocess.Popen(cmd, shell=False, close_fds=True,
+                            stdin=stdin, stdout=stdout, stderr=stderr,
+                            env=env, preexec_fn=os.setsid)
+    result = proc.wait()
+    if result != 0:
+        logger.warning("Return code (%s) for process: %r", result, cmd)
+        logger.warning("Find STDOUT/STDERR in %s/%s", logdir, prefix)
+    return result
 
 
 def is_executable(fpath):
