@@ -2,11 +2,8 @@
 
 from __future__ import absolute_import, division, print_function
 
-import inspect
-
 from .typeguesser import knowndoctypes
 from .utils import logger, which
-from . import doctypes
 
 
 class Platform(object):
