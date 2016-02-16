@@ -27,9 +27,10 @@ class SignatureChecker(object):
 class BaseDoctype(object):
 
     def __init__(self, *args, **kwargs):
-        self.source = kwargs.get('source')
-        self.output = kwargs.get('output')
-        self.platform = kwargs.get('platform')
+        self.source = kwargs.get('source', None)
+        self.output = kwargs.get('output', None)
+        self.platform = kwargs.get('platform', None)
+        assert None is not in (self.source, self.output, self.platform)
         self.logdir = os.path.join(self.output.dirname, 'logs')
         if os.path.exists(self.logdir):
             logger.warning("Found existing logs directory: %s", self.logdir)
