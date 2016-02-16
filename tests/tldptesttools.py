@@ -12,8 +12,8 @@ def stem_and_ext(name):
     return stem, ext
 
 def dir_to_components(reldir):
-    reldir = os.path.normpath(reldir)
-    components = list()
+    reldir, basename = os.path.split(os.path.normpath(reldir))
+    components = [basename]
     while reldir != '':
         reldir, basename = os.path.split(reldir)
         components.append(basename)
@@ -41,13 +41,18 @@ class TestToolsFilesystem(unittest.TestCase):
         relpath = os.path.relpath(absdir, self.tempdir)
         return relpath, absdir
 
-    def addfile(self, dirname, exfile, stem=None, ext=None):
+    def addfile(self, reldir, filename, content=None, stem=None, ext=None):
         if stem is None:
-            stem, _ = stem_and_ext(exfile.filename)
+            stem, _ = stem_and_ext(filename)
         if ext is None:
-            _, ext = stem_and_ext(exfile.filename)
-        newname = os.path.join(dirname, stem + ext)
-        shutil.copy(exfile.filename, newname)
+            _, ext = stem_and_ext(filename)
+        newname = os.path.join(self.tempdir, reldir, stem + ext)
+        if os.path.isfile(filename):
+            shutil.copy(filename, newname)
+        else:
+            with open(newname) as f:
+                if content:
+                    f.write(content)
         relname = os.path.relpath(newname, self.tempdir)
         return relname, newname
 
