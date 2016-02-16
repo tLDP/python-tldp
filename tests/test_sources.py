@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import errno
 import unittest
 from tempfile import NamedTemporaryFile as ntf
 from tempfile import mkdtemp, mkstemp
@@ -98,18 +99,18 @@ class TestInvalidSourceDirs(TestSourceDirs):
 
     def test_validateDirs_onebad(self):
         invalid0 = os.path.join(self.tempdir, 'unique', 'rabbit')
-        with self.assertRaises(OSError) as ecm:
+        with self.assertRaises(IOError) as ecm:
             SourceDirs([invalid0])
         e = ecm.exception
-        self.assertTrue('unique/rabbit' in e.message)
+        self.assertTrue('unique/rabbit' in e.filename)
 
     def test_validateDirs_multibad(self):
         invalid0 = os.path.join(self.tempdir, 'unique', 'rabbit')
         invalid1 = os.path.join(self.tempdir, 'affable', 'elephant')
-        with self.assertRaises(OSError) as ecm:
+        with self.assertRaises(IOError) as ecm:
             SourceDirs([invalid0, invalid1])
         e = ecm.exception
-        self.assertTrue('affable/elephant' in e.message)
+        self.assertTrue('affable/elephant' in e.filename)
 
     def testEmptyDir(self):
         s = SourceDirs([self.tempdir])
@@ -120,12 +121,12 @@ class TestMissingSourceDocuments(TestSourceDirs):
 
     def test_init_missing(self):
         missing = os.path.join(self.tempdir, 'vanishing')
-        with self.assertRaises(OSError) as ecm:
+        with self.assertRaises(IOError) as ecm:
             SourceDocument(missing)
         e = ecm.exception
-        self.assertTrue('Missing' in e.message)
+        self.assertEquals(errno.ENOENT, e.errno)
 
-        with self.assertRaises(OSError) as ecm:
+        with self.assertRaises(TypeError) as ecm:
             SourceDocument(self.tempdir)
         e = ecm.exception
         self.assertTrue('Wrong type' in e.message)

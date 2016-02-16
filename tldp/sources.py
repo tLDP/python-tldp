@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import errno
 
 from .utils import logger
 from .typeguesser import guess, knownextensions
@@ -26,7 +27,7 @@ class SourceDirs(object):
         if not all(results):
             for result, sdir in zip(results, self.sourcedirs):
                 logger.critical("Directory does not exist: " + sdir)
-            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), sdir)
+            raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), sdir)
 
     def enumerateDocuments(self):
         for sdir in self.sourcedirs:
@@ -57,7 +58,7 @@ class SourceDocument(object):
         self.filename = os.path.abspath(filename)
         if not os.path.exists(self.filename):
             logger.critical("Missing source document: %s", self.filename)
-            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), self.filename)
+            raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), self.filename)
         if not os.path.isfile(self.filename):
             logger.critical("Source document is not a plain file: %s", self.filename)
             raise TypeError("Wrong type, not a plain file: " + self.filename)
