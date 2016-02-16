@@ -38,12 +38,16 @@ class BaseDoctype(object):
 
     def generate(self):
         os.chdir(self.output.dirname)
-        self.output.clear()
-        self.platform_check()
-        self.create_htmls()
-        self.create_pdf()
-        self.create_txt()
-        self.create_html()
+        vector = [self.output.clean(),
+                  self.platform_check(),
+                  self.create_htmls(),
+                  self.create_pdf(),
+                  self.create_txt(),
+                  self.create_html(),
+                  ]
+        result = all(vector)
+        logger.info("%s generation of all documents %s", self.source.stem, result)
+        return all(vector)
 
 #
 # -- end of file
