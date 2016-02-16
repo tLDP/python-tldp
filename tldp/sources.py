@@ -27,23 +27,28 @@ class SourceCollection(collections.MutableMapping):
 
         for sdir in dirs:
             docs = dict()
+            candidates = list()
             for fname in os.listdir(sdir):
                 possible = os.path.join(sdir, fname)
                 if os.path.isfile(possible):
-                    this = SourceDocument(possible)
-                    docs[this.stem] = this
+                    candidates.append(SourceDocument(possible))
                 elif os.path.isdir(fname):
                     stem = os.path.basename(fname)
                     for ext in knownextensions:
                         possible = os.path.join(sdir, fname, stem + ext)
                         if os.path.isfile(possible):
-                            this = SourceDocument(possible)
-                            if not docs.has_key(this):
-                                docs[this.stem] = this
-                            else:
-                                logger.critical("Uh-oh, duplicate STEM near %s", fname)
-            logger.debug("Discovered %s documents in %s", len(docs), sdir)
-            self.update(docs)
+                            candidates.append(SourceDocument(possible))
+                else:
+                    logger.warning("Skipping non-directory, non-plain file %s",
+                                   possible)
+                    continue
+                for candy in candidates:
+                    if candy.stem in self:
+                        logger.warning("Duplicate stems: %s and %s", 
+                                        self[candy.stem].filename, candy.filename)
+                        logger.warning("Ignoring %s", candy.filename)
+                    else:
+                        self[candy.stem] = candy
         logger.info("Discovered %s documents total", len(self))
 
     def __delitem__(self, key):
