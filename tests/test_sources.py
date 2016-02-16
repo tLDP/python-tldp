@@ -28,6 +28,16 @@ def stem_and_ext(name):
     assert ext != ''
     return stem, ext
 
+def dir_to_components(reldir):
+    reldir = os.path.normpath(reldir)
+    components = list()
+    while reldir != '':
+        reldir, basename = os.path.split(reldir)
+        components.append(basename)
+    assert len(components) >= 1
+    components.reverse()
+    return components
+
 
 class TestSourceCollection(unittest.TestCase):
 
@@ -37,16 +47,16 @@ class TestSourceCollection(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tempdir)
 
-    def mkdir_components(self, components):
-        dirname = self.tempdir
-        assert len(components) >= 1
+    def adddir(self, reldir):
+        components = dir_to_components(reldir)
+        absdir = self.tempdir
         while components:
-            dirname = os.path.join(dirname, components.pop(0))
-            if not os.path.isdir(dirname):
-                os.mkdir(dirname)
-        self.assertTrue(os.path.isdir(dirname))
-        relpath = os.path.relpath(dirname, self.tempdir)
-        return relpath, dirname
+            absdir = os.path.join(absdir, components.pop(0))
+            if not os.path.isdir(absdir):
+                os.mkdir(absdir)
+        self.assertTrue(os.path.isdir(absdir))
+        relpath = os.path.relpath(absdir, self.tempdir)
+        return relpath, absdir
 
     def addfile(self, dirname, exfile, stem=None, ext=None):
         if stem is None:
@@ -63,34 +73,65 @@ class TestFileSourceCollectionMultiDir(TestSourceCollection):
 
     def test_multidir_finding_singlefiles(self):
         ex = random.choice(examples.examples)
-        doc0 = SimpleNamespace(stem="A-Unique-Stem", components=['LDP', 'howto'])
-        doc1 = SimpleNamespace(stem="A-Different-Stem", components=['LDP', 'guide'])
+        doc0 = SimpleNamespace(reldir='LDP/howto', stem="A-Unique-Stem")
+        doc1 = SimpleNamespace(reldir='LDP/guide', stem="A-Different-Stem")
         documents = (doc0, doc1)
         for d in documents:
-            d.reldir, d.absdir = self.mkdir_components(d.components)
+            d.reldir, d.absdir = self.adddir(d.reldir)
             d.relname, d.absname = self.addfile(d.absdir, ex, stem=d.stem)
         s = SourceCollection([x.absdir for x in documents])
         self.assertEquals(2, len(s))
-        sought = set([x.stem for x in documents])
-        found = set([x for x in s])
-        self.assertEquals(sought, found)
+        expected = set([x.stem for x in documents])
+        found = set(s.keys())
+        self.assertEquals(expected, found)
+
+    def test_multidir_finding_namecollision(self):
+        ex = random.choice(examples.examples)
+        doc0 = SimpleNamespace(reldir='LDP/howto', stem="A-Non-Unique-Stem")
+        doc1 = SimpleNamespace(reldir='LDP/guide', stem="A-Non-Unique-Stem")
+        documents = (doc0, doc1)
+        for d in documents:
+            d.reldir, d.absdir = self.adddir(d.reldir)
+            d.relname, d.absname = self.addfile(d.absdir, ex, stem=d.stem)
+        s = SourceCollection([x.absdir for x in documents])
+        self.assertEquals(1, len(s))
+        expected = set([x.stem for x in documents])
+        found = set(s.keys())
+        self.assertEquals(expected, found)
 
 
 class TestFileSourceCollectionOneDir(TestSourceCollection):
 
+    def test_finding_nonfile(self):
+        maindir = 'LDP/LDP/howto'
+        reldir, absdir = self.adddir(maindir)
+        os.mkfifo(os.path.join(absdir, 'non-dir-non-file.rst'))
+        s = SourceCollection([absdir])
+        self.assertEquals(0, len(s))
+
     def test_finding_singlefile(self):
         ex = random.choice(examples.examples)
-        maindir = ['LDP', 'LDP', 'howto']
-        reldir, absdir = self.mkdir_components(maindir)
+        maindir = 'LDP/LDP/howto'
+        reldir, absdir = self.adddir(maindir)
         _, _ = self.addfile(absdir, ex)
         s = SourceCollection([absdir])
         self.assertEquals(1, len(s))
 
     def test_skipping_misnamed_singlefile(self):
         ex = random.choice(examples.examples)
-        maindir = ['LDP', 'LDP', 'howto']
-        reldir, absdir = self.mkdir_components(maindir)
+        maindir = 'LDP/LDP/howto'
+        reldir, absdir = self.adddir(maindir)
         self.addfile(absdir, ex, ext=".mis")
+        s = SourceCollection([absdir])
+        self.assertEquals(1, len(s))
+
+    def test_multiple_stems_of_different_extensions(self):
+        ex = random.choice(examples.examples)
+        stem = 'A-Non-Unique-Stem'
+        maindir = os.path.join('LDP/LDP/howto', stem)
+        reldir, absdir = self.adddir(maindir)
+        self.addfile(absdir, ex, stem=stem, ext=".xml")
+        self.addfile(absdir, ex, stem=stem, ext=".md")
         s = SourceCollection([absdir])
         self.assertEquals(1, len(s))
 
@@ -114,8 +155,6 @@ class TestInvalidSourceCollection(TestSourceCollection):
 
     def testEmptyDir(self):
         s = SourceCollection([self.tempdir])
-        import pprint
-        pprint.pprint(s.__dict__)
         self.assertEquals(0, len(s))
 
 
