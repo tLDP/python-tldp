@@ -8,7 +8,7 @@ from .utils import logger
 from .typeguesser import guess, knownextensions
 
 
-class Sources(object):
+class SourceDirs(object):
 
     def __repr__(self):
         return '<%s:(%s docs)>' % \
