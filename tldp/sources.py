@@ -10,22 +10,22 @@ from .utils import logger
 from .typeguesser import guess, knownextensions
 
 
-class SourceDirs(collections.MutableMapping):
+class SourceCollection(collections.MutableMapping):
 
     def __repr__(self):
         return '<%s:(%s docs)>' % \
                (self.__class__.__name__, len(self))
 
     def __init__(self, args):
-        sourcedirs = [os.path.abspath(x) for x in args]
-        results = [os.path.exists(x) for x in sourcedirs]
+        dirs = [os.path.abspath(x) for x in args]
+        results = [os.path.exists(x) for x in dirs]
 
         if not all(results):
-            for result, sdir in zip(results, sourcedirs):
+            for result, sdir in zip(results, dirs):
                 logger.critical("Directory does not exist: " + sdir)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), sdir)
 
-        for sdir in sourcedirs:
+        for sdir in dirs:
             docs = dict()
             for fname in os.listdir(sdir):
                 possible = os.path.join(sdir, fname)
