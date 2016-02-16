@@ -70,9 +70,9 @@ class TestFileSourceDirsMultiDir(TestSourceDirs):
             d.reldir, d.absdir = self.mkdir_components(d.components)
             d.relname, d.absname = self.addfile(d.absdir, ex, stem=d.stem)
         s = SourceDirs([x.absdir for x in documents])
-        self.assertEquals(2, len(s.docs))
+        self.assertEquals(2, len(s))
         sought = set([x.stem for x in documents])
-        found = set([x.stem for x in s.docs])
+        found = set([x for x in s])
         self.assertEquals(sought, found)
 
 
@@ -84,7 +84,7 @@ class TestFileSourceDirsOneDir(TestSourceDirs):
         reldir, absdir = self.mkdir_components(maindir)
         _, _ = self.addfile(absdir, ex)
         s = SourceDirs([absdir])
-        self.assertEquals(1, len(s.docs))
+        self.assertEquals(1, len(s))
 
     def test_skipping_misnamed_singlefile(self):
         ex = random.choice(examples.examples)
@@ -92,7 +92,7 @@ class TestFileSourceDirsOneDir(TestSourceDirs):
         reldir, absdir = self.mkdir_components(maindir)
         self.addfile(absdir, ex, ext=".mis")
         s = SourceDirs([absdir])
-        self.assertEquals(1, len(s.docs))
+        self.assertEquals(1, len(s))
 
 
 class TestInvalidSourceDirs(TestSourceDirs):
@@ -114,7 +114,9 @@ class TestInvalidSourceDirs(TestSourceDirs):
 
     def testEmptyDir(self):
         s = SourceDirs([self.tempdir])
-        self.assertEquals(0, len(s.docs))
+        import pprint
+        pprint.pprint(s.__dict__)
+        self.assertEquals(0, len(s))
 
 
 class TestMissingSourceDocuments(TestSourceDirs):

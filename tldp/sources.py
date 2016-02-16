@@ -4,47 +4,62 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import errno
+import collections
 
 from .utils import logger
 from .typeguesser import guess, knownextensions
 
 
-class SourceDirs(object):
+class SourceDirs(collections.MutableMapping):
 
     def __repr__(self):
         return '<%s:(%s docs)>' % \
-               (self.__class__.__name__, len(self.docs))
+               (self.__class__.__name__, len(self))
 
     def __init__(self, args):
-        self.sourcedirs = [os.path.abspath(x) for x in args]
-        self.docs = list()
-        self.validateDirs()
-        self.enumerateDocuments()
-        self.docs.sort(key=lambda x: x.stem.lower())
+        sourcedirs = [os.path.abspath(x) for x in args]
+        results = [os.path.exists(x) for x in sourcedirs]
 
-    def validateDirs(self):
-        results = [os.path.exists(x) for x in self.sourcedirs]
         if not all(results):
-            for result, sdir in zip(results, self.sourcedirs):
+            for result, sdir in zip(results, sourcedirs):
                 logger.critical("Directory does not exist: " + sdir)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), sdir)
 
-    def enumerateDocuments(self):
-        for sdir in self.sourcedirs:
-            docs = list()
+        for sdir in sourcedirs:
+            docs = dict()
             for fname in os.listdir(sdir):
                 possible = os.path.join(sdir, fname)
                 if os.path.isfile(possible):
-                    docs.append(SourceDocument(possible))
+                    this = SourceDocument(possible)
+                    docs[this.stem] = this
                 elif os.path.isdir(fname):
                     stem = os.path.basename(fname)
                     for ext in knownextensions:
                         possible = os.path.join(sdir, fname, stem + ext)
                         if os.path.isfile(possible):
-                            docs.append(SourceDocument(possible))
+                            this = SourceDocument(possible)
+                            if not docs.has_key(this):
+                                docs[this.stem] = this
+                            else:
+                                logger.critical("Uh-oh, duplicate STEM near %s", fname)
             logger.debug("Discovered %s documents in %s", len(docs), sdir)
-            self.docs.extend(docs)
-        logger.info("Discovered %s documents total", len(self.docs))
+            self.update(docs)
+        logger.info("Discovered %s documents total", len(self))
+
+    def __delitem__(self, key):
+        del self.__dict__[key]
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+
+    def __iter__(self):
+        return iter(self.__dict__)
+
+    def __len__(self):
+        return len(self.__dict__)
 
 
 class SourceDocument(object):
@@ -81,4 +96,5 @@ class SourceDocument(object):
     def doctype(self):
         return guess(self.filename)
 
+#
 # -- end of file
