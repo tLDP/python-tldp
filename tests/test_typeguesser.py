@@ -6,7 +6,7 @@ import unittest
 from tempfile import NamedTemporaryFile as ntf
 
 # -- Test Data
-import examples
+import example
 
 # -- SUT
 from tldp.typeguesser import guess
@@ -26,13 +26,13 @@ def genericGuessTest(content, ext):
 class TestDoctypes(unittest.TestCase):
 
     def testDetectionBySignature(self):
-        for ex in examples.sources:
+        for ex in example.sources:
             if isinstance(ex.type, SignatureChecker):
                 dt = genericGuessTest(ex.content, ex['ext'])
                 self.assertEqual(ex.type, dt)
 
     def testDetectionByExtension(self):
-        for ex in examples.sources:
+        for ex in example.sources:
             if not isinstance(ex.type, SignatureChecker):
                 dt = genericGuessTest(ex.content, ex.ext)
                 self.assertEqual(ex.type, dt)
@@ -53,12 +53,12 @@ class TestDoctypes(unittest.TestCase):
         self.assertIsNone(dt)
 
     def testGuessTooManyMatches(self):
-        a = examples.ex_docbook4xml.content
-        b = examples.ex_docbook5xml.content
-        four, fourdt = a + b, examples.ex_docbook4xml.type
+        a = example.ex_docbook4xml.content
+        b = example.ex_docbook5xml.content
+        four, fourdt = a + b, example.ex_docbook4xml.type
         dt = genericGuessTest(four, '.xml')
         self.assertIs(dt, fourdt)
-        five, fivedt = b + a, examples.ex_docbook5xml.type
+        five, fivedt = b + a, example.ex_docbook5xml.type
         dt = genericGuessTest(five, '.xml')
         self.assertIs(dt, fivedt)
 

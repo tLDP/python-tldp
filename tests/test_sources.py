@@ -17,7 +17,7 @@ except ImportError:
 from tldptesttools import *
 
 # -- Test Data
-import examples
+import example
 
 # -- SUT
 from tldp.sources import SourceCollection, SourceDocument
@@ -28,7 +28,7 @@ datadir = os.path.join(os.path.dirname(__file__), 'testdata')
 class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
 
     def test_multidir_finding_singlefiles(self):
-        ex = random.choice(examples.sources)
+        ex = random.choice(example.sources)
         doc0 = SimpleNamespace(reldir='LDP/howto', stem="A-Unique-Stem")
         doc1 = SimpleNamespace(reldir='LDP/guide', stem="A-Different-Stem")
         documents = (doc0, doc1)
@@ -42,7 +42,7 @@ class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
         self.assertEquals(expected, found)
 
     def test_multidir_finding_namecollision(self):
-        ex = random.choice(examples.sources)
+        ex = random.choice(example.sources)
         doc0 = SimpleNamespace(reldir='LDP/howto', stem="A-Non-Unique-Stem")
         doc1 = SimpleNamespace(reldir='LDP/guide', stem="A-Non-Unique-Stem")
         documents = (doc0, doc1)
@@ -66,7 +66,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         self.assertEquals(0, len(s))
 
     def test_finding_singlefile(self):
-        ex = random.choice(examples.sources)
+        ex = random.choice(example.sources)
         maindir = 'LDP/LDP/howto'
         reldir, absdir = self.adddir(maindir)
         _, _ = self.addfile(absdir, ex)
@@ -74,7 +74,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         self.assertEquals(1, len(s))
 
     def test_skipping_misnamed_singlefile(self):
-        ex = random.choice(examples.sources)
+        ex = random.choice(example.sources)
         maindir = 'LDP/LDP/howto'
         reldir, absdir = self.adddir(maindir)
         self.addfile(absdir, ex, ext=".mis")
@@ -82,7 +82,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         self.assertEquals(1, len(s))
 
     def test_multiple_stems_of_different_extensions(self):
-        ex = random.choice(examples.sources)
+        ex = random.choice(example.sources)
         stem = 'A-Non-Unique-Stem'
         maindir = os.path.join('LDP/LDP/howto', stem)
         reldir, absdir = self.adddir(maindir)
