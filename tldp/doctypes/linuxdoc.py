@@ -23,32 +23,45 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
     def platform_check(self):
         for tool in self.tools:
             assert hasattr(self.platform, tool)
+        return True
 
     def create_txt(self):
-        logger.info("%s creating TXT.", self.source.stem)
-        cmd = [self.platform.html2text, '-style', 'pretty', '-nobs',
-               self.output.name_htmls]
-        stdout = open(self.output.name_txt, 'wx')
+        exe = self.platform.html2text
+        inf = self.output.name_htmls
+        assert os.path.exists(inf)
+        outf = self.output.name_txt
+        stem = self.source.stem
+        cmd = [exe, '-style', 'pretty', '-nobs', inf]
+        logger.debug("%s creating TXT %s.", stem, outf)
+        stdout = open(outf, 'wx')
         result = execute(cmd, logdir=self.logdir, stdout=stdout)
         if result == 0:
-            return os.path.isfile(self.output.name_txt)
-        else:
-            return False
+            logger.info("%s created TXT %s.", stem, outf)
+            return os.path.isfile(outf)
+        return False
 
     def create_pdf(self):
-        logger.info("%s creating PDF.", self.source.stem)
-        cmd = [self.platform.htmldoc, '--size', 'universal', '-t', 'pdf',
-               '--firstpage', 'p1', '--outfile', self.output.name_pdf,
-               self.output.name_htmls]
+        exe = self.platform.htmldoc
+        inf = self.output.name_htmls
+        assert os.path.exists(inf)
+        outf = self.output.name_pdf
+        stem = self.source.stem
+        logger.info("%s creating PDF %s.", stem, outf)
+        cmd = [exe, '--size', 'universal', '-t', 'pdf', '--firstpage', 'p1', 
+               '--outfile', outf, inf]
         result = execute(cmd, logdir=self.logdir)
         if result == 0:
-            return os.path.isfile(self.output.name_pdf)
-        else:
-            return False
+            logger.info("%s created PDF %s.", stem, outf)
+            return os.path.isfile(outf)
+        return False
 
     def create_html(self):
+        exe = self.platform.sgml2html
+        inf = self.source.filename
+        assert os.path.exists(inf)
+        outf = self.output.name_html
         stem = self.source.stem
-        logger.info("%s creating chunked HTML.", stem)
+        logger.info("%s creating chunked HTML %s, etc.", stem, outf)
         cmd = [self.platform.sgml2html, self.source.filename]
         result = execute(cmd, logdir=self.logdir)
         if result == 0:  # -- only symlink, if HTML generated successfully
@@ -58,22 +71,26 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
                 os.symlink(target, 'index.html')
             except OSError:
                 logger.debug("%s failed in creating index.html symlink.", stem)
-        return os.path.isfile(self.output.name_html)
+        return os.path.isfile(outf)
 
     def create_htmls(self):
+        exe = self.platform.sgml2html
+        inf = self.source.filename
+        assert os.path.exists(inf)
+        outf = self.output.name_htmls
         stem = self.source.stem
-        logger.info("%s creating single-file HTML.", stem)
-        cmd = [self.platform.sgml2html, '--split=0', self.source.filename]
+        logger.info("%s creating single-file HTML %s, etc.", stem, outf)
+        cmd = [exe, '--split=0', inf]
         result = execute(cmd, logdir=self.logdir)
-        logger.debug("%s result %r.",  stem, result)
         if result == 0:  # -- only rename, if HTML generated successfully
+            source = os.path.basename(self.output.name_html)
             target = os.path.basename(self.output.name_htmls)
             logger.debug("%s renaming HTML single file to %s.", stem, target)
             try:
-                os.rename(self.output.name_html, self.output.name_htmls)
+                os.rename(source, target)
             except OSError:
                 logger.debug("%s failed renaming HTML single file to %s.", stem, target)
-        return os.path.isfile(self.output.name_htmls)
+        return os.path.isfile(outf)
 
 #
 # -- end of file
