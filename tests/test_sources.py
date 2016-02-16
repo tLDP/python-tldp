@@ -17,7 +17,7 @@ except ImportError:
 import examples
 
 # -- SUT
-from tldp.sources import Sources, SourceDocument
+from tldp.sources import SourceDirs, SourceDocument
 
 datadir = os.path.join(os.path.dirname(__file__), 'testdata')
 
@@ -28,7 +28,7 @@ def stem_and_ext(name):
     return stem, ext
 
 
-class TestSources(unittest.TestCase):
+class TestSourceDirs(unittest.TestCase):
 
     def setUp(self):
         self.tempdir = mkdtemp(prefix='tldp-sources-test-')
@@ -58,7 +58,7 @@ class TestSources(unittest.TestCase):
         return relname, newname
 
 
-class TestFileSourcesMultiDir(TestSources):
+class TestFileSourceDirsMultiDir(TestSourceDirs):
 
     def test_multidir_finding_singlefiles(self):
         ex = random.choice(examples.examples)
@@ -68,21 +68,21 @@ class TestFileSourcesMultiDir(TestSources):
         for d in documents:
             d.reldir, d.absdir = self.mkdir_components(d.components)
             d.relname, d.absname = self.addfile(d.absdir, ex, stem=d.stem)
-        s = Sources([x.absdir for x in documents])
+        s = SourceDirs([x.absdir for x in documents])
         self.assertEquals(2, len(s.docs))
         sought = set([x.stem for x in documents])
         found = set([x.stem for x in s.docs])
         self.assertEquals(sought, found)
 
 
-class TestFileSourcesOneDir(TestSources):
+class TestFileSourceDirsOneDir(TestSourceDirs):
 
     def test_finding_singlefile(self):
         ex = random.choice(examples.examples)
         maindir = ['LDP', 'LDP', 'howto']
         reldir, absdir = self.mkdir_components(maindir)
         _, _ = self.addfile(absdir, ex)
-        s = Sources([absdir])
+        s = SourceDirs([absdir])
         self.assertEquals(1, len(s.docs))
 
     def test_skipping_misnamed_singlefile(self):
@@ -90,16 +90,16 @@ class TestFileSourcesOneDir(TestSources):
         maindir = ['LDP', 'LDP', 'howto']
         reldir, absdir = self.mkdir_components(maindir)
         self.addfile(absdir, ex, ext=".mis")
-        s = Sources([absdir])
+        s = SourceDirs([absdir])
         self.assertEquals(1, len(s.docs))
 
 
-class TestInvalidSources(TestSources):
+class TestInvalidSourceDirs(TestSourceDirs):
 
     def test_validateDirs_onebad(self):
         invalid0 = os.path.join(self.tempdir, 'unique', 'rabbit')
         with self.assertRaises(OSError) as ecm:
-            Sources([invalid0])
+            SourceDirs([invalid0])
         e = ecm.exception
         self.assertTrue('unique/rabbit' in e.message)
 
@@ -107,16 +107,16 @@ class TestInvalidSources(TestSources):
         invalid0 = os.path.join(self.tempdir, 'unique', 'rabbit')
         invalid1 = os.path.join(self.tempdir, 'affable', 'elephant')
         with self.assertRaises(OSError) as ecm:
-            Sources([invalid0, invalid1])
+            SourceDirs([invalid0, invalid1])
         e = ecm.exception
         self.assertTrue('affable/elephant' in e.message)
 
     def testEmptyDir(self):
-        s = Sources([self.tempdir])
+        s = SourceDirs([self.tempdir])
         self.assertEquals(0, len(s.docs))
 
 
-class TestMissingSourceDocuments(TestSources):
+class TestMissingSourceDocuments(TestSourceDirs):
 
     def test_init_missing(self):
         missing = os.path.join(self.tempdir, 'vanishing')
