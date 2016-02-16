@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import errno
 
+import collections
 from .utils import logger
 
 
@@ -40,6 +41,9 @@ class OutputNamingConvention(object):
 
 class OutputDirectory(OutputNamingConvention):
 
+    def __repr__(self):
+        return '<%s:%s>' % (self.__class__.__name__, self.dirname)
+
     def __init__(self, dirname):
         self.dirname = os.path.abspath(dirname)
         self.stem = os.path.basename(self.dirname)
@@ -64,22 +68,21 @@ class OutputDirectory(OutputNamingConvention):
         return True
 
 
-class OutputTree(object):
+class OutputCollection(collections.MutableMapping):
 
     def __repr__(self):
-        return '<%s:(%s docs)>' % \
-               (self.__class__.__name__, len(self.docs))
+        return '<%s:(%s docs)>' % (self.__class__.__name__, len(self))
 
     def __init__(self, dirname):
         if not os.path.isdir(dirname):
             logger.critical("Directory %s must already exist.", dirname)
-            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), dirname)
+            raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), dirname)
         for fname in os.listdir(dirname):
             name = os.path.join(dirname, fname)
             if not os.path.isdir(name):
                 logger.warning("Skipping non-directory %s (in %s)", name, dirname)
             o = OutputDirectory(name)
-            assert not self.has_key(o.stem)
+            assert not o.stem in self
             self[o.stem] = o
 
     def __delitem__(self, key):
@@ -96,8 +99,6 @@ class OutputTree(object):
 
     def __len__(self):
         return len(self.__dict__)
-
-
 
 #
 # -- end of file
