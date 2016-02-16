@@ -14,11 +14,15 @@ try:
 except ImportError:
     from utils import SimpleNamespace
 
+from tldptesttools import *
+
 # -- Test Data
 import examples
 
 # -- SUT
-from tldp.outputs import OutputCollection, OutputDirectory
+from tldp.outputs import OutputCollection
+from tldp.outputs import OutputDirectory
+from tldp.outputs import OutputNamingConvention
 
 datadir = os.path.join(os.path.dirname(__file__), 'testdata')
 
@@ -29,16 +33,18 @@ def stem_and_ext(name):
     return stem, ext
 
 
-class TestOutputCollection(unittest.TestCase):
+class TestOutputNamingConvention(unittest.TestCase):
 
-    def setUp(self):
-        self.tempdir = mkdtemp(prefix='tldp-outputs-test-')
+    def test_namesets(self):
+        onc = OutputNamingConvention("Stem", "/path/to/output/")
+        self.assertTrue(onc.name_txt.endswith(".txt"))
+        self.assertTrue(onc.name_pdf.endswith(".pdf"))
+        self.assertTrue(onc.name_html.endswith(".html"))
+        self.assertTrue(onc.name_htmls.endswith("-single.html"))
+        self.assertTrue(onc.name_index.endswith("index.html"))
 
-    def tearDown(self):
-        shutil.rmtree(self.tempdir)
 
-
-class TestMissingOutputCollection(TestOutputCollection):
+class TestMissingOutputCollection(TestToolsFilesystem):
 
     def test_not_a_directory(self):
         missing = os.path.join(self.tempdir, 'vanishing')

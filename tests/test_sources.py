@@ -14,6 +14,8 @@ try:
 except ImportError:
     from utils import SimpleNamespace
 
+from tldptesttools import *
+
 # -- Test Data
 import examples
 
@@ -23,53 +25,7 @@ from tldp.sources import SourceCollection, SourceDocument
 datadir = os.path.join(os.path.dirname(__file__), 'testdata')
 
 
-def stem_and_ext(name):
-    stem, ext = os.path.splitext(os.path.basename(name))
-    assert ext != ''
-    return stem, ext
-
-def dir_to_components(reldir):
-    reldir = os.path.normpath(reldir)
-    components = list()
-    while reldir != '':
-        reldir, basename = os.path.split(reldir)
-        components.append(basename)
-    assert len(components) >= 1
-    components.reverse()
-    return components
-
-
-class TestSourceCollection(unittest.TestCase):
-
-    def setUp(self):
-        self.tempdir = mkdtemp(prefix='tldp-sources-test-')
-
-    def tearDown(self):
-        shutil.rmtree(self.tempdir)
-
-    def adddir(self, reldir):
-        components = dir_to_components(reldir)
-        absdir = self.tempdir
-        while components:
-            absdir = os.path.join(absdir, components.pop(0))
-            if not os.path.isdir(absdir):
-                os.mkdir(absdir)
-        self.assertTrue(os.path.isdir(absdir))
-        relpath = os.path.relpath(absdir, self.tempdir)
-        return relpath, absdir
-
-    def addfile(self, dirname, exfile, stem=None, ext=None):
-        if stem is None:
-            stem, _ = stem_and_ext(exfile.filename)
-        if ext is None:
-            _, ext = stem_and_ext(exfile.filename)
-        newname = os.path.join(dirname, stem + ext)
-        shutil.copy(exfile.filename, newname)
-        relname = os.path.relpath(newname, self.tempdir)
-        return relname, newname
-
-
-class TestFileSourceCollectionMultiDir(TestSourceCollection):
+class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
 
     def test_multidir_finding_singlefiles(self):
         ex = random.choice(examples.examples)
@@ -100,7 +56,7 @@ class TestFileSourceCollectionMultiDir(TestSourceCollection):
         self.assertEquals(expected, found)
 
 
-class TestFileSourceCollectionOneDir(TestSourceCollection):
+class TestFileSourceCollectionOneDir(TestToolsFilesystem):
 
     def test_finding_nonfile(self):
         maindir = 'LDP/LDP/howto'
@@ -136,7 +92,7 @@ class TestFileSourceCollectionOneDir(TestSourceCollection):
         self.assertEquals(1, len(s))
 
 
-class TestInvalidSourceCollection(TestSourceCollection):
+class TestInvalidSourceCollection(TestToolsFilesystem):
 
     def test_validateDirs_onebad(self):
         invalid0 = os.path.join(self.tempdir, 'unique', 'rabbit')
@@ -158,7 +114,7 @@ class TestInvalidSourceCollection(TestSourceCollection):
         self.assertEquals(0, len(s))
 
 
-class TestMissingSourceDocuments(TestSourceCollection):
+class TestMissingSourceDocuments(TestToolsFilesystem):
 
     def test_init_missing(self):
         missing = os.path.join(self.tempdir, 'vanishing')
