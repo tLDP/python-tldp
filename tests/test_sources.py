@@ -34,7 +34,7 @@ class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
         documents = (doc0, doc1)
         for d in documents:
             d.reldir, d.absdir = self.adddir(d.reldir)
-            d.relname, d.absname = self.addfile(d.absdir, ex, stem=d.stem)
+            d.relname, d.absname = self.addfile(d.reldir, ex.filename, stem=d.stem)
         s = SourceCollection([x.absdir for x in documents])
         self.assertEquals(2, len(s))
         expected = set([x.stem for x in documents])
@@ -48,7 +48,7 @@ class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
         documents = (doc0, doc1)
         for d in documents:
             d.reldir, d.absdir = self.adddir(d.reldir)
-            d.relname, d.absname = self.addfile(d.absdir, ex, stem=d.stem)
+            d.relname, d.absname = self.addfile(d.reldir, ex.filename, stem=d.stem)
         s = SourceCollection([x.absdir for x in documents])
         self.assertEquals(1, len(s))
         expected = set([x.stem for x in documents])
@@ -69,7 +69,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         ex = random.choice(example.sources)
         maindir = 'LDP/LDP/howto'
         reldir, absdir = self.adddir(maindir)
-        _, _ = self.addfile(absdir, ex)
+        _, _ = self.addfile(reldir, ex.filename)
         s = SourceCollection([absdir])
         self.assertEquals(1, len(s))
 
@@ -77,7 +77,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         ex = random.choice(example.sources)
         maindir = 'LDP/LDP/howto'
         reldir, absdir = self.adddir(maindir)
-        self.addfile(absdir, ex, ext=".mis")
+        self.addfile(reldir, ex.filename, ext=".mis")
         s = SourceCollection([absdir])
         self.assertEquals(1, len(s))
 
@@ -86,8 +86,8 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         stem = 'A-Non-Unique-Stem'
         maindir = os.path.join('LDP/LDP/howto', stem)
         reldir, absdir = self.adddir(maindir)
-        self.addfile(absdir, ex, stem=stem, ext=".xml")
-        self.addfile(absdir, ex, stem=stem, ext=".md")
+        self.addfile(reldir, ex.filename, stem=stem, ext=".xml")
+        self.addfile(reldir, ex.filename, stem=stem, ext=".md")
         s = SourceCollection([absdir])
         self.assertEquals(1, len(s))
 
