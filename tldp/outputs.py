@@ -74,19 +74,29 @@ class OutputTree(object):
         if not os.path.isdir(dirname):
             logger.critical("Directory %s must already exist.", dirname)
             raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), dirname)
-        self.dirname = dirname
-        self.docs = dict()
-        self.enumerateDocuments()
-
-    def enumerateDocuments(self):
-        for fname in os.listdir(self.dirname):
-            name = os.path.join(self.dirname, fname)
+        for fname in os.listdir(dirname):
+            name = os.path.join(dirname, fname)
             if not os.path.isdir(name):
-                logger.warning("Skipping non-directory %s (in %s)",
-                               name, self.dirname)
+                logger.warning("Skipping non-directory %s (in %s)", name, dirname)
             o = OutputDirectory(name)
-            assert not self.docs.has_key(o.stem)
-            self.docs[o.stem] = o
+            assert not self.has_key(o.stem)
+            self[o.stem] = o
+
+    def __delitem__(self, key):
+        del self.__dict__[key]
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+
+    def __iter__(self):
+        return iter(self.__dict__)
+
+    def __len__(self):
+        return len(self.__dict__)
+
 
 
 #
