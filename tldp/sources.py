@@ -79,6 +79,7 @@ class SourceDocument(object):
             raise TypeError("Wrong type, not a plain file: " + self.filename)
 
         logger.debug("Found existing %s", self.filename)
+        self.doctype = self._doctype()
         self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = os.path.splitext(self.basename)
         self.stat = os.stat(self.filename)
@@ -92,8 +93,7 @@ class SourceDocument(object):
                 if os.path.exists(os.path.join(self.dirname, rdir)):
                     self.resources = True
 
-    @property
-    def doctype(self):
+    def _doctype(self):
         return guess(self.filename)
 
 #
