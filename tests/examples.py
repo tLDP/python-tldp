@@ -59,9 +59,9 @@ ex_markdown = SimpleNamespace(
 
 
 # -- a bit ugly, but grab each dict
-examples = [y for x, y in locals().items() if x.startswith('ex_')]
+sources = [y for x, y in locals().items() if x.startswith('ex_')]
 
-for ex in examples:
+for ex in sources:
     ex.content = open(ex.filename).read()
 
 

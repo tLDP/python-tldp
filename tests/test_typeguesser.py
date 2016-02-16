@@ -26,13 +26,13 @@ def genericGuessTest(content, ext):
 class TestDoctypes(unittest.TestCase):
 
     def testDetectionBySignature(self):
-        for ex in examples.examples:
+        for ex in examples.sources:
             if isinstance(ex.type, SignatureChecker):
                 dt = genericGuessTest(ex.content, ex['ext'])
                 self.assertEqual(ex.type, dt)
 
     def testDetectionByExtension(self):
-        for ex in examples.examples:
+        for ex in examples.sources:
             if not isinstance(ex.type, SignatureChecker):
                 dt = genericGuessTest(ex.content, ex.ext)
                 self.assertEqual(ex.type, dt)
