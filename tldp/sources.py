@@ -25,8 +25,8 @@ class SourceDirs(object):
         results = [os.path.exists(x) for x in self.sourcedirs]
         if not all(results):
             for result, sdir in zip(results, self.sourcedirs):
-                logger.critical("[Errno 2] No such file or directory: " + sdir)
-            raise OSError("[Errno 2] No such file or directory: " + sdir)
+                logger.critical("Directory does not exist: " + sdir)
+            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), sdir)
 
     def enumerateDocuments(self):
         for sdir in self.sourcedirs:
@@ -56,9 +56,11 @@ class SourceDocument(object):
         # -- canonicalize the pathname we are given.
         self.filename = os.path.abspath(filename)
         if not os.path.exists(self.filename):
-            raise OSError("Missing source document: " + self.filename)
+            logger.critical("Missing source document: %s", self.filename)
+            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), self.filename)
         if not os.path.isfile(self.filename):
-            raise OSError("Wrong type, not a plain file: " + self.filename)
+            logger.critical("Source document is not a plain file: %s", self.filename)
+            raise TypeError("Wrong type, not a plain file: " + self.filename)
 
         logger.debug("Found existing %s", self.filename)
         self.dirname, self.basename = os.path.split(self.filename)
