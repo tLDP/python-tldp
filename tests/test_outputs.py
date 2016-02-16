@@ -17,7 +17,7 @@ except ImportError:
 from tldptesttools import *
 
 # -- Test Data
-import examples
+import example
 
 # -- SUT
 from tldp.outputs import OutputCollection
@@ -25,12 +25,6 @@ from tldp.outputs import OutputDirectory
 from tldp.outputs import OutputNamingConvention
 
 datadir = os.path.join(os.path.dirname(__file__), 'testdata')
-
-
-def stem_and_ext(name):
-    stem, ext = os.path.splitext(os.path.basename(name))
-    assert ext != ''
-    return stem, ext
 
 
 class TestOutputNamingConvention(unittest.TestCase):
@@ -44,7 +38,7 @@ class TestOutputNamingConvention(unittest.TestCase):
         self.assertTrue(onc.name_index.endswith("index.html"))
 
 
-class TestMissingOutputCollection(TestToolsFilesystem):
+class TestOutputCollection(TestToolsFilesystem):
 
     def test_not_a_directory(self):
         missing = os.path.join(self.tempdir, 'vanishing')
@@ -52,6 +46,32 @@ class TestMissingOutputCollection(TestToolsFilesystem):
             OutputCollection(missing)
         e = ecm.exception
         self.assertEquals(errno.ENOENT, e.errno)
+
+    def test_file_in_output_collection(self):
+        reldir, absdir = self.adddir('collection')
+        self.addfile('collection', __file__,  stem='non-directory')
+        oc = OutputCollection(absdir)
+        self.assertEquals(0, len(oc))
+
+    def test_manyfiles(self):
+        reldir, absdir = self.adddir('manyfiles')
+        count = random.randint(8, 15)
+        for x in range(count):
+            self.adddir('manyfiles/Document-Stem-' + str(x))
+        oc = OutputCollection(absdir)
+        self.assertEquals(count, len(oc))
+
+
+class TestOutputDirectory(TestToolsFilesystem):
+
+    def test_no_parent_dir(self):
+        odoc = os.path.join(self.tempdir, 'non-existent-parent', 'stem')
+        with self.assertRaises(IOError) as ecm:
+            OutputDirectory(odoc)
+        e = ecm.exception
+        self.assertEquals(errno.ENOENT, e.errno)
+
+
 
 #
 # -- end of file
