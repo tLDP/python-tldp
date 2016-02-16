@@ -30,7 +30,7 @@ class BaseDoctype(object):
         self.source = kwargs.get('source', None)
         self.output = kwargs.get('output', None)
         self.platform = kwargs.get('platform', None)
-        assert None is not in (self.source, self.output, self.platform)
+        assert None not in (self.source, self.output, self.platform)
         self.logdir = os.path.join(self.output.dirname, 'logs')
         if os.path.exists(self.logdir):
             logger.warning("Found existing logs directory: %s", self.logdir)
@@ -47,7 +47,8 @@ class BaseDoctype(object):
                   self.create_html(),
                   ]
         result = all(vector)
-        logger.info("%s generation of all documents %s", self.source.stem, result)
+        logger.info("%s generation of all documents %s",
+                    self.source.stem, result)
         return all(vector)
 
 #

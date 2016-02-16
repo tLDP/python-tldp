@@ -47,7 +47,7 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         outf = self.output.name_pdf
         stem = self.source.stem
         logger.info("%s creating PDF %s.", stem, outf)
-        cmd = [exe, '--size', 'universal', '-t', 'pdf', '--firstpage', 'p1', 
+        cmd = [exe, '--size', 'universal', '-t', 'pdf', '--firstpage', 'p1',
                '--outfile', outf, inf]
         result = execute(cmd, logdir=self.logdir)
         if result == 0:
@@ -62,10 +62,10 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         outf = self.output.name_html
         stem = self.source.stem
         logger.info("%s creating chunked HTML %s, etc.", stem, outf)
-        cmd = [self.platform.sgml2html, self.source.filename]
+        cmd = [exe, inf]
         result = execute(cmd, logdir=self.logdir)
         if result == 0:  # -- only symlink, if HTML generated successfully
-            target = os.path.basename(self.output.name_html)
+            target = os.path.basename(outf)
             logger.debug("%s creating index.html symlink to %s.", stem, target)
             try:
                 os.symlink(target, 'index.html')
@@ -89,7 +89,8 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
             try:
                 os.rename(source, target)
             except OSError:
-                logger.debug("%s failed renaming HTML single file to %s.", stem, target)
+                logger.debug("%s failed renaming HTML single file to %s.",
+                             stem, target)
         return os.path.isfile(outf)
 
 #
