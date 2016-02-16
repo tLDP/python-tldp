@@ -50,9 +50,9 @@ class OutputDirectory(OutputNamingConvention):
         parent = os.path.dirname(self.dirname)
         if not os.path.isdir(parent):
             logger.critical("Missing output tree %s.", parent)
-            raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), parent)
+            raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), parent)
         if not os.path.isdir(self.dirname):
-            logger.info("Creating output directory %s.", dirname)
+            logger.info("%s creating output directory %s.", self.stem, dirname)
             os.mkdir(dirname)
         super(OutputDirectory, self).__init__(self.stem, self.dirname)
 
@@ -81,6 +81,7 @@ class OutputCollection(collections.MutableMapping):
             name = os.path.join(dirname, fname)
             if not os.path.isdir(name):
                 logger.warning("Skipping non-directory %s (in %s)", name, dirname)
+                continue
             o = OutputDirectory(name)
             assert not o.stem in self
             self[o.stem] = o
