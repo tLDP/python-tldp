@@ -10,12 +10,12 @@ from . import doctypes
 
 
 def listDoctypes():
-    knowndoctypes = list()
+    kdt = list()
     for name, member in inspect.getmembers(doctypes, inspect.isclass):
         logger.debug("Located class %s (%r).", name, member)
-        knowndoctypes.append(member)
-    logger.info("Capable of handling %s document classes.", len(knowndoctypes))
-    return knowndoctypes
+        kdt.append(member)
+    logger.debug("Capable of handling %s document classes.", len(kdt))
+    return kdt
 
 
 def guess(thing):
