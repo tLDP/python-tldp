@@ -70,7 +70,7 @@ class Inventory(object):
             fset = mtime_gt(mtime, sdoc.statinfo)
             if fset:
                 for f in fset:
-                    logger.info("%s updated source file %s", stem, f)
+                    logger.debug("%s found updated source file %s", stem, f)
                 odoc.status = sdoc.status = 'stale'
                 self.stale[stem] = sdoc
         logger.info("Identified %d stale documents: %r.", len(self.stale),
