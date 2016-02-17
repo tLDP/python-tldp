@@ -6,13 +6,15 @@ import os
 import io
 import sys
 import errno
+import operator
 import subprocess
+import functools
 from tempfile import mkstemp
 import logging
 
 
 def getLogger(**opts):
-    level = opts.get('level', logging.INFO)
+    level = opts.get('level', logging.DEBUG)
     logging.basicConfig(stream=sys.stderr, level=level)
     logger = logging.getLogger()
     return logger
@@ -24,7 +26,7 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
             logdir=None, env=os.environ):
     prefix = os.path.basename(cmd[0]) + '.' + str(os.getpid()) + '-'
 
-    if logdir is None: 
+    if logdir is None:
         raise Exception("Missing required parameter: logdir.")
 
     if not os.path.isdir(logdir):
@@ -89,6 +91,48 @@ def getfileset(dirname):
     os.chdir(ocwd)
     return q
 
+
+def statfiles(absdir, fileset):
+    statinfo = dict()
+    for fname in fileset:
+        try:
+            statinfo[fname] = os.stat(os.path.join(absdir, fname))
+        except OSError as e:
+            if e.errno != errno.ENOENT:  # -- ho-hum, race condition
+                raise e
+    return statinfo
+
+
+def att_statinfo(statinfo, attr='st_mtime', func=max):
+    x = func([getattr(v, attr) for v in statinfo.values()])
+    return x
+
+
+max_size = functools.partial(att_statinfo, attr='st_size', func=max)
+min_size = functools.partial(att_statinfo, attr='st_size', func=min)
+
+max_mtime = functools.partial(att_statinfo, attr='st_mtime', func=max)
+min_mtime = functools.partial(att_statinfo, attr='st_mtime', func=min)
+
+max_ctime = functools.partial(att_statinfo, attr='st_ctime', func=max)
+min_ctime = functools.partial(att_statinfo, attr='st_ctime', func=min)
+
+max_atime = functools.partial(att_statinfo, attr='st_atime', func=max)
+min_atime = functools.partial(att_statinfo, attr='st_atime', func=min)
+
+
+def sieve(operand, statinfo, attr='st_mtime', func=operator.gt):
+    result = set()
+    for fname, stbuf in statinfo.items():
+        if func(getattr(stbuf, attr), operand):
+            result.add(fname)
+    return result
+
+mtime_gt = functools.partial(sieve, attr='st_mtime', func=operator.gt)
+mtime_lt = functools.partial(sieve, attr='st_mtime', func=operator.lt)
+
+size_gt = functools.partial(sieve, attr='st_size', func=operator.gt)
+size_lt = functools.partial(sieve, attr='st_size', func=operator.lt)
 
 #
 # -- end of file
