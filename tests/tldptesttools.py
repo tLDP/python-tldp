@@ -43,7 +43,7 @@ class TestToolsFilesystem(unittest.TestCase):
         relpath = os.path.relpath(absdir, self.tempdir)
         return relpath, absdir
 
-    def addfile(self, reldir, filename, content=None, stem=None, ext=None):
+    def addfile(self, reldir, filename, stem=None, ext=None):
         if stem is None:
             stem, _ = stem_and_ext(filename)
         if ext is None:
@@ -52,9 +52,8 @@ class TestToolsFilesystem(unittest.TestCase):
         if os.path.isfile(filename):
             shutil.copy(filename, newname)
         else:
-            with open(newname) as f:
-                if content:
-                    f.write(content)
+            with open(newname):
+                pass
         relname = os.path.relpath(newname, self.tempdir)
         return relname, newname
 
