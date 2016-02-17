@@ -13,8 +13,7 @@ from .typeguesser import guess, knownextensions
 class SourceCollection(collections.MutableMapping):
 
     def __repr__(self):
-        return '<%s:(%s docs)>' % \
-               (self.__class__.__name__, len(self))
+        return '<%s:(%s docs)>' % (self.__class__.__name__, len(self))
 
     def __init__(self, args=None):
         if args is None:
