@@ -14,9 +14,9 @@ class OutputNamingConvention(object):
     expected = ['name_txt', 'name_pdf', 'name_htmls', 'name_html',
                 'name_index']
 
-    def __init__(self, stem, dirname):
-        self.stem = stem
+    def __init__(self, dirname, stem):
         self.dirname = dirname
+        self.stem = stem
 
     @property
     def name_txt(self):
@@ -56,7 +56,7 @@ class OutputDirectory(OutputNamingConvention):
             os.mkdir(dirname)
         self.statinfo = statfiles(self.dirname, relative=self.dirname)
         self.status = 'output'
-        super(OutputDirectory, self).__init__(self.stem, self.dirname)
+        super(OutputDirectory, self).__init__(self.dirname, self.stem)
 
     def clean(self):
         logger.info("%s cleaning directory %s.", self.stem, self.dirname)
