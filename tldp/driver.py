@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function
 
 import copy
 
-from .utils import logger, statfiles, max_mtime, mtime_gt
+from .utils import logger, max_mtime, mtime_gt
 
 from .sources import SourceCollection
 from .outputs import OutputCollection
@@ -14,6 +14,15 @@ from argparse import Namespace
 
 class Inventory(object):
 
+    def __repr__(self):
+        return '<%s: %d published, %d orphans, %d new, %d stale>' % (
+               self.__class__.__name__,
+               len(self.published),
+               len(self.orphans),
+               len(self.new),
+               len(self.stale),
+               )
+
     def __init__(self, pubdir, sourcedirs):
         self.outputs = OutputCollection(pubdir)
         self.sources = SourceCollection(sourcedirs)
@@ -22,6 +31,8 @@ class Inventory(object):
         sset = set(s.keys())
         oset = set(o.keys())
 
+        # -- orphan identification
+        #
         self.orphans = OutputCollection()
         for doc in oset.difference(sset):
             self.orphans[doc] = o[doc]
@@ -30,6 +41,8 @@ class Inventory(object):
         logger.info("Identified %d orphaned documents: %r.", len(self.orphans),
                     self.orphans.keys())
 
+        # -- unpublished ('new') identification
+        #
         self.new = SourceCollection()
         for doc in sset.difference(oset):
             self.new[doc] = s[doc]
@@ -38,7 +51,7 @@ class Inventory(object):
         logger.info("Identified %d new documents: %r.", len(self.new),
                     self.new.keys())
 
-        # -- sources + outputs should be same size now
+        # -- published identification; sources and  outputs should be same size
         assert len(s) == len(o)
         for stem, odoc in o.items():
             sdoc = s[stem]
@@ -48,13 +61,16 @@ class Inventory(object):
         self.published = s
         logger.info("Identified %d published documents.", len(self.published))
 
+        # -- stale identification
+        #
         self.stale = SourceCollection()
         for stem, sdoc in s.items():
             odoc = sdoc.output
-            mtime = max_mtime(statfiles(odoc.dirname, odoc.fileset))
-            fset = mtime_gt(mtime, statfiles(sdoc.dirname, sdoc.fileset))
+            mtime = max_mtime(odoc.statinfo)
+            fset = mtime_gt(mtime, sdoc.statinfo)
             if fset:
-                logger.debug("%s stale files %r", stem, fset)
+                for f in fset:
+                    logger.info("%s updated source file %s", stem, f)
                 odoc.status = sdoc.status = 'stale'
                 self.stale[stem] = sdoc
         logger.info("Identified %d stale documents: %r.", len(self.stale),
@@ -77,7 +93,7 @@ def print_sources(scollection, config=None):
         if config.verbose:
             fields = [doc.stem, doc.status, doc.filename, str(doc.doctype),
                       doc.doctype.formatname]
-            fields.extend(sorted(doc.fileset))
+            fields.append(str(len(doc.statinfo)) + ' files')
             print(config.sep.join(fields))
         else:
             print(doc.stem)
@@ -90,6 +106,7 @@ def print_outputs(ocollection, config=None):
         doc = ocollection[stem]
         if config.verbose:
             fields = [doc.stem, doc.status, doc.dirname]
+            fields.append(str(len(doc.statinfo)) + ' files')
             print(config.sep.join(fields))
         else:
             print(doc.stem)
