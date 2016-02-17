@@ -4,20 +4,9 @@ from __future__ import absolute_import, division, print_function
 import os
 import errno
 import unittest
-from tempfile import NamedTemporaryFile as ntf
-from tempfile import mkdtemp, mkstemp
-import shutil
 import random
 
-try:
-    from types import SimpleNamespace
-except ImportError:
-    from utils import SimpleNamespace
-
-from tldptesttools import *
-
-# -- Test Data
-import example
+from tldptesttools import TestToolsFilesystem
 
 # -- SUT
 from tldp.outputs import OutputCollection
@@ -70,8 +59,6 @@ class TestOutputDirectory(TestToolsFilesystem):
             OutputDirectory(odoc)
         e = ecm.exception
         self.assertEquals(errno.ENOENT, e.errno)
-
-
 
 #
 # -- end of file

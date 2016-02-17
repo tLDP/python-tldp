@@ -5,7 +5,7 @@ import os
 import unittest
 from tempfile import NamedTemporaryFile as ntf
 
-from tldptesttools import *
+from tldptesttools import TestToolsFilesystem
 
 # -- SUT
 from tldp.utils import makefh, which, getfileset, execute

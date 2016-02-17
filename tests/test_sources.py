@@ -3,10 +3,6 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import errno
-import unittest
-from tempfile import NamedTemporaryFile as ntf
-from tempfile import mkdtemp, mkstemp
-import shutil
 import random
 
 try:
@@ -14,7 +10,7 @@ try:
 except ImportError:
     from utils import SimpleNamespace
 
-from tldptesttools import *
+from tldptesttools import TestToolsFilesystem
 
 # -- Test Data
 import example
@@ -34,7 +30,7 @@ class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
         documents = (doc0, doc1)
         for d in documents:
             d.reldir, d.absdir = self.adddir(d.reldir)
-            d.relname, d.absname = self.addfile(d.reldir, ex.filename, stem=d.stem)
+            _, _ = self.addfile(d.reldir, ex.filename, stem=d.stem)
         s = SourceCollection([x.absdir for x in documents])
         self.assertEquals(2, len(s))
         expected = set([x.stem for x in documents])
@@ -48,7 +44,7 @@ class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
         documents = (doc0, doc1)
         for d in documents:
             d.reldir, d.absdir = self.adddir(d.reldir)
-            d.relname, d.absname = self.addfile(d.reldir, ex.filename, stem=d.stem)
+            _, _ = self.addfile(d.reldir, ex.filename, stem=d.stem)
         s = SourceCollection([x.absdir for x in documents])
         self.assertEquals(1, len(s))
         expected = set([x.stem for x in documents])

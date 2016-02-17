@@ -3,13 +3,15 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import unittest
-from tempfile import mkdtemp, mkstemp
+from tempfile import mkdtemp
 import shutil
+
 
 def stem_and_ext(name):
     stem, ext = os.path.splitext(os.path.basename(name))
     assert ext != ''
     return stem, ext
+
 
 def dir_to_components(reldir):
     reldir, basename = os.path.split(os.path.normpath(reldir))
