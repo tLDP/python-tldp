@@ -21,7 +21,7 @@ class Inventory(object):
         o = copy.deepcopy(self.outputs)
         sset = set(s.keys())
         oset = set(o.keys())
-    
+
         self.orphans = OutputCollection()
         for doc in oset.difference(sset):
             self.orphans[doc] = o[doc]
@@ -29,7 +29,7 @@ class Inventory(object):
             self.orphans[doc].status = 'orphan'
         logger.info("Identified %d orphaned documents: %r.", len(self.orphans),
                     self.orphans.keys())
-    
+
         self.new = SourceCollection()
         for doc in sset.difference(oset):
             self.new[doc] = s[doc]
@@ -47,7 +47,7 @@ class Inventory(object):
             odoc.status = sdoc.status = 'published'
         self.published = s
         logger.info("Identified %d published documents.", len(self.published))
-    
+
         self.stale = SourceCollection()
         for stem, sdoc in s.items():
             odoc = sdoc.output
