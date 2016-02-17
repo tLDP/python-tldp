@@ -82,6 +82,17 @@ def makefh(thing):
     return f
 
 
+def statfile(name):
+    try:
+        st = os.stat(name)
+    except OSError as e:
+        if e.errno != errno.ENOENT:
+            raise e
+        if os.path.islink(name):
+            st = os.lstat(name)
+    return st
+
+
 def statfiles(name, relative=None):
     statinfo = dict()
     if not os.path.isdir(name):
@@ -89,7 +100,7 @@ def statfiles(name, relative=None):
             relpath = os.path.relpath(name, start=relative)
         else:
             relpath = name
-        statinfo[relpath] = os.stat(name)
+        statinfo[relpath] = statfile(name)
     else:
         for root, dirs, files in os.walk(name):
             for x in files:
@@ -98,7 +109,7 @@ def statfiles(name, relative=None):
                     relpath = os.path.relpath(foundpath, start=relative)
                 else:
                     relpath = foundpath
-                statinfo[relpath] = os.stat(foundpath)
+                statinfo[relpath] = statfile(foundpath)
     return statinfo
 
 
