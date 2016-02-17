@@ -6,7 +6,7 @@ import os
 import errno
 import collections
 
-from .utils import logger
+from .utils import logger, getfileset
 from .typeguesser import guess, knownextensions
 
 
@@ -16,7 +16,9 @@ class SourceCollection(collections.MutableMapping):
         return '<%s:(%s docs)>' % \
                (self.__class__.__name__, len(self))
 
-    def __init__(self, args):
+    def __init__(self, args=None):
+        if args is None:
+            return
         dirs = [os.path.abspath(x) for x in args]
         results = [os.path.exists(x) for x in dirs]
 
@@ -26,13 +28,12 @@ class SourceCollection(collections.MutableMapping):
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), sdir)
 
         for sdir in dirs:
-            docs = dict()
-            candidates = list()
             for fname in os.listdir(sdir):
+                candidates = list()
                 possible = os.path.join(sdir, fname)
                 if os.path.isfile(possible):
                     candidates.append(SourceDocument(possible))
-                elif os.path.isdir(fname):
+                elif os.path.isdir(possible):
                     stem = os.path.basename(fname)
                     for ext in knownextensions:
                         possible = os.path.join(sdir, fname, stem + ext)
@@ -44,12 +45,11 @@ class SourceCollection(collections.MutableMapping):
                     continue
                 for candy in candidates:
                     if candy.stem in self:
-                        logger.warning("Duplicate stems: %s and %s", 
-                                        self[candy.stem].filename, candy.filename)
-                        logger.warning("Ignoring %s", candy.filename)
+                        logger.warning("Ignoring duplicate is %s", candy.filename)
+                        logger.warning("Existing dup-entry is %s", self[candy.stem].filename)
                     else:
                         self[candy.stem] = candy
-        logger.info("Discovered %s documents total", len(self))
+        logger.debug("Discovered %s documents total", len(self))
 
     def __delitem__(self, key):
         del self.__dict__[key]
@@ -87,16 +87,12 @@ class SourceDocument(object):
         self.doctype = self._doctype()
         self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = os.path.splitext(self.basename)
-        self.stat = os.stat(self.filename)
-
         self.resources = False  # -- assume no ./images/, ./resources/
-        self.singlefile = True  # -- assume only one file
-        parentdir = os.path.basename(self.dirname)
-        if parentdir == self.stem:
-            self.singlefile = False
-            for rdir in ('resources', 'images'):
-                if os.path.exists(os.path.join(self.dirname, rdir)):
-                    self.resources = True
+        parentbase = os.path.basename(self.dirname)
+        if parentbase == self.stem:
+            self.fileset = getfileset(self.dirname)
+        else:
+            self.fileset = set([self.basename])
 
     def _doctype(self):
         return guess(self.filename)
