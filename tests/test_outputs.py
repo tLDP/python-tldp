@@ -19,7 +19,7 @@ datadir = os.path.join(os.path.dirname(__file__), 'testdata')
 class TestOutputNamingConvention(unittest.TestCase):
 
     def test_namesets(self):
-        onc = OutputNamingConvention("Stem", "/path/to/output/")
+        onc = OutputNamingConvention("/path/to/output/", "Stem")
         self.assertTrue(onc.name_txt.endswith(".txt"))
         self.assertTrue(onc.name_pdf.endswith(".pdf"))
         self.assertTrue(onc.name_html.endswith(".html"))
