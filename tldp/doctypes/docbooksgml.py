@@ -5,7 +5,7 @@ from .common import SignatureChecker
 
 
 class DocbookSGML(SignatureChecker):
-    formatname = 'DocBook 3.x and 4.x SGML'
+    formatname = 'DocBook SGML 3.x/4.x'
     extensions = ['.sgml']
     signatures = ['-//Davenport//DTD DocBook V3.0//EN',
                   '-//OASIS//DTD DocBook V3.1//EN',

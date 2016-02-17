@@ -5,7 +5,7 @@ from .common import SignatureChecker
 
 
 class Docbook5XML(SignatureChecker):
-    formatname = 'DocBook 5.x XML'
+    formatname = 'DocBook XML 5.x'
     extensions = ['.xml']
     signatures = ['-//OASIS//DTD DocBook V5.0/EN',
                   'http://docbook.org/ns/docbook', ]
