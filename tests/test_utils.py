@@ -9,7 +9,7 @@ from tldptesttools import TestToolsFilesystem
 
 # -- SUT
 from tldp.utils import makefh, which, execute
-from tldp.utils import getfileset, statfiles, att_statinfo
+from tldp.utils import statfiles, att_statinfo
 
 
 class Test_execute(TestToolsFilesystem):
@@ -60,24 +60,31 @@ class Test_which(unittest.TestCase):
         os.unlink(f.name)
 
 
-class Test_getfileset(unittest.TestCase):
-
-    def test_getfileset(self):
-        here = os.path.dirname(os.path.abspath(__file__))
-        me = os.path.join('.', os.path.basename(__file__))
-        fileset = getfileset(here)
-        self.assertIsInstance(fileset, set)
-        self.assertTrue(me in fileset)
-
-
 class Test_statfiles(unittest.TestCase):
 
-    def test_statfiles(self):
+    def test_statfiles_dir_rel(self):
         here = os.path.dirname(os.path.abspath(__file__))
-        me = os.path.join('.', os.path.basename(__file__))
+        statinfo = statfiles(here, relative=here)
+        self.assertIsInstance(statinfo, dict)
+        self.assertTrue(os.path.basename(__file__) in statinfo)
+
+    def test_statfiles_dir_abs(self):
+        here = os.path.dirname(os.path.abspath(__file__))
         statinfo = statfiles(here)
         self.assertIsInstance(statinfo, dict)
-        self.assertTrue(me in statinfo)
+        self.assertTrue(__file__ in statinfo)
+
+    def test_statfiles_file_rel(self):
+        here = os.path.dirname(os.path.abspath(__file__))
+        statinfo = statfiles(__file__, relative=here)
+        self.assertIsInstance(statinfo, dict)
+        self.assertTrue(os.path.basename(__file__) in statinfo)
+
+    def test_statfiles_file_abs(self):
+        here = os.path.dirname(os.path.abspath(__file__))
+        statinfo = statfiles(__file__)
+        self.assertIsInstance(statinfo, dict)
+        self.assertTrue(__file__ in statinfo)
 
 
 class Test_att_statinfo(unittest.TestCase):

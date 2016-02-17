@@ -82,24 +82,23 @@ def makefh(thing):
     return f
 
 
-def getfileset(dirname):
-    statinfo = statfiles(dirname)
-    return set(statinfo.keys())
-
-
-def statfiles(dirname):
+def statfiles(name, relative=None):
     statinfo = dict()
-    ocwd = os.getcwd()
-    os.chdir(dirname)
-    for root, dirs, files in os.walk('.'):
-        for x in files:
-            relpath = os.path.join(root, x)
-            try:
-                statinfo[relpath] = os.stat(relpath)
-            except OSError as e:
-                if e.errno != errno.ENOENT:  # -- ho-hum, race condition
-                    raise e
-    os.chdir(ocwd)
+    if not os.path.isdir(name):
+        if relative:
+            relpath = os.path.relpath(name, start=relative)
+        else:
+            relpath = name
+        statinfo[relpath] = os.stat(name)
+    else:
+        for root, dirs, files in os.walk(name):
+            for x in files:
+                foundpath = os.path.join(root, x)
+                if relative:
+                    relpath = os.path.relpath(foundpath, start=relative)
+                else:
+                    relpath = foundpath
+                statinfo[relpath] = os.stat(foundpath)
     return statinfo
 
 
