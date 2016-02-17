@@ -14,12 +14,6 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
     signatures = ['<!doctype linuxdoc system', ]
     tools = ['sgml2html', 'html2text', 'htmldoc']
 
-    # def __init__(self, *args, **kwargs):
-    #     self.source = kwargs.get('source')
-    #     self.output = kwargs.get('output')
-    #     self.platform = kwargs.get('platform')
-    #     super(Linuxdoc, self).__init__()
-
     def platform_check(self):
         for tool in self.tools:
             assert hasattr(self.platform, tool)
