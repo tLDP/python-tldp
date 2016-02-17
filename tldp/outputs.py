@@ -6,7 +6,7 @@ import os
 import errno
 
 import collections
-from .utils import logger
+from .utils import logger, getfileset
 
 
 class OutputNamingConvention(object):
@@ -54,6 +54,7 @@ class OutputDirectory(OutputNamingConvention):
         if not os.path.isdir(self.dirname):
             logger.info("%s creating output directory %s.", self.stem, dirname)
             os.mkdir(dirname)
+        self.fileset = getfileset(self.dirname)
         super(OutputDirectory, self).__init__(self.stem, self.dirname)
 
     def clean(self):
@@ -73,17 +74,19 @@ class OutputCollection(collections.MutableMapping):
     def __repr__(self):
         return '<%s:(%s docs)>' % (self.__class__.__name__, len(self))
 
-    def __init__(self, dirname):
-        if not os.path.isdir(dirname):
+    def __init__(self, dirname=None):
+        if dirname is None:
+            return
+        elif not os.path.isdir(dirname):
             logger.critical("Directory %s must already exist.", dirname)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), dirname)
         for fname in os.listdir(dirname):
             name = os.path.join(dirname, fname)
             if not os.path.isdir(name):
-                logger.warning("Skipping non-directory %s (in %s)", name, dirname)
+                logger.info("Skipping non-directory %s (in %s)", name, dirname)
                 continue
             o = OutputDirectory(name)
-            assert not o.stem in self
+            assert o.stem not in self
             self[o.stem] = o
 
     def __delitem__(self, key):
