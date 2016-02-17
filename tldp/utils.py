@@ -14,7 +14,7 @@ import logging
 
 
 def getLogger(**opts):
-    level = opts.get('level', logging.DEBUG)
+    level = opts.get('level', logging.INFO)
     logging.basicConfig(stream=sys.stderr, level=level)
     logger = logging.getLogger()
     return logger
@@ -83,29 +83,31 @@ def makefh(thing):
 
 
 def getfileset(dirname):
-    q = set()
+    statinfo = statfiles(dirname)
+    return set(statinfo.keys())
+
+
+def statfiles(dirname):
+    statinfo = dict()
     ocwd = os.getcwd()
     os.chdir(dirname)
     for root, dirs, files in os.walk('.'):
-        q.update([os.path.join(root, x) for x in files])
+        for x in files:
+            relpath = os.path.join(root, x)
+            try:
+                statinfo[relpath] = os.stat(relpath)
+            except OSError as e:
+                if e.errno != errno.ENOENT:  # -- ho-hum, race condition
+                    raise e
     os.chdir(ocwd)
-    return q
-
-
-def statfiles(absdir, fileset):
-    statinfo = dict()
-    for fname in fileset:
-        try:
-            statinfo[fname] = os.stat(os.path.join(absdir, fname))
-        except OSError as e:
-            if e.errno != errno.ENOENT:  # -- ho-hum, race condition
-                raise e
     return statinfo
 
 
 def att_statinfo(statinfo, attr='st_mtime', func=max):
-    x = func([getattr(v, attr) for v in statinfo.values()])
-    return x
+    if statinfo:
+        return func([getattr(v, attr) for v in statinfo.values()])
+    else:
+        return 0
 
 
 max_size = functools.partial(att_statinfo, attr='st_size', func=max)

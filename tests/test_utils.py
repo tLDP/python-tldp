@@ -8,7 +8,8 @@ from tempfile import NamedTemporaryFile as ntf
 from tldptesttools import TestToolsFilesystem
 
 # -- SUT
-from tldp.utils import makefh, which, getfileset, execute
+from tldp.utils import makefh, which, execute
+from tldp.utils import getfileset, statfiles, att_statinfo
 
 
 class Test_execute(TestToolsFilesystem):
@@ -64,8 +65,25 @@ class Test_getfileset(unittest.TestCase):
     def test_getfileset(self):
         here = os.path.dirname(os.path.abspath(__file__))
         me = os.path.join('.', os.path.basename(__file__))
-        self.assertTrue(me in getfileset(here))
+        fileset = getfileset(here)
+        self.assertIsInstance(fileset, set)
+        self.assertTrue(me in fileset)
 
+
+class Test_statfiles(unittest.TestCase):
+
+    def test_statfiles(self):
+        here = os.path.dirname(os.path.abspath(__file__))
+        me = os.path.join('.', os.path.basename(__file__))
+        statinfo = statfiles(here)
+        self.assertIsInstance(statinfo, dict)
+        self.assertTrue(me in statinfo)
+
+
+class Test_att_statinfo(unittest.TestCase):
+
+    def test_max_mtime(self):
+        pass
 
 class Test_makefh(unittest.TestCase):
 
