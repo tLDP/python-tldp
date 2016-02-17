@@ -85,6 +85,7 @@ class SourceDocument(object):
 
         logger.debug("Found existing %s", self.filename)
         self.doctype = self._doctype()
+        self.status = 'source'
         self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = os.path.splitext(self.basename)
         self.resources = False  # -- assume no ./images/, ./resources/

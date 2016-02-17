@@ -55,6 +55,7 @@ class OutputDirectory(OutputNamingConvention):
             logger.info("%s creating output directory %s.", self.stem, dirname)
             os.mkdir(dirname)
         self.fileset = getfileset(self.dirname)
+        self.status = 'output'
         super(OutputDirectory, self).__init__(self.stem, self.dirname)
 
     def clean(self):
