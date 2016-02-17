@@ -6,7 +6,7 @@ import os
 import errno
 
 import collections
-from .utils import logger, getfileset
+from .utils import logger, statfiles
 
 
 class OutputNamingConvention(object):
@@ -54,7 +54,7 @@ class OutputDirectory(OutputNamingConvention):
         if not os.path.isdir(self.dirname):
             logger.info("%s creating output directory %s.", self.stem, dirname)
             os.mkdir(dirname)
-        self.fileset = getfileset(self.dirname)
+        self.statinfo = statfiles(self.dirname, relative=self.dirname)
         self.status = 'output'
         super(OutputDirectory, self).__init__(self.stem, self.dirname)
 

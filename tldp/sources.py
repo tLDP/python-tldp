@@ -6,7 +6,7 @@ import os
 import errno
 import collections
 
-from .utils import logger, getfileset
+from .utils import logger, statfiles
 from .typeguesser import guess, knownextensions
 
 
@@ -90,9 +90,9 @@ class SourceDocument(object):
         self.resources = False  # -- assume no ./images/, ./resources/
         parentbase = os.path.basename(self.dirname)
         if parentbase == self.stem:
-            self.fileset = getfileset(self.dirname)
+            self.statinfo = statfiles(self.dirname, relative=self.dirname)
         else:
-            self.fileset = set([self.basename])
+            self.statinfo = statfiles(self.filename, relative=self.dirname)
 
     def _doctype(self):
         return guess(self.filename)
