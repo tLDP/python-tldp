@@ -5,13 +5,14 @@ from __future__ import absolute_import, division, print_function
 import os
 import io
 import sys
+import errno
 import subprocess
 from tempfile import mkstemp
 import logging
 
 
 def getLogger(**opts):
-    level = opts.get('level', logging.DEBUG)
+    level = opts.get('level', logging.INFO)
     logging.basicConfig(stream=sys.stderr, level=level)
     logger = logging.getLogger()
     return logger
@@ -23,9 +24,11 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
             logdir=None, env=os.environ):
     prefix = os.path.basename(cmd[0]) + '.' + str(os.getpid()) + '-'
 
-    if logdir is None:
-        raise Exception("Missing, required parameter: logdir.")
-    assert os.path.isdir(logdir)
+    if logdir is None: 
+        raise Exception("Missing required parameter: logdir.")
+
+    if not os.path.isdir(logdir):
+        raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), logdir)
 
     # -- not remapping STDIN, because that doesn't make sense here
     if stdout is None:
@@ -75,6 +78,17 @@ def makefh(thing):
         raise TypeError("Cannot make file from %s of %r" %
                         (type(thing), thing,))
     return f
+
+
+def getfileset(dirname):
+    q = set()
+    ocwd = os.getcwd()
+    os.chdir(dirname)
+    for root, dirs, files in os.walk('.'):
+        q.update([os.path.join(root, x) for x in files])
+    os.chdir(ocwd)
+    return q
+
 
 #
 # -- end of file

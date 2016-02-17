@@ -5,8 +5,34 @@ import os
 import unittest
 from tempfile import NamedTemporaryFile as ntf
 
+from tldptesttools import *
+
 # -- SUT
-from tldp.utils import makefh, which
+from tldp.utils import makefh, which, getfileset, execute
+
+
+class Test_execute(TestToolsFilesystem):
+
+    def test_execute_returns_zero(self):
+        result = execute(['true'], logdir=self.tempdir)
+        self.assertEqual(0, result)
+
+    def test_execute_returns_nonzero(self):
+        result = execute(['false'], logdir=self.tempdir)
+        self.assertEqual(1, result)
+
+    def test_execute_exception_when_logdir_none(self):
+        with self.assertRaises(Exception) as ecm:
+            execute(['true'], logdir=None)
+        e = ecm.exception
+        self.assertTrue('Missing' in e.message)
+
+    def test_execute_exception_when_logdir_enoent(self):
+        logdir = os.path.join(self.tempdir, 'nonexistent-directory')
+        with self.assertRaises(IOError) as ecm:
+            execute(['true'], logdir=logdir)
+        e = ecm.exception
+        self.assertTrue('nonexistent' in e.filename)
 
 
 class Test_which(unittest.TestCase):
@@ -31,6 +57,14 @@ class Test_which(unittest.TestCase):
         found = which(f.name)
         self.assertEqual(f.name, found)
         os.unlink(f.name)
+
+
+class Test_getfileset(unittest.TestCase):
+
+    def test_getfileset(self):
+        here = os.path.dirname(os.path.abspath(__file__))
+        me = os.path.join('.', os.path.basename(__file__))
+        self.assertTrue(me in getfileset(here))
 
 
 class Test_makefh(unittest.TestCase):
