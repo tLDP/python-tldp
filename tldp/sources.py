@@ -82,13 +82,12 @@ class SourceDocument(object):
             logger.critical("Source document is not a plain file: %s", self.filename)
             raise TypeError("Wrong type, not a plain file: " + self.filename)
 
-        logger.debug("Found existing %s", self.filename)
         self.doctype = self._doctype()
         self.status = 'source'
         self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = os.path.splitext(self.basename)
-        self.resources = False  # -- assume no ./images/, ./resources/
         parentbase = os.path.basename(self.dirname)
+        logger.debug("%s found source %s", self.stem, self.filename)
         if parentbase == self.stem:
             self.statinfo = statfiles(self.dirname, relative=self.dirname)
         else:
