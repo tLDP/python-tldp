@@ -36,6 +36,10 @@ class OutputNamingConvention(object):
         return os.path.join(self.dirname, self.stem + '-single.html')
 
     @property
+    def name_epub(self):
+        return os.path.join(self.dirname, self.stem + '.epub')
+
+    @property
     def name_index(self):
         return os.path.join(self.dirname, 'index.html')
 
@@ -59,20 +63,16 @@ class OutputDirectory(OutputNamingConvention):
 
     def clean(self):
         logger.info("%s cleaning dir   %s.", self.stem, self.dirname)
-        for oformat in self.expected:
-            name = getattr(self, oformat, None)
-            assert name is not None
-            if os.path.exists(name) or os.path.islink(name):
-                logger.info("%s cleaning dir   %s, removing file %s",
-                            self.stem, self.dirname, os.path.basename(name))
-                os.unlink(name)
-        return True
+        if os.path.isdir(self.dirname):
+            shutil.rmtree(self.dirname)
 
     def prebuild_hook(self):
+        self.clean()
         for d in (self.dirname, self.logdir):
             if not os.path.isdir(d):
                 logger.info("%s creating dir   %s.", self.stem, d)
                 os.mkdir(d)
+        self.copy_ancillaries(self.dirname)
 
     def build_failure_hook(self):
         logger.critical("%s FAILURE, see logs in %s", self.stem, self.logdir)
