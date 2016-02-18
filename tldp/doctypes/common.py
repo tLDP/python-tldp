@@ -35,8 +35,7 @@ class BaseDoctype(object):
     def generate(self):
         self.output.prebuild_hook()
         os.chdir(self.output.dirname)
-        vector = [self.output.clean(),
-                  self.platform_check(),
+        vector = [self.platform_check(),
                   self.create_htmls(),
                   self.create_pdf(),
                   self.create_txt(),
