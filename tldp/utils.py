@@ -28,6 +28,8 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
             logdir=None, env=os.environ):
     prefix = os.path.basename(cmd[0]) + '.' + str(os.getpid()) + '-'
 
+    assert isexecutable(cmd[0])
+
     if logdir is None:
         raise Exception("Missing required parameter: logdir.")
 
@@ -53,7 +55,7 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
     return result
 
 
-def is_executable(fpath):
+def isexecutable(fpath):
     return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
 
@@ -62,13 +64,13 @@ def which(program):
 http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python/377028#377028
     '''
     fpath, fname = os.path.split(program)
-    if fpath and is_executable(program):
+    if fpath and isexecutable(program):
             return program
     else:
         for path in os.environ["PATH"].split(os.pathsep):
             path = path.strip('"')
             sut = os.path.join(path, program)
-            if is_executable(sut):
+            if isexecutable(sut):
                 return sut
     return None
 

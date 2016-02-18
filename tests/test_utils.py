@@ -16,23 +16,27 @@ from tldp.utils import statfiles
 class Test_execute(TestToolsFilesystem):
 
     def test_execute_returns_zero(self):
-        result = execute(['true'], logdir=self.tempdir)
+        exe = which ('true')
+        result = execute([exe], logdir=self.tempdir)
         self.assertEqual(0, result)
 
     def test_execute_returns_nonzero(self):
-        result = execute(['false'], logdir=self.tempdir)
+        exe = which ('false')
+        result = execute([exe], logdir=self.tempdir)
         self.assertEqual(1, result)
 
     def test_execute_exception_when_logdir_none(self):
+        exe = which ('true')
         with self.assertRaises(Exception) as ecm:
-            execute(['true'], logdir=None)
+            execute([exe], logdir=None)
         e = ecm.exception
         self.assertTrue('Missing' in e.message)
 
     def test_execute_exception_when_logdir_enoent(self):
+        exe = which ('true')
         logdir = os.path.join(self.tempdir, 'nonexistent-directory')
         with self.assertRaises(IOError) as ecm:
-            execute(['true'], logdir=logdir)
+            execute([exe], logdir=logdir)
         e = ecm.exception
         self.assertTrue('nonexistent' in e.filename)
 
