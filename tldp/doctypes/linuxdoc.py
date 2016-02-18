@@ -30,10 +30,10 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         logger.debug("%s creating TXT   %s.", stem, outf)
         stdout = open(outf, 'wx')
         result = execute(cmd, logdir=logdir, stdout=stdout)
-        if result == 0:
-            logger.info("%s created  TXT   %s.", stem, outf)
-            return os.path.isfile(outf)
-        return False
+        if result != 0:
+            return False
+        logger.info("%s created  TXT   %s.", stem, outf)
+        return os.path.isfile(outf)
 
     def create_pdf(self):
         exe = self.platform.htmldoc
@@ -46,10 +46,10 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         cmd = [exe, '--size', 'universal', '-t', 'pdf', '--firstpage', 'p1',
                '--outfile', outf, inf]
         result = execute(cmd, logdir=logdir)
-        if result == 0:
-            logger.info("%s created  PDF   %s.", stem, outf)
-            return os.path.isfile(outf)
-        return False
+        if result != 0:
+            return False
+        logger.info("%s created  PDF   %s.", stem, outf)
+        return os.path.isfile(outf)
 
     def create_html(self):
         exe = self.platform.sgml2html
