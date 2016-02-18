@@ -129,6 +129,9 @@ class OutputCollection(collections.MutableMapping):
 
     The key of an OutputCollection is the stem name of the document, which
     allows convenient access and guaranteed non-collision.
+
+    The use of the stem as a key works conveniently with the
+    SourceCollection which uses the same strategy on SourceDocuments.
     '''
     def __repr__(self):
         return '<%s:(%s docs)>' % (self.__class__.__name__, len(self))
@@ -136,8 +139,8 @@ class OutputCollection(collections.MutableMapping):
     def __init__(self, dirname=None):
         '''construct an OutputCollection
 
-        if dirname is not supplied, OutputCollection is basically, a dict().
-        if dirname is supplied, then OutputCollection scans the filesystem
+        If dirname is not supplied, OutputCollection is basically, a dict().
+        If dirname is supplied, then OutputCollection scans the filesystem
         for subdirectories of dirname and creates an OutputDirectory for each
         subdir.  Each subdir name is used as the stem (or key) for holding the
         OutputDirectory in the OutputCollection.
@@ -160,8 +163,6 @@ class OutputCollection(collections.MutableMapping):
               "Wireless-HOWTO": OutputDirectory("/path/en/Wireless-HOWTO")
               }
 
-        The use of the stem as a key works conveniently with the
-        SourceCollection which uses the same strategy on SourceDocuments.
         '''
         if dirname is None:
             return
