@@ -46,8 +46,6 @@ class BaseDoctype(object):
             self.output.build_success_hook()
         else:
             self.output.build_failure_hook()
-        logger.info("%s generation of all documents %s",
-                    self.source.stem, result)
         return all(vector)
 
 #
