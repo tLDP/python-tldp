@@ -15,12 +15,13 @@ from argparse import Namespace
 class Inventory(object):
 
     def __repr__(self):
-        return '<%s: %d published, %d orphans, %d new, %d stale>' % (
+        return '<%s: %d published, %d orphans, %d new, %d stale, %d broken>' % (
                self.__class__.__name__,
                len(self.published),
                len(self.orphans),
                len(self.new),
                len(self.stale),
+               len(self.broken),
                )
 
     def __init__(self, pubdir, sourcedirs):
@@ -76,6 +77,14 @@ class Inventory(object):
         logger.info("Identified %d stale documents: %r.", len(self.stale),
                     self.stale.keys())
 
+        # -- stale identification
+        #
+        self.broken = SourceCollection()
+        for stem, sdoc in s.items():
+            if not sdoc.output.iscomplete:
+                self.broken[stem] = sdoc
+        logger.info("Identified %d broken documents: %r.", len(self.broken),
+                    self.broken.keys())
 
 def get_sources(sourcedirs):
     return SourceCollection(sourcedirs)
