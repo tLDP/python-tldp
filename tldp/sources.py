@@ -23,11 +23,12 @@ class SourceCollection(collections.MutableMapping):
 
         if not all(results):
             for result, sdir in zip(results, dirs):
-                logger.critical("Directory does not exist: " + sdir)
+                logger.critical("Source collection dir must already exist: %s",
+                                sdir)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), sdir)
 
-        for sdir in dirs:
-            for fname in os.listdir(sdir):
+        for sdir in sorted(dirs):
+            for fname in sorted(os.listdir(sdir)):
                 candidates = list()
                 possible = os.path.join(sdir, fname)
                 if os.path.isfile(possible):
