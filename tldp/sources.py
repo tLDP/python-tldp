@@ -44,8 +44,9 @@ class SourceCollection(collections.MutableMapping):
                     continue
                 for candy in candidates:
                     if candy.stem in self:
+                        dup = self[candy.stem].filename
                         logger.warning("Ignoring duplicate is %s", candy.filename)
-                        logger.warning("Existing dup-entry is %s", self[candy.stem].filename)
+                        logger.warning("Existing dup-entry is %s", dup)
                     else:
                         self[candy.stem] = candy
         logger.debug("Discovered %s documents total", len(self))

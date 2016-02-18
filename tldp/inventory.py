@@ -86,6 +86,7 @@ class Inventory(object):
         logger.info("Identified %d broken documents: %r.", len(self.broken),
                     self.broken.keys())
 
+
 def get_sources(sourcedirs):
     return SourceCollection(sourcedirs)
 

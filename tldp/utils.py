@@ -14,6 +14,7 @@ import logging
 
 logdir = 'tldp-document-build-logs'
 
+
 def getLogger(**opts):
     level = opts.get('level', logging.INFO)
     logging.basicConfig(stream=sys.stderr, level=level)
