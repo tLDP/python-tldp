@@ -4,9 +4,10 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import errno
+import shutil
 
 import collections
-from .utils import logger, statfiles
+from .utils import logger, logdir, statfiles
 
 
 class OutputNamingConvention(object):
@@ -51,23 +52,36 @@ class OutputDirectory(OutputNamingConvention):
         if not os.path.isdir(parent):
             logger.critical("Missing output tree %s.", parent)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), parent)
-        if not os.path.isdir(self.dirname):
-            logger.info("%s creating output directory %s.", self.stem, dirname)
-            os.mkdir(dirname)
         self.statinfo = statfiles(self.dirname, relative=self.dirname)
         self.status = 'output'
+        self.logdir = os.path.join(self.dirname, logdir)
         super(OutputDirectory, self).__init__(self.dirname, self.stem)
 
     def clean(self):
-        logger.info("%s cleaning directory %s.", self.stem, self.dirname)
+        logger.info("%s cleaning dir   %s.", self.stem, self.dirname)
         for oformat in self.expected:
             name = getattr(self, oformat, None)
             assert name is not None
             if os.path.exists(name) or os.path.islink(name):
-                logger.info("%s cleaning directory %s, removing file %s",
+                logger.info("%s cleaning dir   %s, removing file %s",
                             self.stem, self.dirname, os.path.basename(name))
                 os.unlink(name)
         return True
+
+    def prebuild_hook(self):
+        for d in (self.dirname, self.logdir):
+            if not os.path.isdir(d):
+                logger.info("%s creating dir   %s.", self.stem, d)
+                os.mkdir(d)
+
+    def build_failure_hook(self):
+        logger.critical("%s FAILURE, see logs in %s", self.stem, self.logdir)
+
+    def build_success_hook(self):
+        logger.info("%s SUCCESS!", self.stem)
+        logger.debug("%s removing logs  %s)", self.stem, self.logdir)
+        if os.path.isdir(self.logdir):
+            shutil.rmtree(logdir)
 
 
 class OutputCollection(collections.MutableMapping):

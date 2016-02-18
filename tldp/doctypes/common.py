@@ -31,13 +31,9 @@ class BaseDoctype(object):
         self.output = kwargs.get('output', None)
         self.platform = kwargs.get('platform', None)
         assert None not in (self.source, self.output, self.platform)
-        self.logdir = os.path.join(self.output.dirname, 'logs')
-        if os.path.exists(self.logdir):
-            logger.warning("Found existing logs directory: %s", self.logdir)
-        else:
-            os.mkdir(self.logdir)
 
     def generate(self):
+        self.output.prebuild_hook()
         os.chdir(self.output.dirname)
         vector = [self.output.clean(),
                   self.platform_check(),
@@ -47,6 +43,10 @@ class BaseDoctype(object):
                   self.create_html(),
                   ]
         result = all(vector)
+        if result:
+            self.output.build_success_hook()
+        else:
+            self.output.build_failure_hook()
         logger.info("%s generation of all documents %s",
                     self.source.stem, result)
         return all(vector)
