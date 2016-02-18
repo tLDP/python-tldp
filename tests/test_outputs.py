@@ -60,5 +60,16 @@ class TestOutputDirectory(TestToolsFilesystem):
         e = ecm.exception
         self.assertEquals(errno.ENOENT, e.errno)
 
+    def test_iscomplete(self):
+        reldir, absdir = self.adddir('outputs/Frobnitz-HOWTO')
+        o = OutputDirectory(absdir)
+        self.assertFalse(o.iscomplete)
+        for prop in o.expected:
+            fname = getattr(o, prop, None)
+            assert fname is not None
+            with open(fname, 'w') as f:
+                pass
+        self.assertTrue(o.iscomplete)
+
 #
 # -- end of file

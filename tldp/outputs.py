@@ -61,6 +61,15 @@ class OutputDirectory(OutputNamingConvention):
         self.logdir = os.path.join(self.dirname, logdir)
         super(OutputDirectory, self).__init__(self.dirname, self.stem)
 
+    @property
+    def iscomplete(self):
+        files = list()
+        for prop in self.expected:
+            name = getattr(self, prop, None)
+            assert name is not None
+            files.append(os.path.isfile(name))
+        return all(files)
+
     def clean(self):
         logger.info("%s cleaning dir   %s.", self.stem, self.dirname)
         if os.path.isdir(self.dirname):
