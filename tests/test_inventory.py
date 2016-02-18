@@ -19,7 +19,7 @@ from tldptesttools import TestToolsFilesystem
 import example
 
 # -- SUT
-from tldp.driver import Inventory
+from tldp.inventory import Inventory
 
 datadir = os.path.join(os.path.dirname(__file__), 'testdata')
 
