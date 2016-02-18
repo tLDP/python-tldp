@@ -25,12 +25,13 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         assert os.path.exists(inf)
         outf = self.output.name_txt
         stem = self.source.stem
+        logdir = self.output.logdir
         cmd = [exe, '-style', 'pretty', '-nobs', inf]
-        logger.debug("%s creating TXT %s.", stem, outf)
+        logger.debug("%s creating TXT   %s.", stem, outf)
         stdout = open(outf, 'wx')
-        result = execute(cmd, logdir=self.logdir, stdout=stdout)
+        result = execute(cmd, logdir=logdir, stdout=stdout)
         if result == 0:
-            logger.info("%s created TXT %s.", stem, outf)
+            logger.info("%s created  TXT   %s.", stem, outf)
             return os.path.isfile(outf)
         return False
 
@@ -40,12 +41,13 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         assert os.path.exists(inf)
         outf = self.output.name_pdf
         stem = self.source.stem
-        logger.info("%s creating PDF %s.", stem, outf)
+        logdir = self.output.logdir
+        logger.debug("%s creating PDF   %s.", stem, outf)
         cmd = [exe, '--size', 'universal', '-t', 'pdf', '--firstpage', 'p1',
                '--outfile', outf, inf]
-        result = execute(cmd, logdir=self.logdir)
+        result = execute(cmd, logdir=logdir)
         if result == 0:
-            logger.info("%s created PDF %s.", stem, outf)
+            logger.info("%s created  PDF   %s.", stem, outf)
             return os.path.isfile(outf)
         return False
 
@@ -55,10 +57,12 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         assert os.path.exists(inf)
         outf = self.output.name_html
         stem = self.source.stem
-        logger.info("%s creating chunked HTML %s, etc.", stem, outf)
+        logdir = self.output.logdir
+        logger.debug("%s creating HTML  %s, etc.", stem, outf)
         cmd = [exe, inf]
-        result = execute(cmd, logdir=self.logdir)
+        result = execute(cmd, logdir=logdir)
         if result == 0:  # -- only symlink, if HTML generated successfully
+            logger.info("%s created  HTML  %s, etc.", stem, outf)
             target = os.path.basename(outf)
             logger.debug("%s creating index.html symlink to %s.", stem, target)
             try:
@@ -73,13 +77,15 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         assert os.path.exists(inf)
         outf = self.output.name_htmls
         stem = self.source.stem
-        logger.info("%s creating single-file HTML %s, etc.", stem, outf)
+        logdir = self.output.logdir
+        logger.debug("%s creating HTMLS %s.", stem, outf)
         cmd = [exe, '--split=0', inf]
-        result = execute(cmd, logdir=self.logdir)
+        result = execute(cmd, logdir=logdir)
         if result == 0:  # -- only rename, if HTML generated successfully
+            logger.info("%s created  HTMLS %s.", stem, outf)
             source = os.path.basename(self.output.name_html)
             target = os.path.basename(self.output.name_htmls)
-            logger.debug("%s renaming HTML single file to %s.", stem, target)
+            logger.debug("%s renaming HTMLS to %s.", stem, target)
             try:
                 os.rename(source, target)
             except OSError:
