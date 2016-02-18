@@ -13,7 +13,7 @@ from .utils import logger, logdir, statfiles
 class OutputNamingConvention(object):
 
     expected = ['name_txt', 'name_pdf', 'name_htmls', 'name_html',
-                'name_index']
+                'name_indexhtml']
 
     def __init__(self, dirname, stem):
         self.dirname = dirname
@@ -40,7 +40,7 @@ class OutputNamingConvention(object):
         return os.path.join(self.dirname, self.stem + '.epub')
 
     @property
-    def name_index(self):
+    def name_indexhtml(self):
         return os.path.join(self.dirname, 'index.html')
 
 
@@ -54,7 +54,7 @@ class OutputDirectory(OutputNamingConvention):
         self.stem = os.path.basename(self.dirname)
         parent = os.path.dirname(self.dirname)
         if not os.path.isdir(parent):
-            logger.critical("Missing output tree %s.", parent)
+            logger.critical("Missing output collection directory %s.", parent)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), parent)
         self.statinfo = statfiles(self.dirname, relative=self.dirname)
         self.status = 'output'
@@ -63,12 +63,12 @@ class OutputDirectory(OutputNamingConvention):
 
     @property
     def iscomplete(self):
-        files = list()
+        present = list()
         for prop in self.expected:
             name = getattr(self, prop, None)
             assert name is not None
-            files.append(os.path.isfile(name))
-        return all(files)
+            present.append(os.path.isfile(name))
+        return all(present)
 
     def clean(self):
         logger.info("%s cleaning dir   %s.", self.stem, self.dirname)
@@ -102,7 +102,8 @@ class OutputCollection(collections.MutableMapping):
         if dirname is None:
             return
         elif not os.path.isdir(dirname):
-            logger.critical("Directory %s must already exist.", dirname)
+            logger.critical("Output collection dir %s must already exist.", 
+                            dirname)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), dirname)
         for fname in os.listdir(dirname):
             name = os.path.join(dirname, fname)

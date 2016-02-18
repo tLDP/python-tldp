@@ -24,7 +24,7 @@ class TestOutputNamingConvention(unittest.TestCase):
         self.assertTrue(onc.name_pdf.endswith(".pdf"))
         self.assertTrue(onc.name_html.endswith(".html"))
         self.assertTrue(onc.name_htmls.endswith("-single.html"))
-        self.assertTrue(onc.name_index.endswith("index.html"))
+        self.assertTrue(onc.name_indexhtml.endswith("index.html"))
 
 
 class TestOutputCollection(TestToolsFilesystem):
