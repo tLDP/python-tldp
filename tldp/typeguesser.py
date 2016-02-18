@@ -24,15 +24,15 @@ def guess(thing):
     except TypeError:
         return None
 
-    _, ext = os.path.splitext(f.name)
+    stem, ext = os.path.splitext(f.name)
     if not ext:
-        logger.debug("No file extension for %s, skipping.", ext)
+        logger.debug("%s no file extension, skipping %s.", stem, ext)
         return None
 
     possible = [t for t in knowndoctypes if ext in t.extensions]
     logger.debug("Possible:  %r", possible)
     if not possible:
-        logger.debug("Found no possible doctypes for extension %s.", ext)
+        logger.debug("%s unknown extension %s.", stem, ext)
         return None
 
     if len(possible) == 1:
@@ -41,10 +41,10 @@ def guess(thing):
 
     # -- for this extension, multiple document types, probably SGML, XML
     #
-    logger.debug("Extension is %s for %s; multiple possible document types.",
-                 ext, f.name)
+    logger.debug("%s multiple possible doctypes for extension %s on file %s.",
+                 stem, ext, f.name)
     for doctype in possible:
-        logger.debug("Extension is %s for %s; %s.", ext, f.name, doctype)
+        logger.debug("%s extension %s could be %s.", stem, ext, doctype)
 
     guesses = list()
     for doctype in possible:
@@ -53,8 +53,8 @@ def guess(thing):
             guesses.append((sindex, doctype))
 
     if not guesses:
-        logger.warning("Extension is %s for %s; no matching signature found.",
-                       ext, f.name)
+        logger.warning("%s no matching signature found for %s.",
+                       stem, f.name)
         return None
     if len(guesses) == 1:
         _, doctype = guesses.pop()
@@ -65,10 +65,10 @@ def guess(thing):
     #    first signature in the file as the more likely document type.
     #
     guesses.sort()
-    logger.info("Multiple guesses for file %s", f.name)
+    logger.info("%s multiple doctype guesses for file %s", stem, f.name)
     for sindex, doctype in guesses:
-        logger.info("Could be %s (file position %s)", doctype, sindex)
-    logger.info("Going to guess that it is %s", doctype)
+        logger.info("%s could be %s (sig at pos %s)", stem, doctype, sindex)
+    logger.info("%s going to guess %s for %s", stem, doctype, f.name)
     _, doctype = guesses.pop(0)
     return doctype
 
