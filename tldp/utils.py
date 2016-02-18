@@ -12,6 +12,7 @@ import functools
 from tempfile import mkstemp
 import logging
 
+logdir = 'tldp-document-build-logs'
 
 def getLogger(**opts):
     level = opts.get('level', logging.INFO)
@@ -90,17 +91,23 @@ def statfile(name):
             raise e
         if os.path.islink(name):
             st = os.lstat(name)
+        else:
+            st = None
     return st
 
 
 def statfiles(name, relative=None):
     statinfo = dict()
+    if not os.path.exists(name):
+        return statinfo
     if not os.path.isdir(name):
         if relative:
             relpath = os.path.relpath(name, start=relative)
         else:
             relpath = name
         statinfo[relpath] = statfile(name)
+        if statinfo[relpath] is None:
+            del statinfo[relpath]
     else:
         for root, dirs, files in os.walk(name):
             for x in files:
@@ -110,6 +117,8 @@ def statfiles(name, relative=None):
                 else:
                     relpath = foundpath
                 statinfo[relpath] = statfile(foundpath)
+                if statinfo[relpath] is None:
+                    del statinfo[relpath]
     return statinfo
 
 

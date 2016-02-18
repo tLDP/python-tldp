@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import uuid
 import unittest
 from tempfile import NamedTemporaryFile as ntf
 
@@ -85,6 +86,13 @@ class Test_statfiles(unittest.TestCase):
         statinfo = statfiles(__file__)
         self.assertIsInstance(statinfo, dict)
         self.assertTrue(__file__ in statinfo)
+
+    def test_statfiles_nonexistent_file(self):
+        here = os.path.dirname(os.path.abspath(__file__))
+        this = os.path.join(here, str(uuid.uuid4()))
+        statinfo = statfiles(this)
+        self.assertIsInstance(statinfo, dict)
+        self.assertEquals(0, len(statinfo))
 
 
 class Test_att_statinfo(unittest.TestCase):
