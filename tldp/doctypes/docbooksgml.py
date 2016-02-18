@@ -1,4 +1,5 @@
 #! /usr/bin/python
+# -*- coding: utf8 -*-
 
 from ..utils import logger
 from .common import SignatureChecker
