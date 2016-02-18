@@ -3,14 +3,8 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import time
-import errno
 import random
 import shutil
-
-try:
-    from types import SimpleNamespace
-except ImportError:
-    from utils import SimpleNamespace
 
 from tldp.outputs import OutputNamingConvention
 from tldptesttools import TestToolsFilesystem
@@ -52,7 +46,7 @@ class TestSourceDocSkeleton(object):
             shutil.copy(content, fname)
         else:
             with open(fname, 'w') as f:
-               f.write(content)
+                f.write(content)
 
 
 class TestInventoryBase(TestToolsFilesystem):
@@ -154,7 +148,7 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertEquals(0, len(i.orphans))
         self.assertEquals(0, len(i.broken))
 
-    def test_detect_status_stale(self):
+    def test_detect_status_broken(self):
         ex = random.choice(example.sources)
         self.add_broken('Frobnitz-HOWTO', ex)
         i = Inventory(self.pubdir, self.sourcedirs)

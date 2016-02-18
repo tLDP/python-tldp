@@ -67,7 +67,7 @@ class TestOutputDirectory(TestToolsFilesystem):
         for prop in o.expected:
             fname = getattr(o, prop, None)
             assert fname is not None
-            with open(fname, 'w') as f:
+            with open(fname, 'w'):
                 pass
         self.assertTrue(o.iscomplete)
 

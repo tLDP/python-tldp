@@ -10,7 +10,7 @@ from tldptesttools import TestToolsFilesystem
 
 # -- SUT
 from tldp.utils import makefh, which, execute
-from tldp.utils import statfiles, att_statinfo
+from tldp.utils import statfiles
 
 
 class Test_execute(TestToolsFilesystem):
@@ -82,7 +82,6 @@ class Test_statfiles(unittest.TestCase):
         self.assertTrue(os.path.basename(__file__) in statinfo)
 
     def test_statfiles_file_abs(self):
-        here = os.path.dirname(os.path.abspath(__file__))
         statinfo = statfiles(__file__)
         self.assertIsInstance(statinfo, dict)
         self.assertTrue(__file__ in statinfo)
@@ -99,6 +98,7 @@ class Test_att_statinfo(unittest.TestCase):
 
     def test_max_mtime(self):
         pass
+
 
 class Test_makefh(unittest.TestCase):
 
