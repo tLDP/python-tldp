@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import errno
 import random
+import unittest
 
 try:
     from types import SimpleNamespace
@@ -16,7 +17,7 @@ from tldptesttools import TestToolsFilesystem
 import example
 
 # -- SUT
-from tldp.sources import SourceCollection, SourceDocument
+from tldp.sources import SourceCollection, SourceDocument, scansourcedirs
 
 datadir = os.path.join(os.path.dirname(__file__), 'testdata')
 
@@ -31,7 +32,7 @@ class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
         for d in documents:
             d.reldir, d.absdir = self.adddir(d.reldir)
             _, _ = self.addfile(d.reldir, ex.filename, stem=d.stem)
-        s = SourceCollection([x.absdir for x in documents])
+        s = scansourcedirs([x.absdir for x in documents])
         self.assertEquals(2, len(s))
         expected = set([x.stem for x in documents])
         found = set(s.keys())
@@ -45,7 +46,7 @@ class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
         for d in documents:
             d.reldir, d.absdir = self.adddir(d.reldir)
             _, _ = self.addfile(d.reldir, ex.filename, stem=d.stem)
-        s = SourceCollection([x.absdir for x in documents])
+        s = scansourcedirs([x.absdir for x in documents])
         self.assertEquals(1, len(s))
         expected = set([x.stem for x in documents])
         found = set(s.keys())
@@ -58,7 +59,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         maindir = 'LDP/LDP/howto'
         reldir, absdir = self.adddir(maindir)
         os.mkfifo(os.path.join(absdir, 'non-dir-non-file.rst'))
-        s = SourceCollection([absdir])
+        s = scansourcedirs([absdir])
         self.assertEquals(0, len(s))
 
     def test_finding_singlefile(self):
@@ -66,7 +67,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         maindir = 'LDP/LDP/howto'
         reldir, absdir = self.adddir(maindir)
         _, _ = self.addfile(reldir, ex.filename)
-        s = SourceCollection([absdir])
+        s = scansourcedirs([absdir])
         self.assertEquals(1, len(s))
 
     def test_skipping_misnamed_singlefile(self):
@@ -74,7 +75,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         maindir = 'LDP/LDP/howto'
         reldir, absdir = self.adddir(maindir)
         self.addfile(reldir, ex.filename, ext=".mis")
-        s = SourceCollection([absdir])
+        s = scansourcedirs([absdir])
         self.assertEquals(1, len(s))
 
     def test_multiple_stems_of_different_extensions(self):
@@ -84,8 +85,15 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         reldir, absdir = self.adddir(maindir)
         self.addfile(reldir, ex.filename, stem=stem, ext=".xml")
         self.addfile(reldir, ex.filename, stem=stem, ext=".md")
-        s = SourceCollection([absdir])
+        s = scansourcedirs([absdir])
         self.assertEquals(1, len(s))
+
+
+class TestNullSourceCollection(TestToolsFilesystem):
+
+    def test_SourceCollection_no_dirnames(self):
+        s = SourceCollection()
+        self.assertIsInstance(s, SourceCollection)
 
 
 class TestInvalidSourceCollection(TestToolsFilesystem):
@@ -93,7 +101,7 @@ class TestInvalidSourceCollection(TestToolsFilesystem):
     def test_validateDirs_onebad(self):
         invalid0 = os.path.join(self.tempdir, 'unique', 'rabbit')
         with self.assertRaises(IOError) as ecm:
-            SourceCollection([invalid0])
+            scansourcedirs([invalid0])
         e = ecm.exception
         self.assertTrue('unique/rabbit' in e.filename)
 
@@ -101,13 +109,21 @@ class TestInvalidSourceCollection(TestToolsFilesystem):
         invalid0 = os.path.join(self.tempdir, 'unique', 'rabbit')
         invalid1 = os.path.join(self.tempdir, 'affable', 'elephant')
         with self.assertRaises(IOError) as ecm:
-            SourceCollection([invalid0, invalid1])
+            scansourcedirs([invalid0, invalid1])
         e = ecm.exception
         self.assertTrue('affable/elephant' in e.filename)
 
     def testEmptyDir(self):
-        s = SourceCollection([self.tempdir])
+        s = scansourcedirs([self.tempdir])
         self.assertEquals(0, len(s))
+
+
+class TestSourceDocuments(unittest.TestCase):
+
+    def test_init_missing(self):
+        doc = SourceDocument(os.path.join(datadir, 'linuxdoc-simple.sgml'))
+        self.assertIsInstance(doc, SourceDocument)
+        self.assertTrue("linuxdoc-simple.sgml" in str(doc))
 
 
 class TestMissingSourceDocuments(TestToolsFilesystem):
