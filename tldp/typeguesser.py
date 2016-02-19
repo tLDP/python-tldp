@@ -11,6 +11,11 @@ from . import doctypes
 
 
 def listDoctypes():
+    '''returns a list of tldp.doctypes Python classes
+
+    This is the canonical list of doctypes which are recognized and capable of
+    being processed into outputs.  See tldp.doctypes for more information.
+    '''
     kdt = list()
     for name, member in inspect.getmembers(doctypes, inspect.isclass):
         logger.debug("Located class %s (%r).", name, member)
@@ -20,6 +25,27 @@ def listDoctypes():
 
 
 def guess(thing):
+    '''return a tldp.doctype class which is a best guess for document type
+
+    thing: Could be a filename or an open file.
+
+    The guess function will try to guess the document type (doctype) from the
+    file extension.  If extension matching produces multiple possible doctype
+    matches (e.g. .xml or .sgml), the guess function will then use signature
+    matching to find the earliest match in the file for a signature.
+
+    If there are multiple signature matches, it will choose the signature
+    matching at the earliest position in the file.
+
+    Bugs/shortcomings:
+
+      * This is only a guesser.
+      * When signature matching, it reports first signature it discovers in
+        any input file.
+      * It could/should read more than 1024 bytes (cf. SignatureChecker)
+        especially if it cannot return any result.
+      * It could/should use heuristics or something richer than signatures.
+    '''
     try:
         f = makefh(thing)
     except TypeError:
