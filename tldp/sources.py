@@ -7,7 +7,7 @@ import os
 import errno
 import collections
 
-from .utils import logger, statfiles
+from .utils import logger, statfiles, stem_and_ext
 from .typeguesser import guess, knownextensions
 
 
@@ -59,11 +59,9 @@ def scansourcedirs(dirnames):
             if os.path.isfile(possible):
                 candidates.append(SourceDocument(possible))
             elif os.path.isdir(possible):
-                stem = os.path.basename(fname)
-                for ext in knownextensions:
-                    possible = os.path.join(sdir, fname, stem + ext)
-                    if os.path.isfile(possible):
-                        candidates.append(SourceDocument(possible))
+                possible = sourcedoc_fromdir(possible)
+                if possible:
+                    candidates.append(SourceDocument(possible))
             else:
                 logger.warning("Skipping non-directory, non-plain file %s",
                                possible)
@@ -77,6 +75,24 @@ def scansourcedirs(dirnames):
                     found[candy.stem] = candy
     logger.debug("Discovered %s documents total", len(found))
     return found
+
+
+def sourcedoc_fromdir(dirname):
+    candidates = list()
+    stem, _ = stem_and_ext(dirname)
+    parentdir = os.path.dirname(dirname)
+    for ext in knownextensions:
+        possible = os.path.join(parentdir, stem, stem + ext)
+        if os.path.isfile(possible):
+            candidates.append(possible)
+    if len(candidates) > 1:
+        logger.warning("%s multiple document choices in dir %s, bailing....", 
+                       stem, dirname)
+        raise Exception("multiple document choices in " + dirname)
+    elif len(candidates) == 0:
+        return None
+    else:
+        return candidates.pop()
 
 
 class SourceCollection(collections.MutableMapping):
@@ -161,7 +177,7 @@ class SourceDocument(object):
         self.doctype = guess(self.filename)
         self.status = 'source'
         self.dirname, self.basename = os.path.split(self.filename)
-        self.stem, self.ext = os.path.splitext(self.basename)
+        self.stem, self.ext = stem_and_ext(self.basename)
         parentbase = os.path.basename(self.dirname)
         logger.debug("%s found source %s", self.stem, self.filename)
         if parentbase == self.stem:
