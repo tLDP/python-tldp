@@ -27,10 +27,10 @@ class Test_execute(TestToolsFilesystem):
 
     def test_execute_exception_when_logdir_none(self):
         exe = which ('true')
-        with self.assertRaises(Exception) as ecm:
+        with self.assertRaises(ValueError) as ecm:
             execute([exe], logdir=None)
         e = ecm.exception
-        self.assertTrue('Missing' in e.message)
+        self.assertTrue('logdir must be a directory' in e.message)
 
     def test_execute_exception_when_logdir_enoent(self):
         exe = which ('true')
