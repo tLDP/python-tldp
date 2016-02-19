@@ -27,12 +27,57 @@ logger = getLogger()
 
 def execute(cmd, stdin=None, stdout=None, stderr=None,
             logdir=None, env=os.environ):
+    '''(yet another) wrapper around subprocess.Popen()
+
+    The processing tools for handling DocBook SGML, DocBook XML and Linuxdoc
+    all use different conventions for writing outputs.  Some write into the
+    working directory.  Others write to STDOUT.  Others accept the output file
+    as a required option.
+
+    To allow for automation and flexibility, this wrapper function does what
+    most other synchronous subprocess.Popen() wrappers does, but it adds a
+    feature to record the STDOUT and STDERR of the executable.  This is
+    helpful when trying to diagnose build failures of individual documents.
+
+    Required:
+
+      - cmd: (list form only; the paranoid prefer shell=False)
+        this must include the whole command-line
+      - logdir: an existing directory in which temporary log files
+        will be created
+
+    Optional:
+
+      - stdin: if not supplied, STDIN (FD 0) will be left as is
+      - stdout: if not supplied, STDOUT (FD 1) will be connected
+        to a named file in the logdir (and left for later inspection)
+      - stderr: if not supplied, STDERR (FD 2) will be connected
+        to a named file in the logdir (and left for later inspection)
+      - env: if not supplied, just use current environment
+
+    Returns: the numeric exit code of the process
+
+    Side effects:
+
+      * will probably create temporary files in logdir
+      * function calls wait(); process execution will intentionally block
+        until the child process terminates
+
+    Possible exceptions:
+
+      * if the first element of list cmd does not contain an executable,
+        this function will raise an AssertionError
+      * if logdir is not a directory, this function will raise ValueError or
+        IOError
+      * and, of course, any exceptions passed up from calling subprocess.Popen
+
+    '''
     prefix = os.path.basename(cmd[0]) + '.' + str(os.getpid()) + '-'
 
     assert isexecutable(cmd[0])
 
     if logdir is None:
-        raise Exception("Missing required parameter: logdir.")
+        raise ValueError("logdir must be a directory, cannot be None.")
 
     if not os.path.isdir(logdir):
         raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), logdir)
@@ -57,6 +102,7 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
 
 
 def isexecutable(fpath):
+    '''True if argument is executable'''
     return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
 
@@ -77,6 +123,7 @@ http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python/37
 
 
 def makefh(thing):
+    '''return a file object; given an existing filename name or file object'''
     if isinstance(thing, io.IOBase):
         f = thing
     elif isinstance(thing, str) and os.path.isfile(thing):
@@ -88,6 +135,7 @@ def makefh(thing):
 
 
 def statfile(name):
+    '''return posix.stat_result (or None) for a single file name'''
     try:
         st = os.stat(name)
     except OSError as e:
@@ -101,6 +149,38 @@ def statfile(name):
 
 
 def statfiles(name, relative=None):
+    '''return a dict() with keys being filenames and posix.stat_result values
+
+    Required:
+
+      name: the name should be an existing file, but accessing filesystems 
+            can be a racy proposition, so if the name is ENOENT, returns an
+            empty dict()
+            if name is a directory, os.walk() over the entire subtree and
+            record and return all stat() results
+
+    Optional:
+
+      relative: if the filenames in the keys should be relative some other
+                directory, then supply that path here (see examples)
+
+
+    Bugs:
+      Dealing with filesystems is always potentially a racy affair.  They go
+      out for lunch sometimes.  They don't call.  They don't write.  But, at
+      least we can try to rely on them as best we can--mostly, by just
+      excluding any files (in the output dict()) which did not return a valid
+      posix.stat_result.
+
+    Examples:
+
+    >>> statfiles('./docs/x509').keys()
+    ['./docs/x509/tutorial.rst', './docs/x509/reference.rst', './docs/x509/index.rst']
+    >>> statfiles('./docs/x509', relative='./').keys()
+    ['docs/x509/reference.rst', 'docs/x509/tutorial.rst', 'docs/x509/index.rst']
+    >>> statfiles('./docs/x509', relative='./docs/x509/').keys()
+    ['index.rst', 'tutorial.rst', 'reference.rst']
+    '''
     statinfo = dict()
     if not os.path.exists(name):
         return statinfo
