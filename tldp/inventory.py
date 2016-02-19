@@ -14,7 +14,27 @@ from argparse import Namespace
 
 
 class Inventory(object):
+    '''a container for classifying documents by their status
 
+    Every SourceDocument has no more than one matching OutputDirectory.
+
+    The Inventory class encodes the logic for identifying the following
+    different status possibilities for an arbitrary set of SourceDocuments and
+    OutputDirectorys.
+
+    The following are possible values for status:
+       - 'source':  a source document before any status detection
+       - 'output':  an output document before any status detection
+       - 'new':  a source document without any matching output stem
+       - 'published':  a pair of source/output documents with matching stems
+       - 'orphan':  an output document without any matching source stem
+       - 'broken':  a published document with missing output files
+       - 'stale':  a published document with new(er) source files
+
+    The Inventory object is intended to be used to identify work that needs to
+    be done on individual source documents to produce up-to-date output
+    documents.
+    '''
     def __repr__(self):
         return '<%s: %d published, %d orphans, %d new, %d stale, %d broken>' % (
                self.__class__.__name__,
@@ -26,6 +46,15 @@ class Inventory(object):
                )
 
     def __init__(self, pubdir, sourcedirs):
+        '''construct an Inventory
+
+        pubdir: path to the OutputCollection
+
+        sourcedirs: a list of directories which could be passed to the
+          SourceCollection object; essentially a directory containing
+          SourceDocuments; for example LDP/LDP/howto/linuxdoc and
+          LDP/LDP/guide/docbook
+        '''
         self.outputs = OutputCollection(pubdir)
         self.sources = SourceCollection(sourcedirs)
         s = copy.deepcopy(self.sources)
