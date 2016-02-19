@@ -10,7 +10,7 @@ from tldptesttools import TestToolsFilesystem
 
 # -- SUT
 from tldp.utils import makefh, which, execute
-from tldp.utils import statfiles
+from tldp.utils import statfiles, stem_and_ext
 
 
 class Test_execute(TestToolsFilesystem):
@@ -103,6 +103,19 @@ class Test_statfiles(unittest.TestCase):
         statinfo = statfiles(this)
         self.assertIsInstance(statinfo, dict)
         self.assertEquals(0, len(statinfo))
+
+
+class Test_stem_and_ext(unittest.TestCase):
+
+    def test_stem_and_ext_final_slash(self):
+        r0 = stem_and_ext('/h/q/t/z/Frobnitz-HOWTO')
+        r1 = stem_and_ext('/h/q/t/z/Frobnitz-HOWTO/')
+        self.assertEqual(r0, r1)
+
+    def test_stem_and_ext_rel_abs(self):
+        r0 = stem_and_ext('/h/q/t/z/Frobnitz-HOWTO')
+        r1 = stem_and_ext('Frobnitz-HOWTO/')
+        self.assertEqual(r0, r1)
 
 
 class Test_att_statinfo(unittest.TestCase):

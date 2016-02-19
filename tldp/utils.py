@@ -25,6 +25,11 @@ def getLogger(**opts):
 logger = getLogger()
 
 
+def stem_and_ext(name):
+    '''return (stem, ext) for any relative or absolute filename'''
+    return os.path.splitext(os.path.basename(os.path.normpath(name)))
+
+
 def execute(cmd, stdin=None, stdout=None, stderr=None,
             logdir=None, env=os.environ):
     '''(yet another) wrapper around subprocess.Popen()
