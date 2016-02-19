@@ -194,7 +194,10 @@ def statfiles(name, relative=None):
             del statinfo[relpath]
     else:
         for root, dirs, files in os.walk(name):
-            for x in files:
+            inodes = list()
+            inodes.extend(dirs)
+            inodes.extend(files)
+            for x in inodes:
                 foundpath = os.path.join(root, x)
                 if relative:
                     relpath = os.path.relpath(foundpath, start=relative)

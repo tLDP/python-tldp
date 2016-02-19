@@ -67,6 +67,13 @@ class Test_which(unittest.TestCase):
 
 class Test_statfiles(unittest.TestCase):
 
+    def test_statfiles_dir_in_result(self):
+        '''Assumes that directory ./testdata/ exists here'''
+        here = os.path.dirname(os.path.abspath(__file__))
+        statinfo = statfiles(here, relative=here)
+        self.assertIsInstance(statinfo, dict)
+        self.assertTrue(os.path.basename('testdata') in statinfo)
+
     def test_statfiles_dir_rel(self):
         here = os.path.dirname(os.path.abspath(__file__))
         statinfo = statfiles(here, relative=here)
