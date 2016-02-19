@@ -88,7 +88,7 @@ class Inventory(object):
             sdoc = s[stem]
             sdoc.output = odoc
             odoc.source = sdoc
-            odoc.status = sdoc.status = 'published'
+            sdoc.status = sdoc.output.status = 'published'
         self.published = s
         logger.info("Identified %d published documents.", len(self.published))
 
@@ -113,6 +113,7 @@ class Inventory(object):
         for stem, sdoc in s.items():
             if not sdoc.output.iscomplete:
                 self.broken[stem] = sdoc
+                sdoc.status = sdoc.output.status = 'broken'
         logger.info("Identified %d broken documents: %r.", len(self.broken),
                     self.broken.keys())
 
@@ -165,6 +166,11 @@ def list_outputs(pubdir, config=None):
 def list_stale(pubdir, sourcedirs, config=None):
     i = Inventory(pubdir, sourcedirs)
     print_sources(i.stale, config)
+
+
+def list_broken(pubdir, sourcedirs, config=None):
+    i = Inventory(pubdir, sourcedirs)
+    print_sources(i.broken, config)
 
 
 def list_new(pubdir, sourcedirs, config=None):
