@@ -153,7 +153,7 @@ def statfiles(name, relative=None):
 
     Required:
 
-      name: the name should be an existing file, but accessing filesystems 
+      name: the name should be an existing file, but accessing filesystems
             can be a racy proposition, so if the name is ENOENT, returns an
             empty dict()
             if name is a directory, os.walk() over the entire subtree and
