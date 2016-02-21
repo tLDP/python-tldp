@@ -132,9 +132,9 @@ def print_sources(scollection, config=None):
     for stem in sorted(scollection.keys(), key=lambda x: x.lower()):
         doc = scollection[stem]
         if config.verbose:
-            fields = [doc.stem, doc.status, doc.filename, str(doc.doctype),
-                      doc.doctype.formatname]
-            fields.append(str(len(doc.statinfo)) + ' files')
+            fields = [doc.stem, doc.status]
+            fields.append(str(len(doc.statinfo)) + ' source files')
+            fields.extend([doc.filename, doc.doctype.formatname, str(doc.doctype)])
             print(config.sep.join(fields))
         else:
             print(doc.stem)
