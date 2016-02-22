@@ -18,16 +18,14 @@ setup(
     long_description=readme,
     packages=find_packages(),
     test_suite='tests',
-    install_requires=[
-        'six>=1.7',
-    ],
+    install_requires=[],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Topic :: Software Development :: Libraries :: Python Modules'
+        'Topic :: Software Development :: Documentation',
+        'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )
