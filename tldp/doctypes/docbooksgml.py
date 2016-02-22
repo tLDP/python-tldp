@@ -1,8 +1,21 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
 
-from ..utils import logger
+from ..utils import logger, which
 from .common import SignatureChecker
+
+
+def uniconf(p):
+    parser.add_argument('--docbooksgml-jw', type=which,
+                        help='fully qualified path to jw')
+    parser.add_argument('--docbooksgml-html2text', type=which,
+                        help='fully qualified path to html2text')
+    parser.add_argument('--docbooksgml-openjade', type=which,
+                        help='fully qualified path to openjade')
+    parser.add_argument('--docbooksgml-dblatex', type=which,
+                        help='fully qualified path to dblatex')
+    parser.add_argument('--docbooksgml-collateindex', type=which,
+                        help='fully qualified path to collateindex')
 
 
 class DocbookSGML(SignatureChecker):

@@ -4,9 +4,19 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import argparse
 
 from ..utils import logger, execute
 from .common import BaseDoctype, SignatureChecker
+
+
+def uniconf(p):
+    parser.add_argument('--linuxdoc-sgml2html', type=str,
+                        help='fully qualified path to sgml2html')
+    parser.add_argument('--linuxdoc-html2text', type=str,
+                        help='fully qualified path to html2text')
+    parser.add_argument('--linuxdoc-htmldoc', type=str,
+                        help='fully qualified path to htmldoc')
 
 
 class Linuxdoc(BaseDoctype, SignatureChecker):
@@ -18,6 +28,7 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
     def platform_check(self):
         for tool in self.tools:
             assert hasattr(self.platform, tool)
+            assert isexecutable(getattr(self.platform, tool))
         return True
 
     def create_txt(self):

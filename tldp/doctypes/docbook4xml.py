@@ -1,9 +1,19 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
 
-from ..utils import logger
-
+from ..utils import logger, which
 from .common import SignatureChecker
+
+
+def uniconf(p):
+    parser.add_argument('--docbook4xml-xsltproc', type=which,
+                        help='fully qualified path to xsltproc')
+    parser.add_argument('--docbook4xml-html2text', type=which,
+                        help='fully qualified path to html2text')
+    parser.add_argument('--docbook4xml-fop', type=which,
+                        help='fully qualified path to fop')
+    parser.add_argument('--docbook4xml-dblatex', type=which,
+                        help='fully qualified path to dblatex')
 
 
 class Docbook4XML(SignatureChecker):
@@ -29,7 +39,5 @@ class Docbook4XML(SignatureChecker):
     def create_htmls(self):
         logger.info("Creating single page HTML for %s", self.source.stem)
 
-#
-# -- end of file
 #
 # -- end of file

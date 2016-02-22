@@ -1,8 +1,19 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
 
-from ..utils import logger
+from ..utils import logger, which
 from .common import SignatureChecker
+
+
+def uniconf(p):
+    parser.add_argument('--docbook5xml-xsltproc', type=which,
+                        help='fully qualified path to xsltproc')
+    parser.add_argument('--docbook5xml-html2text', type=which,
+                        help='fully qualified path to html2text')
+    parser.add_argument('--docbook5xml-fop', type=which,
+                        help='fully qualified path to fop')
+    parser.add_argument('--docbook5xml-dblatex', type=which,
+                        help='fully qualified path to dblatex')
 
 
 class Docbook5XML(SignatureChecker):
