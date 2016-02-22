@@ -24,11 +24,18 @@ def getLogger(**opts):
 
 logger = getLogger()
 
+
 def firstfoundfile(locations):
     '''return the first existing file from a list of filenames (or None)'''
     for option in locations:
         if os.path.isfile(option):
             return option
+    return None
+
+
+def isdirectory(d):
+    if os.path.exists(d):
+        return d
     return None
 
 
