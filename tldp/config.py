@@ -26,8 +26,7 @@ def collectconfiguration(argv):
                            '-s',
                            action='append', default=None, type=isdirectory,
                            help='a directory containing LDP source documents')
-    argparser.add_argument('--pubdir', '--publication-dir', '--output',
-                           '--outputdir', '--output-directory',
+    argparser.add_argument('--pubdir', '--output', '--outputdir', '--outdir',
                            '-o',
                            default=None, type=isdirectory,
                            help='a directory containing LDP output documents')
