@@ -3,26 +3,16 @@
 
 from __future__ import absolute_import, division, print_function
 
-import os
-import sys
-import inspect
-
-from .utils import logger
-from .cascadingconfig import CascadingConfig, DefaultFreeArgumentParser
+from tldp.utils import logger, isdirectory
+from tldp.cascadingconfig import CascadingConfig, DefaultFreeArgumentParser
 
 import tldp.doctypes
-
-
-def isdirectory(d):
-    if os.path.exists(d):
-        return d
-    return None
 
 
 def collectconfiguration(argv):
     tag = 'ldptool'
     argparser = DefaultFreeArgumentParser()
-    argparser.add_argument('--sourcedir', '--source-dir', '--source-directory', 
+    argparser.add_argument('--sourcedir', '--source-dir', '--source-directory',
                            '-s',
                            action='append', default=None, type=isdirectory,
                            help='a directory containing LDP source documents')
@@ -44,6 +34,7 @@ def collectconfiguration(argv):
 
     cc = CascadingConfig(tag, argparser, argv)
     return cc.config
+
 
 def main(argv):
     config = collectconfiguration(argv)
