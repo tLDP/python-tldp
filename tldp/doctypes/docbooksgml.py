@@ -1,21 +1,47 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
 
-from ..utils import logger, which
+import os
+
+from ..utils import logger, which, firstfoundfile
 from .common import SignatureChecker
 
 
-def uniconf(p):
-    parser.add_argument('--docbooksgml-jw', type=which,
-                        help='fully qualified path to jw')
-    parser.add_argument('--docbooksgml-html2text', type=which,
-                        help='fully qualified path to html2text')
-    parser.add_argument('--docbooksgml-openjade', type=which,
-                        help='fully qualified path to openjade')
-    parser.add_argument('--docbooksgml-dblatex', type=which,
-                        help='fully qualified path to dblatex')
-    parser.add_argument('--docbooksgml-collateindex', type=which,
-                        help='fully qualified path to collateindex')
+def docbookdsl_finder():
+    locations = [
+      '/usr/share/sgml/docbook/stylesheet/dsssl/ldp/ldp.dsl',
+      '/usr/share/sgml/docbook/dsssl-stylesheets/html/docbook.dsl']
+    return firstfoundfile(locations)
+
+
+def ldpdsl_finder():
+    locations = [
+      '/usr/share/sgml/docbook/stylesheet/dsssl/modular/html/docbook.dsl']
+    return firstfoundfile(locations)
+
+
+def config_fragment(p):
+    p.add_argument('--docbooksgml-docbookdsl', type=str,
+                   default=docbookdsl_finder(),
+                   help='full path to html/docbook.dsl')
+    p.add_argument('--docbooksgml-ldpdsl', type=str,
+                   default=ldpdsl_finder(),
+                   help='full path to ldp/ldp.dsl')
+    p.add_argument('--docbooksgml-jw', type=which,
+                   default=which('jw'),
+                   help='fully qualified path to executable jw')
+    p.add_argument('--docbooksgml-html2text', type=which,
+                   default=which('html2text'),
+                   help='fully qualified path to executable html2text')
+    p.add_argument('--docbooksgml-openjade', type=which,
+                   default=which('openjade'),
+                   help='fully qualified path to executable openjade')
+    p.add_argument('--docbooksgml-dblatex', type=which,
+                   default=which('dblatex'),
+                   help='fully qualified path to executable dblatex')
+    p.add_argument('--docbooksgml-collateindex', type=which,
+                   default=which('collateindex'),
+                   help='fully qualified path to executable collateindex')
 
 
 class DocbookSGML(SignatureChecker):

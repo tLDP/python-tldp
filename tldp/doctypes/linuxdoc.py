@@ -4,19 +4,21 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-import argparse
 
-from ..utils import logger, execute
+from ..utils import logger, which, execute
 from .common import BaseDoctype, SignatureChecker
 
 
-def uniconf(p):
-    parser.add_argument('--linuxdoc-sgml2html', type=str,
-                        help='fully qualified path to sgml2html')
-    parser.add_argument('--linuxdoc-html2text', type=str,
-                        help='fully qualified path to html2text')
-    parser.add_argument('--linuxdoc-htmldoc', type=str,
-                        help='fully qualified path to htmldoc')
+def config_fragment(p):
+    p.add_argument('--linuxdoc-sgml2html', type=str,
+                   default=which('sgml2html'),
+                   help='fully qualified path to executable sgml2html')
+    p.add_argument('--linuxdoc-html2text', type=str,
+                   default=which('html2text'),
+                   help='fully qualified path to executable html2text')
+    p.add_argument('--linuxdoc-htmldoc', type=str,
+                   default=which('htmldoc'),
+                   help='fully qualified path to executable htmldoc')
 
 
 class Linuxdoc(BaseDoctype, SignatureChecker):

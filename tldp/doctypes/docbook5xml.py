@@ -5,15 +5,19 @@ from ..utils import logger, which
 from .common import SignatureChecker
 
 
-def uniconf(p):
-    parser.add_argument('--docbook5xml-xsltproc', type=which,
-                        help='fully qualified path to xsltproc')
-    parser.add_argument('--docbook5xml-html2text', type=which,
-                        help='fully qualified path to html2text')
-    parser.add_argument('--docbook5xml-fop', type=which,
-                        help='fully qualified path to fop')
-    parser.add_argument('--docbook5xml-dblatex', type=which,
-                        help='fully qualified path to dblatex')
+def config_fragment(p):
+    p.add_argument('--docbook5xml-xsltproc', type=which,
+                   default=which('xsltproc'),
+                   help='fully qualified path to executable xsltproc')
+    p.add_argument('--docbook5xml-html2text', type=which,
+                   default=which('html2text'),
+                   help='fully qualified path to executable html2text')
+    p.add_argument('--docbook5xml-fop', type=which,
+                   default=which('fop'),
+                   help='fully qualified path to executable fop')
+    p.add_argument('--docbook5xml-dblatex', type=which,
+                   default=which('dblatex'),
+                   help='fully qualified path to executable dblatex')
 
 
 class Docbook5XML(SignatureChecker):
