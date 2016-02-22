@@ -1,9 +1,14 @@
 tldp - tools for publishing from TLDP sources
 =============================================
+A toolset for publishing multiple output formats of a source document to an
+output directory.  The supported source formats can be listed, but contain at
+least, Linuxdoc, DocBookSGML and DocBook XML 4.x.
 
 TLDP = The Linux Documentation Project.
+
 These are a set of scripts that process committed documents in the
 TLDP document source repository to an output tree of choice.
+
 
 Installation
 ------------
