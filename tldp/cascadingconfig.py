@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import sys
+import functools
 
 from argparse import ArgumentParser, ArgumentError, Namespace
 from argparse import _UNRECOGNIZED_ARGS_ATTR
@@ -13,10 +14,8 @@ import logging
 logging.basicConfig(stream=sys.stderr, level=logging.WARNING)
 logger = logging.getLogger()
 
-CFGSEP = '.'
-ENVSEP = '_'
-CLISEP = '-'
-
+ENVSEP = NSSEP = '_'    # -- underscore _
+CLISEP = CFGSEP = '-'   # -- dash -
 MULTIVALUESEP = ','
 
 try:
@@ -66,8 +65,8 @@ def convert_multivalues(d, multivaluesep=MULTIVALUESEP):
     return d
 
 
-def cfg_to_dict(f, base=None, cfgsep=CFGSEP, clisep=CLISEP):
-    '''read a configuration file; convert to CLI-parseable form
+def dict_from_cfg(f, base=None, cfgsep=CFGSEP, clisep=CLISEP):
+    '''read a configuration file, normalizing fields to CLI-parseable form
 
     :param: f, a filename or file-like object (readable via
             ConfigParser.read() [filename] or ConfigParser.fp() [open file]
@@ -89,7 +88,7 @@ def cfg_to_dict(f, base=None, cfgsep=CFGSEP, clisep=CLISEP):
 
     When invoked as:
 
-      cfg_to_dict(f)  # -- where f is the pathname or open filehandle
+      dict_from_cfg(f)  # -- where f is the pathname or open filehandle
 
     This function will return a dict that looks like this:
 
@@ -116,8 +115,8 @@ def cfg_to_dict(f, base=None, cfgsep=CFGSEP, clisep=CLISEP):
     return d
 
 
-def env_to_dict(env=os.environ, base=None, envsep=ENVSEP, clisep=CLISEP):
-    '''read environment, return keys starting with 'base'
+def dict_from_envdict(env=os.environ, base=None, envsep=ENVSEP, clisep=CLISEP):
+    '''read environment, normalizing all keys starting with 'base' to CLI form
 
     :param: env, if nothing is supplied, os.environ
     :param: base [optional], envar prefix filter selection criterion
@@ -141,7 +140,7 @@ def env_to_dict(env=os.environ, base=None, envsep=ENVSEP, clisep=CLISEP):
 
     When invoked as:
 
-      env_to_dict(os.environ, 'SSH')
+      dict_from_envdict(os.environ, 'SSH')
 
     This function will return a dict that looks like this:
 
@@ -150,7 +149,7 @@ def env_to_dict(env=os.environ, base=None, envsep=ENVSEP, clisep=CLISEP):
 
     When invoked as:
 
-      env_to_dict(os.environ)
+      dict_from_envdict(os.environ)
 
     This function will return a dict that looks like this:
 
@@ -170,7 +169,15 @@ def env_to_dict(env=os.environ, base=None, envsep=ENVSEP, clisep=CLISEP):
     return d
 
 
-def strip_tag_from_key(base, d, clisep=CLISEP):
+def prepend_tag(base, d, sep=CLISEP):
+    newd = dict()
+    tag = ''.join((base, sep))
+    for k, v in d.items():
+        newd[''.join((tag, k.upper()))] = v
+    return newd
+
+
+def strip_tag(base, d, clisep=CLISEP):
     if not base:
         return d
     newd = dict()
@@ -179,13 +186,25 @@ def strip_tag_from_key(base, d, clisep=CLISEP):
         if oldk.startswith(tag):
             newk = oldk[len(tag):]
             if newk in newd:
-                logger.debug("Duplicate key found when stripping %s from %s",
+                logger.debug("Duplicate key found when stripping %s from %s.",
                              tag, oldk)
+                logger.info("strip_tag: returning unchanged dict().")
                 return d
             newd[newk] = v
         else:
             newd[oldk] = v
     return newd
+
+
+def dict_from_ns(ns):
+    return vars(ns)
+
+
+def ns_from_dict(d):
+    ns = Namespace()
+    for k, v in d.items():
+        setattr(ns, k, v)
+    return ns
 
 
 def argv_from_env(args, tag, **kw):
@@ -214,11 +233,11 @@ def argv_from_env(args, tag, **kw):
        '--sourcedir', '/path/faq/docbook/',
        '--sourcedir', '/path/howto/linuxdoc/']
     '''
-    d = env_to_dict(args, base=tag.upper(), **kw)
+    d = dict_from_envdict(args, base=tag.upper(), **kw)
     listify_values = kw.get('convert_multivalues', convert_multivalues)
     if listify_values is not None:
         d = listify_values(d)
-    d = strip_tag_from_key(tag, d)
+    d = strip_tag(tag, d)
     d = dict_to_argv_longform(d)
     return d
 
@@ -258,24 +277,13 @@ def argv_from_cfg(args, tag, **kw):
        '--linuxdoc-sgml2html', '/usr/bin/sgml2html',
        '--docbook-xsltproc', '/usr/bin/xsltproc']
     '''
-    d = cfg_to_dict(args, base=tag, **kw)
+    d = dict_from_cfg(args, base=tag, **kw)
     listify_values = kw.get('convert_multivalues', convert_multivalues)
     if listify_values is not None:
         d = listify_values(d, **kw)
-    d = strip_tag_from_key(tag, d, **kw)
+    d = strip_tag(tag, d, **kw)
     d = dict_to_argv_longform(d, **kw)
     return d
-
-
-def dict_from_namespace(ns):
-    return vars(ns)
-
-
-def namespace_from_dict(d):
-    ns = Namespace()
-    for k, v in d.items():
-        setattr(ns, k, v)
-    return ns
 
 
 class DefaultFreeArgumentParser(ArgumentParser):
@@ -360,8 +368,9 @@ class CascadingConfig(object):
     order = ['cli', 'environment', 'userconfig', 'systemconfig', 'defaults']
     '''
     order = ['cli', 'environment', 'userconfig', 'systemconfig', 'defaults']
+    mine = ['--dump_cli', '--dump_env', '--dump_cfg', '--debug_options']
 
-    def __init__(self, tag, parser, argv=sys.argv[1:], env=os.environ,
+    def __init__(self, tag, argparser, argv=sys.argv[1:], env=os.environ,
                  configfile='configfile', order=order):
         '''construct a CascadingConfig
 
@@ -384,12 +393,17 @@ class CascadingConfig(object):
         # -- a wee-bit hackish; but this is crucial to the proper functioning
         #    of CascadingConfig
         #
-        assert hasattr(parser, 'parse_known_args_no_defaults')
+        assert hasattr(argparser, 'parse_known_args_no_defaults')
+        for opt in self.mine:
+            synonym = opt.replace(NSSEP, CLISEP)
+            argparser.add_argument(opt, synonym, action='store_true')
 
+        self.tag = tag
         self.order = order
-        self.parser = parser.parse_known_args_no_defaults
+        self.argparser = argparser
+        self.parser = argparser.parse_known_args_no_defaults
 
-        self.defaults = parser.parse_args([])  # -- "compiled-in" defaults
+        self.defaults = argparser.parse_args([])  # -- "compiled-in" defaults
         self.cli, _ = self.parser(argv)
         self.environment, _ = self.parser(argv_from_env(env, tag))
 
@@ -421,6 +435,46 @@ class CascadingConfig(object):
 
         self.resolve()
 
+        # -- clean up after ourselves (and report in, if asked)
+        #
+        diagfunc = False
+        for opt in self.mine:
+            opt = opt.lstrip(CLISEP)
+            if getattr(self.config, opt, False):
+                diagfunc = getattr(self, opt)
+            delattr(self.config, opt)
+        if diagfunc:
+                sys.exit(diagfunc())
+
+    def dump_env(self):
+        d = dict_from_ns(self.config)
+        d = prepend_tag(self.tag.upper(), d, sep=ENVSEP)
+        for k, v in d.items():
+            if isinstance(v, (list, tuple)):
+                v = MULTIVALUESEP.join(v)
+            print('{}={}'.format(k, v))
+        return 0
+
+    def dump_cfg(self):
+        d = dict_from_ns(self.config)
+        return 0
+
+    def dump_cli(self):
+        d = dict_from_ns(self.config)
+        cli = list()
+        for k, v in d.items():
+            k = ''.join(('--', k.replace(NSSEP, CLISEP)))
+            if isinstance(v, (list, tuple)):
+                for val in v:
+                    cli.extend((k, str(val)))
+            else:
+                cli.extend((k, str(v)))
+        print(' '.join(cli))
+        return 0
+
+    def debug_options(self):
+        return 0
+
     def resolve(self, order=None):
         if order is None:
             order = self.order
@@ -436,7 +490,7 @@ class CascadingConfig(object):
                     logger.info("Source %s: replacing %s=%s with %s=%s",
                                 sourcename, name, oldval, name, newval)
                 setattr(config, name, newval)
-        return config
+        self.config = config
 
 
 def sample(args):
@@ -451,9 +505,10 @@ def sample(args):
                         type=str)
     parser.add_argument('--configfile', '--cfg', '--config-file', type=str,
                         default="/home/mabrown/tmp/ldptool.cfg")
-    uniconf = CascadingConfig(tag, parser, sys.argv[1:])
+    cc = CascadingConfig(tag, parser, sys.argv[1:])
+    config = cc.config
     import pprint
-    pprint.pprint(uniconf.resolve())
+    pprint.pprint(dict_from_ns(config))
 
 
 if __name__ == '__main__':
