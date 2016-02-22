@@ -14,7 +14,7 @@ from .typeguesser import guess, knownextensions
 def scansourcedirs(dirnames):
     '''return a dict() of all SourceDocuments discovered in dirnames
     dirnames:  a list of directories containing SourceDocuments.
-    
+
     scansourcedirs ensures it is operating on the absolute filesystem path for
     each of the source directories.
 
@@ -86,7 +86,7 @@ def sourcedoc_fromdir(dirname):
         if os.path.isfile(possible):
             candidates.append(possible)
     if len(candidates) > 1:
-        logger.warning("%s multiple document choices in dir %s, bailing....", 
+        logger.warning("%s multiple document choices in dir %s, bailing....",
                        stem, dirname)
         raise Exception("multiple document choices in " + dirname)
     elif len(candidates) == 0:
