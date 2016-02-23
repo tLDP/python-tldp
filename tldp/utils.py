@@ -37,9 +37,11 @@ def isloglevel(l):
     try:
         level = int(l)
     except ValueError:
-        level = getattr(logging, l, None)
-        if level is None:
-            level = logging.ERROR
+        level = getattr(logging, l.upper(), None)
+    try:
+        logging.getLogger().setLevel(level)
+    except ValueError:
+        level = logging.ERROR
     return level
 
 
