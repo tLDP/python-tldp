@@ -115,7 +115,7 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertEquals(0, len(i.stale))
         self.assertEquals(1, len(i.published))
         self.assertEquals(0, len(i.new))
-        self.assertEquals(0, len(i.orphans))
+        self.assertEquals(0, len(i.orphan))
         self.assertEquals(0, len(i.broken))
 
     def test_detect_status_new(self):
@@ -125,7 +125,7 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertEquals(0, len(i.stale))
         self.assertEquals(0, len(i.published))
         self.assertEquals(1, len(i.new))
-        self.assertEquals(0, len(i.orphans))
+        self.assertEquals(0, len(i.orphan))
         self.assertEquals(0, len(i.broken))
 
     def test_detect_status_orphan(self):
@@ -135,7 +135,7 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertEquals(0, len(i.stale))
         self.assertEquals(0, len(i.published))
         self.assertEquals(0, len(i.new))
-        self.assertEquals(1, len(i.orphans))
+        self.assertEquals(1, len(i.orphan))
         self.assertEquals(0, len(i.broken))
 
     def test_detect_status_stale(self):
@@ -145,7 +145,7 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertEquals(1, len(i.stale))
         self.assertEquals(1, len(i.published))
         self.assertEquals(0, len(i.new))
-        self.assertEquals(0, len(i.orphans))
+        self.assertEquals(0, len(i.orphan))
         self.assertEquals(0, len(i.broken))
 
     def test_detect_status_broken(self):
@@ -155,7 +155,7 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertEquals(0, len(i.stale))
         self.assertEquals(1, len(i.published))
         self.assertEquals(0, len(i.new))
-        self.assertEquals(0, len(i.orphans))
+        self.assertEquals(0, len(i.orphan))
         self.assertEquals(1, len(i.broken))
 
 #
