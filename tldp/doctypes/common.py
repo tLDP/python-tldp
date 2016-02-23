@@ -30,13 +30,13 @@ class BaseDoctype(object):
     def __init__(self, *args, **kwargs):
         self.source = kwargs.get('source', None)
         self.output = kwargs.get('output', None)
-        self.platform = kwargs.get('platform', None)
-        assert None not in (self.source, self.output, self.platform)
+        self.config = kwargs.get('config', None)
+        assert None not in (self.source, self.output, self.config)
 
     def generate(self):
         self.output.prebuild_hook()
         os.chdir(self.output.dirname)
-        vector = [self.platform_check(),
+        vector = [self.config_check(),
                   self.create_htmls(),
                   self.create_pdf(),
                   self.create_txt(),
