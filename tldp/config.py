@@ -5,11 +5,13 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-from tldp.utils import logger, arg_isdirectory, arg_isloglevel
+from tldp.utils import logger
+
+from tldp.utils import arg_isdirectory, arg_isloglevel, arg_isreadablefile
 from tldp.cascadingconfig import CascadingConfig, DefaultFreeArgumentParser
+from tldp.inventory import status_classes
 
 import tldp.doctypes
-from tldp.inventory import status_classes
 
 
 def collectconfiguration(tag, argv):
@@ -43,7 +45,7 @@ def collectconfiguration(tag, argv):
                     help='a directory containing LDP output documents')
     ap.add_argument('--configfile', '--config-file', '--cfg',
                     '-c',
-                    default=None, type=arg_isdirectory,
+                    default=None, type=arg_isreadablefile,
                     help='a configuration file')
 
     # -- collect up the fragments of CLI; automate detection?
