@@ -34,20 +34,25 @@ class BaseDoctype(object):
         assert None not in (self.source, self.output, self.config)
 
     def generate(self):
+        def last(l): 
+            return l[-1]
         self.output.prebuild_hook()
         os.chdir(self.output.dirname)
-        vector = [self.config_check(),
-                  self.create_htmls(),
-                  self.create_pdf(),
-                  self.create_txt(),
-                  self.create_html(),
-                  ]
-        result = all(vector)
+        command = list()
+        command.append(self.build_precheck())
+        if not last(command):
+           return False
+        command.append(self.create_htmls())
+        command.append(self.create_pdf())
+        command.append(self.create_txt())
+        command.append(self.create_html())
+
+        result = all(command)
         if result:
             self.output.build_success_hook()
         else:
             self.output.build_failure_hook()
-        return all(vector)
+        return result
 
 #
 # -- end of file
