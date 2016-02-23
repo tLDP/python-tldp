@@ -119,22 +119,25 @@ class OutputDirectory(OutputNamingConvention):
         if os.path.isdir(self.dirname):
             shutil.rmtree(self.dirname)
 
-    def prebuild_hook(self):
+    def hook_prebuild(self):
         self.clean()
         for d in (self.dirname, self.logdir):
             if not os.path.isdir(d):
                 logger.info("%s creating dir   %s.", self.stem, d)
                 os.mkdir(d)
-        self.copy_ancillaries(self.dirname)
+        #self.copy_ancillaries(self.dirname)
+        return True
 
-    def build_failure_hook(self):
+    def hook_build_fail(self):
         logger.critical("%s FAILURE, see logs in %s", self.stem, self.logdir)
+        return True
 
-    def build_success_hook(self):
+    def hook_build_success(self):
         logger.info("%s SUCCESS!", self.stem)
         logger.debug("%s removing logs  %s)", self.stem, self.logdir)
         if os.path.isdir(self.logdir):
             shutil.rmtree(logdir)
+        return True
 
     def detail(self, widths, verbose, file=sys.stdout):
         '''
