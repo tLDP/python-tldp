@@ -1,3 +1,3 @@
 import outputs
-import platform
 import sources
+import inventory
