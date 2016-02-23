@@ -33,6 +33,13 @@ class BaseDoctype(object):
         self.config = kwargs.get('config', None)
         assert None not in (self.source, self.output, self.config)
 
+    def build_precheck(self):
+        for tool, validator in self.required.items():
+            thing = getattr(self.config, tool, None)
+            assert thing is not None
+            assert validator(thing)
+        return True
+
     def generate(self):
         # -- the output directory gets to prepare; must return True
         #
