@@ -61,6 +61,17 @@ class OutputNamingConvention(object):
             present.append(os.path.isfile(name))
         return all(present)
 
+    @property
+    def missing(self):
+        '''returns a set of missing files'''
+        missing = set()
+        for prop in self.expected:
+            name = getattr(self, prop, None)
+            assert name is not None
+            if not os.path.isfile(name):
+                missing.add(name)
+        return missing
+
 
 class OutputDirectory(OutputNamingConvention):
     '''A class providing a container for each set of output documents
