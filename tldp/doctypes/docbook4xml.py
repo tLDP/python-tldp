@@ -6,21 +6,18 @@ from .common import SignatureChecker
 
 def xslchunk_finder():
     l = ['/usr/share/xml/docbook/stylesheet/ldp/html/tldp-sections.xsl',
-         '/home/mabrown/vcs/LDP/LDP/builder/xsl/ldp-html-chunk.xsl',
          ]
     return firstfoundfile(l)
 
 
 def xslsingle_finder():
     l = ['/usr/share/xml/docbook/stylesheet/ldp/html/tldp-one-page.xsl',
-         '/home/mabrown/vcs/LDP/LDP/builder/xsl/ldp-html.xsl',
          ]
     return firstfoundfile(l)
 
 
 def xslprint_finder():
     l = ['/usr/share/xml/docbook/stylesheet/ldp/fo/tldp-print.xsl',
-         '/home/mabrown/vcs/LDP/LDP/builder/xsl/ldp-print.xsl',
          ]
     return firstfoundfile(l)
 
