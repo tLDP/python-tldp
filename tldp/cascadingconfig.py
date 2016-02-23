@@ -52,8 +52,9 @@ def empty2none_values(d):
     '''
     for k, v in d.items():
         if v == '':
-            d[k] = None 
+            d[k] = None
     return d
+
 
 def convert_multivalues(d, multivaluesep=MULTIVALUESEP):
     '''creates multivalued values in an argument dict()
