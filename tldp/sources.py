@@ -4,6 +4,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import sys
 import errno
 
 from tldp.ldpcollection import LDPDocumentCollection
@@ -159,6 +160,7 @@ class SourceDocument(object):
 
         self.doctype = guess(self.filename)
         self.status = 'source'
+        self.output = None
         self.newer = set()
         self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = stem_and_ext(self.basename)
@@ -168,6 +170,20 @@ class SourceDocument(object):
             self.statinfo = statfiles(self.dirname, relative=self.dirname)
         else:
             self.statinfo = statfiles(self.filename, relative=self.dirname)
+
+    def detail(self, widths, verbose, file=sys.stdout):
+        '''
+        '''
+        template = '{s.status:{w.status}} {s.stem:{w.stem}}'
+        outstr = template.format(s=self, w=widths)
+        print(outstr)
+        if verbose:
+            for f in self.newer:
+                fname = os.path.join(self.dirname, f)
+                print('  newer file {}'.format(fname))
+            if self.output:
+                for f in self.output.missing:
+                    print('  missing file {}'.format(f))
 
 #
 # -- end of file

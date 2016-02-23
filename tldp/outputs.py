@@ -4,6 +4,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import sys
 import errno
 import shutil
 
@@ -98,14 +99,15 @@ class OutputDirectory(OutputNamingConvention):
         '''
         self.dirname = os.path.abspath(dirname)
         self.stem = os.path.basename(self.dirname)
+        super(OutputDirectory, self).__init__(self.dirname, self.stem)
         parent = os.path.dirname(self.dirname)
         if not os.path.isdir(parent):
             logger.critical("Missing output collection directory %s.", parent)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), parent)
         self.statinfo = statfiles(self.dirname, relative=self.dirname)
         self.status = 'output'
+        self.source = None
         self.logdir = os.path.join(self.dirname, logdir)
-        super(OutputDirectory, self).__init__(self.dirname, self.stem)
 
     def clean(self):
         '''remove the output directory for this document
@@ -133,6 +135,15 @@ class OutputDirectory(OutputNamingConvention):
         logger.debug("%s removing logs  %s)", self.stem, self.logdir)
         if os.path.isdir(self.logdir):
             shutil.rmtree(logdir)
+
+    def detail(self, widths, verbose, file=sys.stdout):
+        '''
+        '''
+        template = '{s.status:{w.status}} {s.stem:{w.stem}}'
+        outstr = template.format(s=self, w=widths)
+        print(outstr)
+        if verbose:
+            pass
 
 
 class OutputCollection(LDPDocumentCollection):
@@ -187,6 +198,7 @@ class OutputCollection(LDPDocumentCollection):
             o = OutputDirectory(name)
             assert o.stem not in self
             self[o.stem] = o
+
 
 #
 # -- end of file
