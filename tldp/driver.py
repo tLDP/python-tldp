@@ -11,74 +11,73 @@ from tldp.utils import logger
 import tldp.config
 import tldp.inventory
 
+from argparse import Namespace
 
-def detail(config):
+
+def detail(config, args):
     i = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
-    output_order = ['broken', 'stale', 'orphan', 'new']
-    assert set(output_order).issubset(tldp.inventory.status_types)
-    for status in output_order:
-        if config.detail in ('all', status):
+    width = Namespace()
+    width.status = max([len(x) for x in tldp.inventory.status_types])
+    width.stem = max([len(x) for x in i.source.keys()])
+    for arg in args:
+        status_class = tldp.inventory.status_classes[arg]
+        for status in status_class:
             s = getattr(i, status, None)
             assert s is not None
-            print_list(s, status, verbose=config.verbose)
+            for stem, doc in s.items():
+                # -- a 'stale' or 'broken' document is implicitly a 'published'
+                #    document as well, but we only want to list each document
+                #    once
+                #
+                if doc.status == status:
+                    doc.detail(width, config.verbose, file=sys.stdout)
     return 0
 
 
-def print_list(s, status, verbose):
-    width = dict()
-    width['status'] = max([len(x) for x in tldp.inventory.status_types])
-    width['stem'] = max([len(x) for x in s.keys()])
-    for stem, doc in s.items():
-        if doc.status != status:
-            continue
-        s = '{d.status:{w[status]}} {d.stem:{w[stem]}}'.format(d=doc, w=width)
-        print(s)
-        if verbose:
-            if not hasattr(doc, 'newer'):
-                continue
-            for f in doc.newer:
-                fname = os.path.join(doc.dirname, f)
-                print('  newer file {}'.format(fname))
-            if not hasattr(doc, 'output'):
-                continue
-            if not hasattr(doc.output, 'missing'):
-                continue
-            for f in doc.output.missing:
-                print('  missing file {}'.format(f))
-    return 0
-
-def status(config):
+def status(config, args):
     i = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
-    width = max([len(x) for x in tldp.inventory.status_types])
+    width = Namespace()
+    width.status = max([len(x) for x in tldp.inventory.status_types])
+    width.count = len(str(len(i.source.keys())))
     for status in tldp.inventory.status_types:
         if status == 'all':
             continue
         count = len(getattr(i, status, 0))
-        s = '{0:{width}} {1:}'.format(status, count, width=width)
-        print(s)
+        s = '{0:{w.status}}  {1:{w.count}}  '.format(status, count, w=width)
+        print(s, end="")
+        if config.verbose:
+            print('\t'.join(getattr(i, status).keys()))
+        else:
+            abbrev = getattr(i, status).keys()
+            displaynum = 3
+            if len(abbrev) > displaynum:
+                abbrev = abbrev[:displaynum]
+                remainder = count - displaynum
+                abbrev.append('[and %d more]' % (remainder,))
+            print('\t'.join(abbrev))
     return 0
 
 
-def build(config):
+def build(config, args):
     return 0
 
 
 def run():
     tag = os.path.basename(sys.argv[0]).strip('.py')
     argv = sys.argv[1:]
-    config = tldp.config.collectconfiguration(tag, argv)
+    config, args = tldp.config.collectconfiguration(tag, argv)
 
     # -- first, and foremost, set requested logging level
     #
     logger.setLevel(config.loglevel)
-    
+
     # -- check to see if the user wishes to --list things
     #    this function and friends is called 'detail', because
     #    Python reserves a special (fundamental) meaning for the word
     #    list; but for the end-user they are synonyms
     #
     if config.detail:
-        sys.exit(detail(config))
+        sys.exit(detail(config, args))
 
     # -- check to see if the user wants --status output
     #
@@ -87,13 +86,12 @@ def run():
             sys.exit("Option --pubdir required for --status.")
         if not config.sourcedir:
             sys.exit("Option --sourcedir required for --status.")
-        sys.exit(status(config))
+        sys.exit(status(config, args))
 
     # -- our primary action is to try to build
     if config.build is None:
         config.all = True
-    sys.exit(build(config))
-    
+    sys.exit(build(config, args))
 
 #
 # -- end of file
