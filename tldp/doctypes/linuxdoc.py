@@ -32,6 +32,13 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
                 'linuxdoc_htmldoc': isexecutable,
                 }
 
+    buildorder = ['create_htmls',
+                  'create_pdf',
+                  'create_txt',
+                  'create_html',
+                  'create_indexhtml',
+                  ]
+
     def build_precheck(self):
         for tool, validator in self.required.items():
             thing = getattr(self.config, tool, None)
@@ -81,36 +88,51 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         logger.debug("%s creating HTML  %s, etc.", stem, outf)
         cmd = [exe, inf]
         result = execute(cmd, logdir=logdir)
-        if result == 0:  # -- only symlink, if HTML generated successfully
-            logger.info("%s created  HTML  %s, etc.", stem, outf)
-            target = os.path.basename(outf)
-            logger.debug("%s creating index.html symlink to %s.", stem, target)
-            try:
-                os.symlink(target, 'index.html')
-            except OSError:
-                logger.debug("%s failed in creating index.html symlink.", stem)
+        if result != 0:
+            return False
+        logger.info("%s created  HTML  %s, etc.", stem, outf)
         return os.path.isfile(outf)
+
+    def create_indexhtml(self):
+        stem = self.source.stem
+        outf = self.output.name_html
+        target = os.path.basename(outf)
+        linkname = self.output.name_indexhtml
+        symlink = os.path.basename(linkname)
+        logger.debug("%s creating index.html symlink to %s.", stem, target)
+        try:
+            os.symlink(target, symlink)
+            logger.info("%s created  link  %s to %s.", stem, linkname, target)
+        except OSError:
+            logger.debug("%s failed in creating index.html symlink.", stem)
+        return os.path.islink(linkname)
 
     def create_htmls(self):
         exe = self.config.linuxdoc_sgml2html
         inf = self.source.filename
         assert os.path.exists(inf)
-        outf = self.output.name_htmls
+        outf = self.output.name_html
         stem = self.source.stem
         logdir = self.output.logdir
         logger.debug("%s creating HTMLS %s.", stem, outf)
         cmd = [exe, '--split=0', inf]
         result = execute(cmd, logdir=logdir)
-        if result == 0:  # -- only rename, if HTML generated successfully
+        if result != 0:
+            return False
+        return os.path.isfile(outf)
+
+    def post_create_htmls(self):
+        stem = self.source.stem
+        outf = self.output.name_htmls
+        source = os.path.basename(self.output.name_html)
+        target = os.path.basename(outf)
+        logger.debug("%s renaming HTMLS to %s.", stem, target)
+        try:
+            os.rename(source, target)
             logger.info("%s created  HTMLS %s.", stem, outf)
-            source = os.path.basename(self.output.name_html)
-            target = os.path.basename(self.output.name_htmls)
-            logger.debug("%s renaming HTMLS to %s.", stem, target)
-            try:
-                os.rename(source, target)
-            except OSError:
-                logger.debug("%s failed renaming HTML single file to %s.",
-                             stem, target)
+        except OSError:
+            logger.debug("%s failed renaming HTML single file to %s.",
+                         stem, target)
         return os.path.isfile(outf)
 
 #
