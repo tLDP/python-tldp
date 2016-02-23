@@ -563,26 +563,5 @@ class CascadingConfig(object):
         if diagfunc:
                 sys.exit(diagfunc())
 
-
-def sample(args):
-    tag = 'ldptool'
-    parser = DefaultFreeArgumentParser()
-    parser.add_argument('--sourcedir', default=None, type=str, action='append')
-    parser.add_argument('--pubdir', default=None, type=str)
-    parser.add_argument('--verbose', default=0, type=int)
-    parser.add_argument('--linuxdoc-sgml2html', default="/usr/bin/sgml2html",
-                        type=str)
-    parser.add_argument('--docbook-xsltproc', default="/usr/bin/xsltproc",
-                        type=str)
-    parser.add_argument('--configfile', '--cfg', '--config-file', type=str,
-                        default="/home/mabrown/tmp/ldptool.cfg")
-    cc = CascadingConfig(tag, parser, sys.argv[1:])
-    config = cc.config
-    import pprint
-    pprint.pprint(dict_from_ns(config))
-
-
-if __name__ == '__main__':
-    sample(sys.argv[1:])
-
+#
 # -- end of file
