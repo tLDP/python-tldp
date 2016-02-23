@@ -28,25 +28,25 @@ def xslprint_finder():
 def config_fragment(p):
     p.add_argument('--docbook4xml-xslchunk', type=str,
                    default=xslchunk_finder(),
-                   help='full path to LDP HTML section chunker XSL')
+                   help='full path to LDP HTML section chunker XSL [%(default)s]')
     p.add_argument('--docbook4xml-xslsingle', type=str,
                    default=xslsingle_finder(),
-                   help='full path to LDP HTML single-page XSL')
+                   help='full path to LDP HTML single-page XSL [%(default)s]')
     p.add_argument('--docbook4xml-xslprint', type=str,
                    default=xslprint_finder(),
-                   help='full path to LDP FO print XSL')
+                   help='full path to LDP FO print XSL [%(default)s]')
     p.add_argument('--docbook4xml-xsltproc', type=which,
                    default=which('xsltproc'),
-                   help='fully qualified path to executable xsltproc')
+                   help='full path to xsltproc [%(default)s]')
     p.add_argument('--docbook4xml-html2text', type=which,
                    default=which('html2text'),
-                   help='fully qualified path to executable html2text')
+                   help='full path to html2text [%(default)s]')
     p.add_argument('--docbook4xml-fop', type=which,
                    default=which('fop'),
-                   help='fully qualified path to executable fop')
+                   help='full path to fop [%(default)s]')
     p.add_argument('--docbook4xml-dblatex', type=which,
                    default=which('dblatex'),
-                   help='fully qualified path to executable dblatex')
+                   help='full path to dblatex [%(default)s]')
 
 
 class Docbook4XML(SignatureChecker):

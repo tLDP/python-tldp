@@ -23,25 +23,25 @@ def ldpdsl_finder():
 def config_fragment(p):
     p.add_argument('--docbooksgml-docbookdsl', type=str,
                    default=docbookdsl_finder(),
-                   help='full path to html/docbook.dsl')
+                   help='full path to html/docbook.dsl [%(default)s]')
     p.add_argument('--docbooksgml-ldpdsl', type=str,
                    default=ldpdsl_finder(),
-                   help='full path to ldp/ldp.dsl')
+                   help='full path to ldp/ldp.dsl [%(default)s]')
     p.add_argument('--docbooksgml-jw', type=which,
                    default=which('jw'),
-                   help='fully qualified path to executable jw')
+                   help='full path to jw [%(default)s]')
     p.add_argument('--docbooksgml-html2text', type=which,
                    default=which('html2text'),
-                   help='fully qualified path to executable html2text')
+                   help='full path to html2text [%(default)s]')
     p.add_argument('--docbooksgml-openjade', type=which,
                    default=which('openjade'),
-                   help='fully qualified path to executable openjade')
+                   help='full path to openjade [%(default)s]')
     p.add_argument('--docbooksgml-dblatex', type=which,
                    default=which('dblatex'),
-                   help='fully qualified path to executable dblatex')
+                   help='full path to dblatex [%(default)s]')
     p.add_argument('--docbooksgml-collateindex', type=which,
                    default=which('collateindex'),
-                   help='fully qualified path to executable collateindex')
+                   help='full path to collateindex [%(default)s]')
 
 
 class DocbookSGML(SignatureChecker):

@@ -12,13 +12,13 @@ from .common import BaseDoctype, SignatureChecker
 def config_fragment(p):
     p.add_argument('--linuxdoc-sgml2html', type=str,
                    default=which('sgml2html'),
-                   help='fully qualified path to executable sgml2html')
+                   help='full path to sgml2html [%(default)s]')
     p.add_argument('--linuxdoc-html2text', type=str,
                    default=which('html2text'),
-                   help='fully qualified path to executable html2text')
+                   help='full path to html2text [%(default)s]')
     p.add_argument('--linuxdoc-htmldoc', type=str,
                    default=which('htmldoc'),
-                   help='fully qualified path to executable htmldoc')
+                   help='full path to htmldoc [%(default)s]')
 
 
 class Linuxdoc(BaseDoctype, SignatureChecker):
