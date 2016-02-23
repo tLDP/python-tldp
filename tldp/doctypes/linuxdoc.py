@@ -39,13 +39,6 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
                   'create_indexhtml',
                   ]
 
-    def build_precheck(self):
-        for tool, validator in self.required.items():
-            thing = getattr(self.config, tool, None)
-            assert thing is not None
-            assert validator(thing)
-        return True
-
     def create_txt(self):
         exe = self.config.linuxdoc_html2text
         inf = self.output.name_htmls
