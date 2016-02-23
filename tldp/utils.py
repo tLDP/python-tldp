@@ -33,7 +33,7 @@ def firstfoundfile(locations):
     return None
 
 
-def isloglevel(l):
+def arg_isloglevel(l):
     try:
         level = int(l)
     except ValueError:
@@ -45,9 +45,15 @@ def isloglevel(l):
     return level
 
 
-def isdirectory(d):
+def arg_isdirectory(d):
     if os.path.exists(d):
         return d
+    return None
+
+
+def arg_isexecutable(f):
+    if isexecutable(f):
+        return f
     return None
 
 
@@ -114,12 +120,16 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
         raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), logdir)
 
     # -- not remapping STDIN, because that doesn't make sense here
+    mytfile = functools.partial(mkstemp, prefix=prefix, dir=logdir)
     if stdout is None:
-        stdout, stdoutname = mkstemp(prefix=prefix, suffix='.stdout',
-                                     dir=logdir)
+        stdout, stdoutname = mytfile(suffix='.stdout')
+    else:
+        stdoutname = None
+
     if stderr is None:
-        stderr, stderrname = mkstemp(prefix=prefix, suffix='.stderr',
-                                     dir=logdir)
+        stderr, stderrname = mytfile(suffix='.stderr')
+    else:
+        stderrname = None
 
     logger.debug("About to execute: %r", cmd)
     proc = subprocess.Popen(cmd, shell=False, close_fds=True,
@@ -129,6 +139,10 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
     if result != 0:
         logger.warning("Return code (%s) for process: %r", result, cmd)
         logger.warning("Find STDOUT/STDERR in %s/%s", logdir, prefix)
+    if isinstance(stdout, int) and stdoutname:
+        os.close(stdout)
+    if isinstance(stderr, int) and stderrname:
+        os.close(stderr)
     return result
 
 
