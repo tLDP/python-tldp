@@ -129,12 +129,12 @@ class OutputDirectory(OutputNamingConvention):
         return True
 
     def hook_build_fail(self):
-        logger.critical("%s FAILURE, see logs in %s", self.stem, self.logdir)
+        logger.error("%s FAILURE, see logs in %s", self.stem, self.logdir)
         return True
 
     def hook_build_success(self):
-        logger.info("%s SUCCESS!", self.stem)
-        logger.debug("%s removing logs  %s)", self.stem, self.logdir)
+        logger.info("%s build success  %s.", self.stem, self.dirname)
+        logger.info("%s removing logs  %s)", self.stem, self.logdir)
         if os.path.isdir(self.logdir):
             shutil.rmtree(logdir)
         return True
