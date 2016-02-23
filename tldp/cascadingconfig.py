@@ -206,6 +206,29 @@ def ns_from_dict(d):
     return ns
 
 
+def envdict_from_ns(tag, ns):
+    d = dict_from_ns(ns)
+    d = prepend_tag(tag, d, sep=ENVSEP)
+    d = dict([(k.upper(), v) for k, v in d.items()])
+    for k, v in sorted(d.items()):
+        if isinstance(v, (list, tuple)):
+            v = MULTIVALUESEP.join([str(x) for x in v])
+    return d
+
+
+def clilist_from_ns(ns):
+    cli = list()
+    d = dict_from_ns(ns)
+    for k, v in d.items():
+        k = ''.join(('--', k.replace(NSSEP, CLISEP)))
+        if isinstance(v, (list, tuple)):
+            for val in v:
+                cli.extend((k, str(val)))
+        else:
+            cli.extend((k, str(v)))
+    return cli
+
+
 def argv_from_env(args, tag, **kw):
     '''read a config file and produce argparse-compatible invocation
 
@@ -486,12 +509,8 @@ class CascadingConfig(object):
         self.config = config
 
     def dump_env(self):
-        d = dict_from_ns(self.config)
-        d = prepend_tag(self.tag, d, sep=ENVSEP)
-        d = dict([(k.upper(), v) for k, v in d.items()])
+        d = envdict_from_ns(self.tag, self.config)
         for k, v in sorted(d.items()):
-            if isinstance(v, (list, tuple)):
-                v = MULTIVALUESEP.join([str(x) for x in v])
             print('{}={}'.format(k, v))
         return 0
 
@@ -519,15 +538,7 @@ class CascadingConfig(object):
         return 0
 
     def dump_cli(self):
-        d = dict_from_ns(self.config)
-        cli = list()
-        for k, v in d.items():
-            k = ''.join(('--', k.replace(NSSEP, CLISEP)))
-            if isinstance(v, (list, tuple)):
-                for val in v:
-                    cli.extend((k, str(val)))
-            else:
-                cli.extend((k, str(v)))
+        cli = clilist_from_ns(self.config)
         print(' '.join(cli))
         return 0
 
