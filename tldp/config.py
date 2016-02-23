@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-from tldp.utils import logger, isdirectory, isloglevel
+from tldp.utils import logger, arg_isdirectory, arg_isloglevel
 from tldp.cascadingconfig import CascadingConfig, DefaultFreeArgumentParser
 
 import tldp.doctypes
@@ -31,19 +31,19 @@ def collectconfiguration(tag, argv):
                     help='more info in --list and --status [%(default)s]')
     ap.add_argument('--loglevel',
                     '-L',
-                    default=logging.ERROR, type=isloglevel,
+                    default=logging.ERROR, type=arg_isloglevel,
                     help='set the loglevel')
     ap.add_argument('--sourcedir', '--source-dir', '--source-directory',
                     '-s',
-                    action='append', default='', type=isdirectory,
+                    action='append', default='', type=arg_isdirectory,
                     help='a directory containing LDP source documents')
     ap.add_argument('--pubdir', '--output', '--outputdir', '--outdir',
                     '-o',
-                    default=None, type=isdirectory,
+                    default=None, type=arg_isdirectory,
                     help='a directory containing LDP output documents')
     ap.add_argument('--configfile', '--config-file', '--cfg',
                     '-c',
-                    default=None, type=isdirectory,
+                    default=None, type=arg_isdirectory,
                     help='a configuration file')
 
     # -- collect up the fragments of CLI; automate detection?
