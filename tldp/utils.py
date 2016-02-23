@@ -45,6 +45,12 @@ def arg_isloglevel(l):
     return level
 
 
+def arg_isfile(f):
+    if os.path.exists(f):
+        return f
+    return None
+
+
 def arg_isdirectory(d):
     if os.path.exists(d):
         return d
