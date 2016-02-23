@@ -65,10 +65,10 @@ class Inventory(object):
           SourceDocuments; for example LDP/LDP/howto/linuxdoc and
           LDP/LDP/guide/docbook
         '''
-        self.outputs = OutputCollection(pubdir)
-        self.sources = SourceCollection(sourcedirs)
-        s = copy.deepcopy(self.sources)
-        o = copy.deepcopy(self.outputs)
+        self.output = OutputCollection(pubdir)
+        self.source = SourceCollection(sourcedirs)
+        s = copy.deepcopy(self.source)
+        o = copy.deepcopy(self.output)
         sset = set(s.keys())
         oset = set(o.keys())
 
@@ -92,7 +92,7 @@ class Inventory(object):
         logger.info("Identified %d new documents: %r.", len(self.new),
                     self.new.keys())
 
-        # -- published identification; sources and  outputs should be same size
+        # -- published identification; source and output should be same size
         assert len(s) == len(o)
         for stem, odoc in o.items():
             sdoc = s[stem]
@@ -110,6 +110,7 @@ class Inventory(object):
             mtime = max_mtime(odoc.statinfo)
             fset = mtime_gt(mtime, sdoc.statinfo)
             if fset:
+                sdoc.newer = fset
                 for f in fset:
                     logger.debug("%s found updated source file %s", stem, f)
                 odoc.status = sdoc.status = 'stale'
