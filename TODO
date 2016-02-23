@@ -1,0 +1,16 @@
+python-tldp TODO
+----------------
+
+  * SourceDocument and OutputDirectory both have nearly-identical
+    methods called detail() which define a format string; probably
+    should be defined once in a parent class or something
+
+  * produce a runnable shell-script instead of calling the programs
+
+
+CascadingConfig
+---------------
+
+  * factor out CascadingConfig into its own project
+
+  * allow automatic detection of config_fragment() functions
