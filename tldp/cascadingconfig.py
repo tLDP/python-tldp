@@ -45,10 +45,20 @@ def dict_to_argv_longform(d):
     return args
 
 
+def empty2none_values(d):
+    '''creates None values for values holding the empty string ("")
+
+    :param: d, a dictionary
+    '''
+    for k, v in d.items():
+        if v == '':
+            d[k] = None 
+    return d
+
 def convert_multivalues(d, multivaluesep=MULTIVALUESEP):
     '''creates multivalued values in an argument dict()
 
-    :param: d, should be a dictionary
+    :param: d, a dictionary
     :param: separator; optional, desired string separator
 
     Returns: a dictionary where any values containing the separator
@@ -211,15 +221,18 @@ def envdict_from_ns(tag, ns):
     d = prepend_tag(tag, d, sep=ENVSEP)
     d = dict([(k.upper(), v) for k, v in d.items()])
     for k, v in sorted(d.items()):
+        if v is None:
+            d[k] = ''
         if isinstance(v, (list, tuple)):
             v = MULTIVALUESEP.join([str(x) for x in v])
+            d[k] = v
     return d
 
 
 def clilist_from_ns(ns):
     cli = list()
     d = dict_from_ns(ns)
-    for k, v in d.items():
+    for k, v in sorted(d.items()):
         k = ''.join(('--', k.replace(NSSEP, CLISEP)))
         if isinstance(v, (list, tuple)):
             for val in v:
@@ -259,6 +272,9 @@ def argv_from_env(args, tag, **kw):
     listify_values = kw.get('convert_multivalues', convert_multivalues)
     if listify_values is not None:
         d = listify_values(d)
+    fix_empty = kw.get('empty2none_values', empty2none_values)
+    if fix_empty is not None:
+        d = fix_empty(d, **kw)
     d = strip_tag(tag, d)
     d = dict_to_argv_longform(d)
     return d
@@ -303,6 +319,9 @@ def argv_from_cfg(args, tag, **kw):
     listify_values = kw.get('convert_multivalues', convert_multivalues)
     if listify_values is not None:
         d = listify_values(d, **kw)
+    fix_empty = kw.get('empty2none_values', empty2none_values)
+    if fix_empty is not None:
+        d = fix_empty(d, **kw)
     d = strip_tag(tag, d, **kw)
     d = dict_to_argv_longform(d, **kw)
     return d
