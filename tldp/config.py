@@ -9,44 +9,35 @@ from tldp.utils import logger, isdirectory, isloglevel
 from tldp.cascadingconfig import CascadingConfig, DefaultFreeArgumentParser
 
 import tldp.doctypes
+from tldp.inventory import status_types
 
-status_types = ['all',
-                'sources',
-                'outputs',
-                'new',
-                'broken',
-                'orphaned',
-                'published',
-                'stale',
-                ]
 
-def collectconfiguration(argv):
-    tag = 'ldptool'
+def collectconfiguration(tag, argv):
     argparser = DefaultFreeArgumentParser()
     argparser.add_argument('--build',
                            '-b',
                            nargs='*', default=None, type=str,
                            help='build LDP documentation')
-    argparser.add_argument('--list',
+    argparser.add_argument('--detail', '--list',
                            '-l',
-                           nargs='?', default=None, type=str,
-                           choices=status_types,
+                           default=None, type=str,
+                           choices=tldp.inventory.status_types,
                            help='list elements of LDP publication system')
-    argparser.add_argument('--status',
+    argparser.add_argument('--status', '--summary',
                            '-t',
                            action='store_true', default=False,
-                           help='produce a detailed status report of documents')
-    argparser.add_argument('--all', 
-                           '-a',
+                           help='produce a status report of the inventory')
+    argparser.add_argument('--verbose', 
+                           '-v',
                            action='store_true', default=False,
-                           help='process all documents (list, build or status)')
+                           help='increase information produced during --list')
     argparser.add_argument('--loglevel', 
                            '-L',
                            default=logging.ERROR, type=isloglevel,
                            help='set the loglevel')
     argparser.add_argument('--sourcedir', '--source-dir', '--source-directory',
-                           '-i',
-                           action='append', default=None, type=isdirectory,
+                           '-s',
+                           action='append', default='', type=isdirectory,
                            help='a directory containing LDP source documents')
     argparser.add_argument('--pubdir', '--output', '--outputdir', '--outdir',
                            '-o',
@@ -70,7 +61,7 @@ def collectconfiguration(argv):
 
 
 def main(argv):
-    config = collectconfiguration(argv)
+    config = collectconfiguration('ldptool', argv)
     import pprint
     pprint.pprint(vars(config))
     return 0
