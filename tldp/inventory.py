@@ -12,6 +12,16 @@ from .outputs import OutputCollection
 
 from argparse import Namespace
 
+status_types = ['all',
+                'source',
+                'output',
+                'new',
+                'orphan',
+                'published',
+                'broken',
+                'stale',
+                ]
+
 
 class Inventory(object):
     '''a container for classifying documents by their status
@@ -36,10 +46,10 @@ class Inventory(object):
     documents.
     '''
     def __repr__(self):
-        return '<%s: %d published, %d orphans, %d new, %d stale, %d broken>' % (
+        return '<%s: %d published, %d orphan, %d new, %d stale, %d broken>' % (
                self.__class__.__name__,
                len(self.published),
-               len(self.orphans),
+               len(self.orphan),
                len(self.new),
                len(self.stale),
                len(self.broken),
@@ -64,13 +74,13 @@ class Inventory(object):
 
         # -- orphan identification
         #
-        self.orphans = OutputCollection()
+        self.orphan = OutputCollection()
         for doc in oset.difference(sset):
-            self.orphans[doc] = o[doc]
+            self.orphan[doc] = o[doc]
             del o[doc]
-            self.orphans[doc].status = 'orphan'
-        logger.info("Identified %d orphaned documents: %r.", len(self.orphans),
-                    self.orphans.keys())
+            self.orphan[doc].status = 'orphan'
+        logger.info("Identified %d orphan documents: %r.", len(self.orphan),
+                    self.orphan.keys())
 
         # -- unpublished ('new') identification
         #
@@ -129,7 +139,7 @@ def get_outputs(pubdir):
 def print_sources(scollection, config=None):
     if config is None:
         config = Namespace(sep='\t', verbose=0)
-    for stem in sorted(scollection.keys(), key=lambda x: x.lower()):
+    for stem in scollection.keys():
         doc = scollection[stem]
         if config.verbose:
             fields = [doc.stem, doc.status]
@@ -143,7 +153,7 @@ def print_sources(scollection, config=None):
 def print_outputs(ocollection, config=None):
     if config is None:
         config = Namespace(sep='\t', verbose=0)
-    for stem in sorted(ocollection.keys(), key=lambda x: x.lower()):
+    for stem in ocollection.keys():
         doc = ocollection[stem]
         if config.verbose:
             fields = [doc.stem, doc.status, doc.dirname]
@@ -151,36 +161,6 @@ def print_outputs(ocollection, config=None):
             print(config.sep.join(fields))
         else:
             print(doc.stem)
-
-
-def list_sources(sourcedirs, config=None):
-    s = get_sources(sourcedirs)
-    print_sources(s, config)
-
-
-def list_outputs(pubdir, config=None):
-    o = get_outputs(pubdir)
-    print_outputs(o, config)
-
-
-def list_stale(pubdir, sourcedirs, config=None):
-    i = Inventory(pubdir, sourcedirs)
-    print_sources(i.stale, config)
-
-
-def list_broken(pubdir, sourcedirs, config=None):
-    i = Inventory(pubdir, sourcedirs)
-    print_sources(i.broken, config)
-
-
-def list_new(pubdir, sourcedirs, config=None):
-    i = Inventory(pubdir, sourcedirs)
-    print_sources(i.new, config)
-
-
-def list_orphans(pubdir, sourcedirs, config=None):
-    i = Inventory(pubdir, sourcedirs)
-    print_outputs(i.orphans, config)
 
 
 #
