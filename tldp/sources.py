@@ -5,10 +5,11 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import errno
-import collections
 
-from .utils import logger, statfiles, stem_and_ext
-from .typeguesser import guess, knownextensions
+from tldp.ldpcollection import LDPDocumentCollection
+
+from tldp.utils import logger, statfiles, stem_and_ext
+from tldp.typeguesser import guess, knownextensions
 
 
 def scansourcedirs(dirnames):
@@ -95,7 +96,7 @@ def sourcedoc_fromdir(dirname):
         return candidates.pop()
 
 
-class SourceCollection(collections.MutableMapping):
+class SourceCollection(LDPDocumentCollection):
     '''a dict-like container for SourceDocument objects
 
     The key in the SourceCollection is the stem name of the document, which
@@ -104,9 +105,6 @@ class SourceCollection(collections.MutableMapping):
     The use of the stem as a key works conveniently with the
     OutputCollection which uses the same strategy on OutputDirectory.
     '''
-    def __repr__(self):
-        return '<%s:(%s docs)>' % (self.__class__.__name__, len(self))
-
     def __init__(self, dirnames=None):
         '''construct a SourceCollection
 
@@ -115,21 +113,6 @@ class SourceCollection(collections.MutableMapping):
         if dirnames is None:
             return
         self.update(scansourcedirs(dirnames))
-
-    def __delitem__(self, key):
-        del self.__dict__[key]
-
-    def __getitem__(self, key):
-        return self.__dict__[key]
-
-    def __setitem__(self, key, value):
-        self.__dict__[key] = value
-
-    def __iter__(self):
-        return iter(self.__dict__)
-
-    def __len__(self):
-        return len(self.__dict__)
 
 
 class SourceDocument(object):
@@ -176,6 +159,7 @@ class SourceDocument(object):
 
         self.doctype = guess(self.filename)
         self.status = 'source'
+        self.newer = set()
         self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = stem_and_ext(self.basename)
         parentbase = os.path.basename(self.dirname)

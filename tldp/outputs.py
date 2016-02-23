@@ -7,8 +7,8 @@ import os
 import errno
 import shutil
 
-import collections
-from .utils import logger, logdir, statfiles
+from tldp.ldpcollection import LDPDocumentCollection
+from tldp.utils import logger, logdir, statfiles
 
 
 class OutputNamingConvention(object):
@@ -124,7 +124,7 @@ class OutputDirectory(OutputNamingConvention):
             shutil.rmtree(logdir)
 
 
-class OutputCollection(collections.MutableMapping):
+class OutputCollection(LDPDocumentCollection):
     '''a dict-like container for OutputDirectory objects
 
     The key of an OutputCollection is the stem name of the document, which
@@ -133,9 +133,6 @@ class OutputCollection(collections.MutableMapping):
     The use of the stem as a key works conveniently with the
     SourceCollection which uses the same strategy on SourceDocuments.
     '''
-    def __repr__(self):
-        return '<%s:(%s docs)>' % (self.__class__.__name__, len(self))
-
     def __init__(self, dirname=None):
         '''construct an OutputCollection
 
@@ -179,21 +176,6 @@ class OutputCollection(collections.MutableMapping):
             o = OutputDirectory(name)
             assert o.stem not in self
             self[o.stem] = o
-
-    def __delitem__(self, key):
-        del self.__dict__[key]
-
-    def __getitem__(self, key):
-        return self.__dict__[key]
-
-    def __setitem__(self, key, value):
-        self.__dict__[key] = value
-
-    def __iter__(self):
-        return iter(self.__dict__)
-
-    def __len__(self):
-        return len(self.__dict__)
 
 #
 # -- end of file
