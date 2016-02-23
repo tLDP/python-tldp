@@ -5,18 +5,19 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
-from ..utils import logger, which, execute
-from .common import BaseDoctype, SignatureChecker
+from tldp.utils import logger, which, execute
+from tldp.utils import arg_isexecutable, isexecutable
+from tldp.doctypes.common import BaseDoctype, SignatureChecker
 
 
 def config_fragment(p):
-    p.add_argument('--linuxdoc-sgml2html', type=str,
+    p.add_argument('--linuxdoc-sgml2html', type=arg_isexecutable,
                    default=which('sgml2html'),
                    help='full path to sgml2html [%(default)s]')
-    p.add_argument('--linuxdoc-html2text', type=str,
+    p.add_argument('--linuxdoc-html2text', type=arg_isexecutable,
                    default=which('html2text'),
                    help='full path to html2text [%(default)s]')
-    p.add_argument('--linuxdoc-htmldoc', type=str,
+    p.add_argument('--linuxdoc-htmldoc', type=arg_isexecutable,
                    default=which('htmldoc'),
                    help='full path to htmldoc [%(default)s]')
 
@@ -25,16 +26,21 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
     formatname = 'Linuxdoc'
     extensions = ['.sgml']
     signatures = ['<!doctype linuxdoc system', ]
-    tools = ['sgml2html', 'html2text', 'htmldoc']
 
-    def platform_check(self):
-        for tool in self.tools:
-            assert hasattr(self.platform, tool)
-            assert isexecutable(getattr(self.platform, tool))
+    required = {'linuxdoc_sgml2html': isexecutable,
+                'linuxdoc_html2text': isexecutable,
+                'linuxdoc_htmldoc': isexecutable,
+                }
+
+    def build_precheck(self):
+        for tool, validator in self.required.items():
+            thing = getattr(self.config, tool, None)
+            assert thing is not None
+            assert validator(thing)
         return True
 
     def create_txt(self):
-        exe = self.platform.html2text
+        exe = self.config.linuxdoc_html2text
         inf = self.output.name_htmls
         assert os.path.exists(inf)
         outf = self.output.name_txt
@@ -42,15 +48,15 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         logdir = self.output.logdir
         cmd = [exe, '-style', 'pretty', '-nobs', inf]
         logger.debug("%s creating TXT   %s.", stem, outf)
-        stdout = open(outf, 'wx')
-        result = execute(cmd, logdir=logdir, stdout=stdout)
+        with open(outf, 'wx') as stdout:
+            result = execute(cmd, logdir=logdir, stdout=stdout)
         if result != 0:
             return False
         logger.info("%s created  TXT   %s.", stem, outf)
         return os.path.isfile(outf)
 
     def create_pdf(self):
-        exe = self.platform.htmldoc
+        exe = self.config.linuxdoc_htmldoc
         inf = self.output.name_htmls
         assert os.path.exists(inf)
         outf = self.output.name_pdf
@@ -66,7 +72,7 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         return os.path.isfile(outf)
 
     def create_html(self):
-        exe = self.platform.sgml2html
+        exe = self.config.linuxdoc_sgml2html
         inf = self.source.filename
         assert os.path.exists(inf)
         outf = self.output.name_html
@@ -86,7 +92,7 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         return os.path.isfile(outf)
 
     def create_htmls(self):
-        exe = self.platform.sgml2html
+        exe = self.config.linuxdoc_sgml2html
         inf = self.source.filename
         assert os.path.exists(inf)
         outf = self.output.name_htmls
