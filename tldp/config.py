@@ -9,7 +9,7 @@ from tldp.utils import logger, isdirectory, isloglevel
 from tldp.cascadingconfig import CascadingConfig, DefaultFreeArgumentParser
 
 import tldp.doctypes
-from tldp.inventory import status_types
+from tldp.inventory import status_classes
 
 
 def collectconfiguration(tag, argv):
@@ -21,17 +21,17 @@ def collectconfiguration(tag, argv):
     argparser.add_argument('--detail', '--list',
                            '-l',
                            default=None, type=str,
-                           choices=tldp.inventory.status_types,
+                           choices=status_classes.keys(),
                            help='list elements of LDP publication system')
     argparser.add_argument('--status', '--summary',
                            '-t',
                            action='store_true', default=False,
                            help='produce a status report of the inventory')
-    argparser.add_argument('--verbose', 
+    argparser.add_argument('--verbose',
                            '-v',
                            action='store_true', default=False,
                            help='increase information produced during --list')
-    argparser.add_argument('--loglevel', 
+    argparser.add_argument('--loglevel',
                            '-L',
                            default=logging.ERROR, type=isloglevel,
                            help='set the loglevel')
