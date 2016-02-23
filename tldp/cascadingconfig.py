@@ -510,8 +510,9 @@ class CascadingConfig(object):
             self.userconfig_extras = extras
 
     def set_config(self, order=None):
-        if order is None:
+        if order is not None:
             logger.debug("Installing custom resolution order %r", order)
+        else:
             order = self.order
         sources = [(x, getattr(self, x)) for x in order]
         sources.reverse()
@@ -548,6 +549,8 @@ class CascadingConfig(object):
                 field = CFGSEP.join(parts[2:])
             if not cfg.has_section(sect):
                 cfg.add_section(sect)
+            if v is None:
+                v = ''
             if isinstance(v, (list, tuple)):
                 vstr = ',\n'.join([str(x) for x in v])
                 cfg.set(sect, field, vstr)
