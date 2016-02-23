@@ -33,6 +33,16 @@ def firstfoundfile(locations):
     return None
 
 
+def isloglevel(l):
+    try:
+        level = int(l)
+    except ValueError:
+        level = getattr(logging, l, None)
+        if level is None:
+            level = logging.ERROR
+    return level
+
+
 def isdirectory(d):
     if os.path.exists(d):
         return d
