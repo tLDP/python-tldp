@@ -12,15 +12,32 @@ from .outputs import OutputCollection
 
 from argparse import Namespace
 
-status_types = ['all',
+# -- any individual document (source or output) will have a status
+#    from the following list of status_types
+#
+status_types = [
                 'source',
                 'output',
+                'published',
                 'new',
                 'orphan',
-                'published',
                 'broken',
                 'stale',
                 ]
+
+# -- the user probably doesn't usually care (too much) about listing
+#    every single published document and source document, but is probably
+#    mostly interested in specific documents grouped by status; so the
+#    status_classes are just sets of status_types
+#
+status_classes = dict(zip(status_types, [[x] for x in status_types]))
+status_classes['outputs'] = ['output']
+status_classes['sources'] = ['source']
+status_classes['problems'] = ['orphan', 'broken', 'stale']
+status_classes['work'] = ['new', 'orphan', 'broken', 'stale']
+status_classes['orphans'] = ['orphan']
+status_classes['orphaned'] = ['orphan']
+status_classes['all'] = ['published', 'new', 'orphan', 'broken', 'stale']
 
 
 class Inventory(object):
@@ -145,7 +162,9 @@ def print_sources(scollection, config=None):
         if config.verbose:
             fields = [doc.stem, doc.status]
             fields.append(str(len(doc.statinfo)) + ' source files')
-            fields.extend([doc.filename, doc.doctype.formatname, str(doc.doctype)])
+            fields.append(doc.filename)
+            fields.extend(doc.doctype.formatname)
+            fields.extend(str(doc.doctype))
             print(config.sep.join(fields))
         else:
             print(doc.stem)
