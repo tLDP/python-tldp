@@ -8,8 +8,7 @@ import sys
 
 from tldp.utils import logger
 
-import tldp.config
-import tldp.inventory
+import tldp
 
 from argparse import Namespace
 
@@ -59,6 +58,24 @@ def status(config, args):
 
 
 def build(config, args):
+    targets = list()
+    if not args:
+        i = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+        targets.extend(i.new.values())
+        targets.extend(i.stale.values())
+        targets.extend(i.broken.values())
+    else:
+        for arg in args:
+            if os.path.isfile(arg):
+                source = tldp.sources.SourceDocument(arg)
+                targets.append(source)
+    for source in targets:
+        if not source.output:
+            dirname = os.path.join(config.pubdir, source.stem)
+            source.output = tldp.outputs.OutputDirectory(dirname)
+        output = source.output
+        runner = source.doctype(source=source, output=output, config=config)
+        runner.generate()
     return 0
 
 
