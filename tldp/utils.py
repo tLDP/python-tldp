@@ -28,7 +28,7 @@ logger = getLogger()
 def firstfoundfile(locations):
     '''return the first existing file from a list of filenames (or None)'''
     for option in locations:
-        if os.path.isfile(option):
+        if isreadablefile(option):
             return option
     return None
 
@@ -40,19 +40,19 @@ def arg_isloglevel(l):
         level = getattr(logging, l.upper(), None)
     try:
         logging.getLogger().setLevel(level)
-    except ValueError:
+    except (TypeError, ValueError):
         level = logging.ERROR
     return level
 
 
-def arg_isfile(f):
-    if os.path.exists(f):
+def arg_isreadablefile(f):
+    if isreadablefile(f):
         return f
     return None
 
 
 def arg_isdirectory(d):
-    if os.path.exists(d):
+    if os.path.isdir(d):
         return d
     return None
 
@@ -152,9 +152,14 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
     return result
 
 
-def isexecutable(fpath):
+def isexecutable(f):
     '''True if argument is executable'''
-    return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+    return os.path.isfile(f) and os.access(f, os.X_OK)
+
+
+def isreadablefile(f):
+    '''True if argument is readable file'''
+    return os.path.isfile(f) and os.access(f, os.R_OK)
 
 
 def which(program):

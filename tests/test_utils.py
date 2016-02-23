@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import stat
 import uuid
 import unittest
 from tempfile import NamedTemporaryFile as ntf
@@ -11,6 +12,51 @@ from tldptesttools import TestToolsFilesystem
 # -- SUT
 from tldp.utils import makefh, which, execute
 from tldp.utils import statfiles, stem_and_ext
+from tldp.utils import arg_isexecutable, isexecutable
+from tldp.utils import arg_isreadablefile, isreadablefile
+from tldp.utils import arg_isdirectory
+from tldp.utils import arg_isloglevel
+
+
+class Test_isexecutable_and_friends(unittest.TestCase):
+
+    def test_isexecutable(self):
+        f = ntf(prefix='executable-file')
+        self.assertFalse(isexecutable(f.name))
+        mode = stat.S_IXUSR | stat.S_IRUSR | stat.S_IWUSR
+        os.chmod(f.name, mode)
+        self.assertTrue(isexecutable(f.name))
+
+    def test_arg_isexecutable(self):
+        f = ntf(prefix='executable-file')
+        self.assertIsNone(arg_isexecutable(f.name))
+        mode = stat.S_IXUSR | stat.S_IRUSR | stat.S_IWUSR
+        os.chmod(f.name, mode)
+        self.assertEqual(f.name, arg_isexecutable(f.name))
+
+
+class Test_isreadablefile_and_friends(unittest.TestCase):
+
+    def test_isreadablefile(self):
+        f = ntf(prefix='readable-file')
+        self.assertTrue(isreadablefile(f.name))
+        os.chmod(f.name, 0)
+        self.assertFalse(isreadablefile(f.name))
+
+    def test_arg_isreadablefile(self):
+        f = ntf(prefix='readable-file')
+        self.assertEquals(f.name, arg_isreadablefile(f.name))
+        os.chmod(f.name, 0)
+        self.assertIsNone(arg_isreadablefile(f.name))
+
+
+class Test_arg_isloglevel(unittest.TestCase):
+
+    def test_arg_isloglevel_integer(self):
+        self.assertEquals(7, arg_isloglevel(7))
+        self.assertEquals(40, arg_isloglevel('frobnitz'))
+        self.assertEquals(20, arg_isloglevel('INFO'))
+        self.assertEquals(10, arg_isloglevel('DEBUG'))
 
 
 class Test_execute(TestToolsFilesystem):
