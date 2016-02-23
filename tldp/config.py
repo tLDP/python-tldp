@@ -33,7 +33,8 @@ def collectconfiguration(argv):
     tldp.doctypes.docbook5xml.config_fragment(argparser)
 
     cc = CascadingConfig(tag, argparser, argv)
-    return cc.config
+    config, args = cc.parse()
+    return config
 
 
 def main(argv):

@@ -361,8 +361,8 @@ class CascadingConfig(object):
       - defaults       (lowest precedence)
 
     The order of resolution of configurations can be controlled by passing
-    a list of sources to the resolve() method.  Here's the standard resolution
-    order:
+    a list of sources to the set_config() method.  Here's the standard
+    resolution order:
 
     order = ['cli', 'environment', 'userconfig', 'systemconfig', 'defaults']
     '''
@@ -405,16 +405,15 @@ class CascadingConfig(object):
         self.configfile = configfile
         self.order = order
 
-    @property
-    def config(self):
+    def parse(self):
         self.read_defaults()
         self.read_cli()
         self.read_environment()
         self.read_systemconfig()
         self.read_userconfig()
-        self.resolve()
-        self.ccrequest()
-        return self._config
+        self.set_config()
+        self.handle_ccrequest()
+        return self.config, self.cli_extras
 
     def read_defaults(self):
         '''read the defaults that the developer set in the ArgumentParser'''
@@ -468,8 +467,9 @@ class CascadingConfig(object):
             self.userconfig, extras = parser(argv_from_cfg(usrcfg, self.tag))
             self.userconfig_extras = extras
 
-    def resolve(self, order=None):
+    def set_config(self, order=None):
         if order is None:
+            logger.debug("Installing custom resolution order %r", order)
             order = self.order
         sources = [(x, getattr(self, x)) for x in order]
         sources.reverse()
@@ -483,10 +483,10 @@ class CascadingConfig(object):
                     logger.debug("Source %s: replacing %s=%s with %s=%s",
                                  sourcename, name, oldval, name, newval)
                 setattr(config, name, newval)
-        self._config = config
+        self.config = config
 
     def dump_env(self):
-        d = dict_from_ns(self._config)
+        d = dict_from_ns(self.config)
         d = prepend_tag(self.tag, d, sep=ENVSEP)
         d = dict([(k.upper(), v) for k, v in d.items()])
         for k, v in sorted(d.items()):
@@ -496,7 +496,7 @@ class CascadingConfig(object):
         return 0
 
     def dump_cfg(self):
-        d = dict_from_ns(self._config)
+        d = dict_from_ns(self.config)
         d = prepend_tag(self.tag, d, sep=CFGSEP)
         cfg = ConfigParser()
         for k, v in d.items():
@@ -519,7 +519,7 @@ class CascadingConfig(object):
         return 0
 
     def dump_cli(self):
-        d = dict_from_ns(self._config)
+        d = dict_from_ns(self.config)
         cli = list()
         for k, v in d.items():
             k = ''.join(('--', k.replace(NSSEP, CLISEP)))
@@ -542,13 +542,13 @@ class CascadingConfig(object):
                 pprint.pprint(v)
         return 0
 
-    def ccrequest(self):
+    def handle_ccrequest(self):
         diagfunc = False
         for opt in self.mine:
             opt = opt.lstrip(CLISEP)
-            if getattr(self._config, opt, False):
+            if getattr(self.config, opt, False):
                 diagfunc = getattr(self, opt)
-            delattr(self._config, opt)
+            delattr(self.config, opt)
         if diagfunc:
                 sys.exit(diagfunc())
 
