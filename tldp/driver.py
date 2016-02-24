@@ -73,6 +73,10 @@ def build(config, args):
         if not source.output:
             dirname = os.path.join(config.pubdir, source.stem)
             source.output = tldp.outputs.OutputDirectory(dirname)
+        if not source.doctype:
+            logger.warning("%s skipping document of unknown doctype", 
+                           source.stem)
+            continue
         output = source.output
         runner = source.doctype(source=source, output=output, config=config)
         runner.generate()
