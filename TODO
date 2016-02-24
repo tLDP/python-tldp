@@ -5,8 +5,10 @@ python-tldp TODO
     methods called detail() which define a format string; probably
     should be defined once in a parent class or something
 
-  * produce a runnable shell-script instead of calling the programs
+  * Add a verb to produce a runnable shell-script instead of having 
+    ldptool do the job.
 
+  * Copy images into the output directory.
 
 CascadingConfig
 ---------------
