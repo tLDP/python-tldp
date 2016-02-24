@@ -34,6 +34,11 @@ class BaseDoctype(object):
         assert None not in (self.source, self.output, self.config)
 
     def build_precheck(self):
+        try:
+            self.required.items()
+        except AttributeError:
+            return False
+
         for tool, validator in self.required.items():
             thing = getattr(self.config, tool, None)
             assert thing is not None
@@ -52,6 +57,8 @@ class BaseDoctype(object):
         # -- the processor gets to prepare; must return True
         #
         if not self.build_precheck():
+            logger.warning("%s build_precheck failed (%s), skipping to next build", 
+                           self.source.stem, self.source.doctype.formatname)
             return False
 
         # -- now, we can walk through build targets, and record a vector
@@ -71,15 +78,21 @@ class BaseDoctype(object):
             if premethod:
                 vector.append(premethod())
                 if not last_command():
+                    logger.warning("%s pre_%s failed, skipping to next target",
+                                   self.source.stem, target)
                     continue
 
             vector.append(mainmethod())
             if not last_command():
+                logger.warning("%s %s failed, skipping to next target",
+                               self.source.stem, target)
                 continue
 
             if postmethod:
                 vector.append(postmethod())
                 if not last_command():
+                    logger.warning("%s post_%s failed, skipping to next target",
+                                   self.source.stem, target)
                     continue
 
         result = all(vector)
