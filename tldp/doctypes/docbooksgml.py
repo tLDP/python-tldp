@@ -174,11 +174,23 @@ ln \\
 # -- end of file'''
 
     def buildindex(self):
+        indexsgml = os.path.join(self.source.dirname, 'index.sgml')
+        if os.path.isfile(indexsgml):
+            self.indexsgml = lambda: None
+            return True
+
+        def unlink_indexsgml():
+            os.unlink(indexsgml)
+
+        self.indexsgml = unlink_indexsgml
         return self.shellscript(self.indexscript)
 
     def buildall(self):
         return self.shellscript(self.mainscript)
 
+    def post_buildall(self):
+        self.indexsgml()
+        return True
 
 #
 # -- end of file
