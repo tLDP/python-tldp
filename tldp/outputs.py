@@ -33,6 +33,10 @@ class OutputNamingConvention(object):
         return os.path.join(self.dirname, self.stem + '.txt')
 
     @property
+    def name_fo(self):
+        return os.path.join(self.dirname, self.stem + '.fo')
+
+    @property
     def name_pdf(self):
         return os.path.join(self.dirname, self.stem + '.pdf')
 
@@ -115,7 +119,7 @@ class OutputDirectory(OutputNamingConvention):
         This is done as a matter of course when the output documents must be
         regenerated.  Better to start fresh.
         '''
-        logger.info("%s cleaning dir   %s.", self.stem, self.dirname)
+        logger.debug("%s removing dir   %s.", self.stem, self.dirname)
         if os.path.isdir(self.dirname):
             shutil.rmtree(self.dirname)
 
@@ -123,18 +127,18 @@ class OutputDirectory(OutputNamingConvention):
         self.clean()
         for d in (self.dirname, self.logdir):
             if not os.path.isdir(d):
-                logger.info("%s creating dir   %s.", self.stem, d)
+                logger.debug("%s creating dir   %s.", self.stem, d)
                 os.mkdir(d)
         #self.copy_ancillaries(self.dirname)
         return True
 
-    def hook_build_fail(self):
+    def hook_build_failure(self):
         logger.error("%s FAILURE, see logs in %s", self.stem, self.logdir)
         return True
 
     def hook_build_success(self):
         logger.info("%s build success  %s.", self.stem, self.dirname)
-        logger.info("%s removing logs  %s)", self.stem, self.logdir)
+        logger.debug("%s removing logs  %s)", self.stem, self.logdir)
         if os.path.isdir(self.logdir):
             shutil.rmtree(logdir)
         return True
