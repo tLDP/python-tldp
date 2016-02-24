@@ -4,7 +4,10 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-from ..utils import logger
+import stat
+from tempfile import NamedTemporaryFile as ntf
+
+from tldp.utils import logger, execute
 
 
 class SignatureChecker(object):
@@ -45,6 +48,29 @@ class BaseDoctype(object):
             assert validator(thing)
         return True
 
+    def shellscript(self, script):
+        source = self.source
+        output = self.output
+        config = self.config
+
+        logdir = output.logdir
+        prefix = source.doctype.__name__ + '-'
+
+        s = script.format(output=output, source=source, config=config)
+        tf = ntf(dir=logdir, prefix=prefix, suffix='.sh', delete=False)
+        tf.write(s)
+        tf.close()
+
+        mode = stat.S_IXUSR | stat.S_IRUSR | stat.S_IWUSR
+        os.chmod(tf.name, mode)
+
+        cmd = [tf.name]
+        result = execute(cmd, logdir=logdir)
+        if result != 0:
+            return False
+        logger.debug("%s checking for complete set of files", source.stem)
+        return self.output.iscomplete
+
     def generate(self):
         # -- the output directory gets to prepare; must return True
         #
@@ -57,8 +83,9 @@ class BaseDoctype(object):
         # -- the processor gets to prepare; must return True
         #
         if not self.build_precheck():
-            logger.warning("%s build_precheck failed (%s), skipping to next build", 
-                           self.source.stem, self.source.doctype.formatname)
+            logger.warning("%s %s failed (%s), skipping to next build",
+                           'build_precheck', self.source.stem,
+                           self.source.doctype.formatname)
             return False
 
         # -- now, we can walk through build targets, and record a vector

@@ -3,11 +3,7 @@
 
 from __future__ import absolute_import, division, print_function
 
-import os
-import stat
-from tempfile import NamedTemporaryFile as ntf
-
-from tldp.utils import logger, which, execute, firstfoundfile
+from tldp.utils import logger, which, firstfoundfile
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.utils import arg_isreadablefile, isreadablefile
 
@@ -73,8 +69,9 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
                 'docbook4xml_xslprint': isreadablefile,
                 }
 
-    buildorder = ['shellscript']
-    script = '''#! /bin/bash
+    buildorder = ['buildall']
+
+    buildscript = '''#! /bin/bash
 #
 # -- generate LDP outputs from DocBook XML 4.x
 
@@ -103,13 +100,16 @@ cd "{output.dirname}"
 "{config.docbook4xml_fop}" \\
   -fo "{output.name_fo}" \\
   -pdf "{output.name_pdf}" \\
-  && rm -f -- "{output.name_fo}"
 
-# "{config.docbook4xml_dblatex}" \\
-#   -F xml \\
-#   -t pdf \\
-#   -o "{output.name_pdf}" \\
-#      "{source.filename}"
+test -e "{output.name_pdf}" \\
+  || "{config.docbook4xml_dblatex}" \\
+       -F xml \\
+       -t pdf \\
+       -o "{output.name_pdf}" \\
+       "{source.filename}"
+
+test -e "{output.name_fo}" \\
+  && rm -f -- "{output.name_fo}"
 
 "{config.docbook4xml_xsltproc}" \\
   --nonet \\
@@ -131,28 +131,8 @@ ln \\
 
 # -- end of file'''
 
-    def shellscript(self):
-        source = self.source
-        output = self.output
-        logdir = self.output.logdir
-        config = self.config
-
-        s = self.script.format(output=self.output,
-                               source=self.source,
-                               config=self.config)
-        tf = ntf(dir=self.output.logdir, prefix='docbook4xml-shell-', 
-                 suffix='.sh', delete=False)
-        tf.write(s)
-        tf.close()
-
-        mode = stat.S_IXUSR | stat.S_IRUSR | stat.S_IWUSR
-        os.chmod(tf.name, mode)
-
-        cmd = [tf.name]
-        result = execute(cmd, logdir=logdir)
-        if result != 0:
-            return False
-        return self.output.iscomplete
+    def buildall(self):
+        return self.shellscript(self.buildscript)
 
 
 #
