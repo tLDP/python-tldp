@@ -129,7 +129,7 @@ class OutputDirectory(OutputNamingConvention):
             if not os.path.isdir(d):
                 logger.debug("%s creating dir   %s.", self.stem, d)
                 os.mkdir(d)
-        #self.copy_ancillaries(self.dirname)
+        logger.info("%s ready to build %s.", self.stem, self.dirname)
         return True
 
     def hook_build_failure(self):
@@ -137,7 +137,7 @@ class OutputDirectory(OutputNamingConvention):
         return True
 
     def hook_build_success(self):
-        logger.info("%s build success  %s.", self.stem, self.dirname)
+        logger.info("%s build SUCCESS  %s.", self.stem, self.dirname)
         logger.debug("%s removing logs  %s)", self.stem, self.logdir)
         if os.path.isdir(self.logdir):
             shutil.rmtree(logdir)
