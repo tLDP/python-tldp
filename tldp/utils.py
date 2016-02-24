@@ -144,7 +144,7 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
     result = proc.wait()
     if result != 0:
         logger.warning("Return code (%s) for process: %r", result, cmd)
-        logger.warning("Find STDOUT/STDERR in %s/%s", logdir, prefix)
+        logger.warning("Find STDOUT/STDERR in %s/%s*", logdir, prefix)
     if isinstance(stdout, int) and stdoutname:
         os.close(stdout)
     if isinstance(stderr, int) and stderrname:
