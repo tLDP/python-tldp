@@ -68,8 +68,7 @@ class BaseDoctype(object):
         result = execute(cmd, logdir=logdir)
         if result != 0:
             return False
-        logger.debug("%s checking for complete set of files", source.stem)
-        return self.output.iscomplete
+        return True
 
     def generate(self):
         # -- the output directory gets to prepare; must return True
@@ -105,22 +104,22 @@ class BaseDoctype(object):
             if premethod:
                 vector.append(premethod())
                 if not last_command():
-                    logger.warning("%s pre_%s failed, skipping to next target",
+                    logger.warning("%s pre_%s failed, skipping to next build",
                                    self.source.stem, target)
-                    continue
+                    break
 
             vector.append(mainmethod())
             if not last_command():
-                logger.warning("%s %s failed, skipping to next target",
+                logger.warning("%s %s failed, skipping to next build",
                                self.source.stem, target)
-                continue
+                break
 
             if postmethod:
                 vector.append(postmethod())
                 if not last_command():
-                    logger.warning("%s post_%s failed, skipping to next target",
+                    logger.warning("%s post_%s failed, skipping to next build",
                                    self.source.stem, target)
-                    continue
+                    break
 
         result = all(vector)
         if result:
