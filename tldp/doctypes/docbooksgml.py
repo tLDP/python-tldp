@@ -68,17 +68,128 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                 'docbooksgml_docbookdsl': isreadablefile,
                 }
 
-    buildorder = ['create_docindex_blank',
-                  'create_docindex_data',
-                  'create_docindex_full',
-                  'move_docindex_to_source',
-                  'create_htmls',
-                  'create_pdf',
-                  'create_txt',
-                  'create_html',
-                  'create_indexhtml',
-                  ]
+    buildorder = ['buildindex', 'buildall']
 
+    indexscript = '''#! /bin/bash
+#
+# -- generate usable index.sgml from DocBook SGML 3.x/4.x
+
+set -x
+set -e
+set -o pipefail
+
+cd "{output.dirname}"
+
+"{config.docbooksgml_collateindex}" \\
+  -N \\
+  -o \\
+  "{source.dirname}/index.sgml"
+
+"{config.docbooksgml_openjade}" \\
+           -t sgml \\
+           -V html-index \\
+           -d "{config.docbooksgml_docbookdsl}" \\
+           "{source.filename}"
+
+"{config.docbooksgml_collateindex}" \\
+  -g \\
+  -t Index \\
+  -i doc-index \\
+  -o "index.sgml" \\
+     "HTML.index" \\
+     "{source.filename}"
+
+mv \\
+  --no-clobber \\
+  --verbose \\
+  -- "index.sgml" "{source.dirname}/index.sgml"
+
+find . -mindepth 1 -maxdepth 1 -type f -print0 \
+  | xargs --null --no-run-if-empty -- rm -f --
+
+# -- end of file'''
+
+    mainscript = '''#! /bin/bash
+#
+# -- generate LDP outputs from DocBook SGML 3.x/4.x
+
+set -x
+set -e
+set -o pipefail
+
+cd "{output.dirname}"
+
+"{config.docbooksgml_jw}" \\
+  -f docbook \\
+  -b html \\
+  --dsl "{config.docbooksgml_ldpdsl}#html" \\
+  -V nochunks \\
+  -V '%callout-graphics-path%=images/callouts/' \\
+  -V '%stock-graphics-extension%=.png' \\
+  --output . \\
+  "{source.filename}"
+
+mv \\
+  --no-clobber \\
+  --verbose \\
+  -- "{output.name_html}" "{output.name_htmls}"
+
+"{config.docbooksgml_html2text}" > "{output.name_txt}" \\
+  -style pretty \\
+  -nobs \\
+  "{output.name_htmls}"
+
+"{config.docbooksgml_jw}" \\
+  -f docbook \\
+  -b pdf \\
+  --output . \\
+  "{source.filename}" \\
+  || "{config.docbooksgml_dblatex}" \\
+      -F sgml \\
+      -t pdf \\
+      -o "{output.name_pdf}" \\
+         "{source.filename}"
+
+"{config.docbooksgml_jw}" \\
+  -f docbook \\
+  -b html \\
+  --dsl "{config.docbooksgml_ldpdsl}#html" \\
+  -V '%callout-graphics-path%=images/callouts/' \\
+  -V '%stock-graphics-extension%=.png' \\
+  --output . \\
+  "{source.filename}"
+
+mv \\
+  --no-clobber \\
+  --verbose \\
+  -- "{output.name_indexhtml}" "{output.name_html}"
+
+ln \\
+  --symbolic \\
+  --relative \\
+  --verbose \\
+  -- "{output.name_html}" "{output.name_indexhtml}"
+
+
+# -- end of file'''
+
+    def buildindex(self):
+        return self.shellscript(self.indexscript)
+
+    def buildall(self):
+        return self.shellscript(self.mainscript)
+
+    # buildorder = ['create_docindex_blank',
+    #               'create_docindex_data',
+    #               'create_docindex_full',
+    #               'move_docindex_to_source',
+    #               'create_htmls',
+    #               'create_pdf',
+    #               'create_txt',
+    #               'create_html',
+    #               'create_indexhtml',
+    #               ]
+    #
     # -- these names are (sort-of) chosen by the SGML toolchain
     docindex = 'index.sgml'
     docindexdata = 'HTML.index'
