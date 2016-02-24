@@ -96,7 +96,7 @@ class Inventory(object):
             self.orphan[doc] = o[doc]
             del o[doc]
             self.orphan[doc].status = 'orphan'
-        logger.info("Identified %d orphan documents: %r.", len(self.orphan),
+        logger.debug("Identified %d orphan documents: %r.", len(self.orphan),
                     self.orphan.keys())
 
         # -- unpublished ('new') identification
@@ -106,7 +106,7 @@ class Inventory(object):
             self.new[doc] = s[doc]
             del s[doc]
             self.new[doc].status = 'new'
-        logger.info("Identified %d new documents: %r.", len(self.new),
+        logger.debug("Identified %d new documents: %r.", len(self.new),
                     self.new.keys())
 
         # -- published identification; source and output should be same size
@@ -117,7 +117,7 @@ class Inventory(object):
             odoc.source = sdoc
             sdoc.status = sdoc.output.status = 'published'
         self.published = s
-        logger.info("Identified %d published documents.", len(self.published))
+        logger.debug("Identified %d published documents.", len(self.published))
 
         # -- stale identification
         #
@@ -132,7 +132,7 @@ class Inventory(object):
                     logger.debug("%s found updated source file %s", stem, f)
                 odoc.status = sdoc.status = 'stale'
                 self.stale[stem] = sdoc
-        logger.info("Identified %d stale documents: %r.", len(self.stale),
+        logger.debug("Identified %d stale documents: %r.", len(self.stale),
                     self.stale.keys())
 
         # -- stale identification
@@ -142,46 +142,8 @@ class Inventory(object):
             if not sdoc.output.iscomplete:
                 self.broken[stem] = sdoc
                 sdoc.status = sdoc.output.status = 'broken'
-        logger.info("Identified %d broken documents: %r.", len(self.broken),
+        logger.debug("Identified %d broken documents: %r.", len(self.broken),
                     self.broken.keys())
-
-
-def get_sources(sourcedirs):
-    return SourceCollection(sourcedirs)
-
-
-def get_outputs(pubdir):
-    return OutputCollection(pubdir)
-
-
-def print_sources(scollection, config=None):
-    if config is None:
-        config = Namespace(sep='\t', verbose=0)
-    for stem in scollection.keys():
-        doc = scollection[stem]
-        if config.verbose:
-            fields = [doc.stem, doc.status]
-            fields.append(str(len(doc.statinfo)) + ' source files')
-            fields.append(doc.filename)
-            fields.extend(doc.doctype.formatname)
-            fields.extend(str(doc.doctype))
-            print(config.sep.join(fields))
-        else:
-            print(doc.stem)
-
-
-def print_outputs(ocollection, config=None):
-    if config is None:
-        config = Namespace(sep='\t', verbose=0)
-    for stem in ocollection.keys():
-        doc = ocollection[stem]
-        if config.verbose:
-            fields = [doc.stem, doc.status, doc.dirname]
-            fields.append(str(len(doc.statinfo)) + ' files')
-            print(config.sep.join(fields))
-        else:
-            print(doc.stem)
-
 
 #
 # -- end of file
