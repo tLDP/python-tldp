@@ -14,5 +14,3 @@ CascadingConfig
 ---------------
 
   * factor out CascadingConfig into its own project
-
-  * allow automatic detection of config_fragment() functions

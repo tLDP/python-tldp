@@ -4,6 +4,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
+import inspect
 
 from tldp.utils import logger
 
@@ -11,7 +12,7 @@ from tldp.utils import arg_isdirectory, arg_isloglevel, arg_isreadablefile
 from tldp.cascadingconfig import CascadingConfig, DefaultFreeArgumentParser
 from tldp.inventory import status_classes
 
-import tldp.doctypes
+import tldp.typeguesser
 
 
 def collectconfiguration(tag, argv):
@@ -48,12 +49,12 @@ def collectconfiguration(tag, argv):
                     default=None, type=arg_isreadablefile,
                     help='a configuration file')
 
-    # -- collect up the fragments of CLI; automate detection?
+    # -- collect up the distributed configuration fragments
     #
-    tldp.doctypes.linuxdoc.config_fragment(ap)
-    tldp.doctypes.docbooksgml.config_fragment(ap)
-    tldp.doctypes.docbook4xml.config_fragment(ap)
-    tldp.doctypes.docbook5xml.config_fragment(ap)
+    for module in tldp.typeguesser.knowndoctypemodules:
+        config_fragment = getattr(module, 'config_fragment', None)
+        if config_fragment:
+            config_fragment(ap)
 
     cc = CascadingConfig(tag, ap, argv)
     config, args = cc.parse()
