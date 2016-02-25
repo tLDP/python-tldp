@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 from tldp.doctypes.common import BaseDoctype
 

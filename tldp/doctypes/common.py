@@ -8,7 +8,7 @@ import stat
 from tempfile import NamedTemporaryFile as ntf
 
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 from tldp.utils import execute
 

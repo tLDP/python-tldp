@@ -8,7 +8,7 @@ import sys
 import errno
 import shutil
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 from tldp.ldpcollection import LDPDocumentCollection
 from tldp.utils import logdir, statfiles

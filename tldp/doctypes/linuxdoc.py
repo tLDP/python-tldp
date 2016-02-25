@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 from tldp.utils import which, execute
 from tldp.utils import arg_isexecutable, isexecutable

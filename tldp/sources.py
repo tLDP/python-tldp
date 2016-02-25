@@ -7,7 +7,7 @@ import os
 import sys
 import errno
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 from tldp.ldpcollection import LDPDocumentCollection
 

@@ -10,7 +10,7 @@ from argparse import ArgumentParser, ArgumentError, Namespace
 from argparse import _UNRECOGNIZED_ARGS_ATTR
 
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 ENVSEP = NSSEP = '_'    # -- underscore _
 CLISEP = CFGSEP = '-'   # -- dash -
