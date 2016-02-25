@@ -4,8 +4,10 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import logging
+logger = logging.getLogger()
 
-from tldp.utils import logger, which, execute
+from tldp.utils import which, execute
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.doctypes.common import BaseDoctype, SignatureChecker
 

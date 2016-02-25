@@ -7,7 +7,10 @@ import os
 import stat
 from tempfile import NamedTemporaryFile as ntf
 
-from tldp.utils import logger, execute
+import logging
+logger = logging.getLogger()
+
+from tldp.utils import execute
 
 
 class SignatureChecker(object):

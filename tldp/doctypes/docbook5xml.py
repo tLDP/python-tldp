@@ -1,11 +1,16 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
 
-from ..utils import logger, which
-from .common import SignatureChecker
+from __future__ import absolute_import, division, print_function
+
+import logging
+logger = logging.getLogger()
+
+from tldp.utils import which
+from tldp.doctypes.common import BaseDoctype, SignatureChecker
 
 
-class Docbook5XML(SignatureChecker):
+class Docbook5XML(BaseDoctype, SignatureChecker):
     formatname = 'DocBook XML 5.x'
     extensions = ['.xml']
     signatures = ['-//OASIS//DTD DocBook V5.0/EN',

@@ -1,10 +1,15 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
 
-from ..utils import logger
+from __future__ import absolute_import, division, print_function
+
+import logging
+logger = logging.getLogger()
+
+from tldp.doctypes.common import BaseDoctype
 
 
-class Text(object):
+class Text(BaseDoctype):
     formatname = 'plain text'
     extensions = ['.txt']
     signatures = []

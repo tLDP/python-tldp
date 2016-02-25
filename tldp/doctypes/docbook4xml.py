@@ -3,7 +3,10 @@
 
 from __future__ import absolute_import, division, print_function
 
-from tldp.utils import logger, which, firstfoundfile
+import logging
+logger = logging.getLogger()
+
+from tldp.utils import which, firstfoundfile
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.utils import arg_isreadablefile, isreadablefile
 

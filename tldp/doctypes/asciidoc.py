@@ -1,10 +1,13 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
 
-from ..utils import logger
+import logging
+logger = logging.getLogger()
+
+from tldp.doctypes.common import BaseDoctype
 
 
-class Asciidoc(object):
+class Asciidoc(BaseDoctype):
     formatname = 'AsciiDoc'
     extensions = ['.txt']
     signatures = []
