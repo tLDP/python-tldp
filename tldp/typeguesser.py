@@ -6,22 +6,36 @@ from __future__ import absolute_import, division, print_function
 import os
 import inspect
 
-from .utils import logger, makefh
-from . import doctypes
+from tldp.utils import logger, makefh
+
+import tldp.doctypes
 
 
-def listDoctypes():
-    '''returns a list of tldp.doctypes Python classes
+def getDoctypeMembers(membertype):
+    '''returns a list of tldp.doctypes; convenience function'''
+    found = list()
+    for name, member in inspect.getmembers(tldp.doctypes, membertype):
+        logger.debug("Located %s %s (%r).", membertype.__name__, name, member)
+        found.append(member)
+    return found
+
+
+def getDoctypeModules():
+    '''returns a list of the modules known in tldp.doctypes
 
     This is the canonical list of doctypes which are recognized and capable of
     being processed into outputs.  See tldp.doctypes for more information.
     '''
-    kdt = list()
-    for name, member in inspect.getmembers(doctypes, inspect.isclass):
-        logger.debug("Located class %s (%r).", name, member)
-        kdt.append(member)
-    logger.debug("Capable of handling %s document classes.", len(kdt))
-    return kdt
+    return getDoctypeMembers(inspect.ismodule)
+
+
+def getDoctypeClasses():
+    '''returns a list of the classes known in tldp.doctypes
+
+    This is the canonical list of doctypes which are recognized and capable of
+    being processed into outputs.  See tldp.doctypes for more information.
+    '''
+    return getDoctypeMembers(inspect.isclass)
 
 
 def guess(thing):
@@ -56,7 +70,7 @@ def guess(thing):
         logger.debug("%s no file extension, skipping %s.", stem, ext)
         return None
 
-    possible = [t for t in knowndoctypes if ext in t.extensions]
+    possible = [t for t in knowndoctypeclasses if ext in t.extensions]
     logger.debug("Possible:  %r", possible)
     if not possible:
         logger.debug("%s unknown extension %s.", stem, ext)
@@ -100,9 +114,10 @@ def guess(thing):
     return doctype
 
 
-knowndoctypes = listDoctypes()
+knowndoctypemodules = getDoctypeModules()
+knowndoctypeclasses = getDoctypeClasses()
 knownextensions = set()
-for x in knowndoctypes:
+for x in knowndoctypeclasses:
     knownextensions.update(x.extensions)
 
 #
