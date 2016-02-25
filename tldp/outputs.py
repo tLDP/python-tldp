@@ -196,7 +196,7 @@ class OutputCollection(LDPDocumentCollection):
             logger.critical("Output collection dir %s must already exist.",
                             dirname)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), dirname)
-        for fname in sorted(os.listdir(dirname)):
+        for fname in sorted(os.listdir(dirname), key=lambda x: x.lower()):
             name = os.path.join(dirname, fname)
             if not os.path.isdir(name):
                 logger.info("Skipping non-directory %s (in %s)", name, dirname)
