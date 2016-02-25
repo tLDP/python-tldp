@@ -3,10 +3,9 @@
 
 from __future__ import absolute_import, division, print_function
 
-import logging
 import inspect
-
-from tldp.utils import logger
+import logging
+logger = logging.getLogger(__name__)
 
 from tldp.utils import arg_isdirectory, arg_isloglevel, arg_isreadablefile
 from tldp.cascadingconfig import CascadingConfig, DefaultFreeArgumentParser
@@ -33,9 +32,11 @@ def collectconfiguration(tag, argv):
                     action='store_true', default=False,
                     help='more info in --list and --status [%(default)s]')
     ap.add_argument('--loglevel',
-                    '-L',
                     default=logging.ERROR, type=arg_isloglevel,
                     help='set the loglevel')
+    ap.add_argument('--skip',
+                    default=None, action='append', type=str,
+                    help='skip this stem during processing')
     ap.add_argument('--sourcedir', '--source-dir', '--source-directory',
                     '-s',
                     action='append', default='', type=arg_isdirectory,
@@ -59,6 +60,12 @@ def collectconfiguration(tag, argv):
     cc = CascadingConfig(tag, ap, argv)
     config, args = cc.parse()
     return config, args
+
+def validateconfiguration(config):
+    fuckedup = False
+    if fuckedup:
+        return False
+    return True
 
 #
 # -- end of file
