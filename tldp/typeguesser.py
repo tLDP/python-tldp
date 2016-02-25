@@ -70,7 +70,7 @@ def guess(thing):
         logger.debug("%s no file extension, skipping %s.", stem, ext)
         return None
 
-    possible = [t for t in knowndoctypeclasses if ext in t.extensions]
+    possible = [t for t in knowndoctypes if ext in t.extensions]
     logger.debug("Possible:  %r", possible)
     if not possible:
         logger.debug("%s unknown extension %s.", stem, ext)
@@ -114,10 +114,9 @@ def guess(thing):
     return doctype
 
 
-knowndoctypemodules = getDoctypeModules()
-knowndoctypeclasses = getDoctypeClasses()
+knowndoctypes = getDoctypeClasses()
 knownextensions = set()
-for x in knowndoctypeclasses:
+for x in knowndoctypes:
     knownextensions.update(x.extensions)
 
 #
