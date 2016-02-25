@@ -10,7 +10,6 @@ from argparse import ArgumentParser, ArgumentError, Namespace
 from argparse import _UNRECOGNIZED_ARGS_ATTR
 
 import logging
-logging.basicConfig(stream=sys.stderr, level=logging.WARNING)
 logger = logging.getLogger()
 
 ENVSEP = NSSEP = '_'    # -- underscore _

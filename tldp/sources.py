@@ -6,10 +6,12 @@ from __future__ import absolute_import, division, print_function
 import os
 import sys
 import errno
+import logging
+logger = logging.getLogger()
 
 from tldp.ldpcollection import LDPDocumentCollection
 
-from tldp.utils import logger, statfiles, stem_and_ext
+from tldp.utils import statfiles, stem_and_ext
 from tldp.typeguesser import guess, knownextensions
 
 

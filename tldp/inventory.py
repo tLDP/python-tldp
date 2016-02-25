@@ -4,11 +4,13 @@
 from __future__ import absolute_import, division, print_function
 
 import copy
+import logging
+logger = logging.getLogger()
 
-from .utils import logger, max_mtime, mtime_gt
+from tldp.utils import max_mtime, mtime_gt
 
-from .sources import SourceCollection
-from .outputs import OutputCollection
+from tldp.sources import SourceCollection
+from tldp.outputs import OutputCollection
 
 from argparse import Namespace
 

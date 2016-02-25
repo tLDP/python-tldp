@@ -7,9 +7,11 @@ import os
 import sys
 import errno
 import shutil
+import logging
+logger = logging.getLogger()
 
 from tldp.ldpcollection import LDPDocumentCollection
-from tldp.utils import logger, logdir, statfiles
+from tldp.utils import logdir, statfiles
 
 
 class OutputNamingConvention(object):

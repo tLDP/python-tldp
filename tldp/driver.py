@@ -5,8 +5,8 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import sys
-
-from tldp.utils import logger
+import logging
+logger = logging.getLogger()
 
 import tldp
 
@@ -90,7 +90,7 @@ def run():
 
     # -- first, and foremost, set requested logging level
     #
-    logger.setLevel(config.loglevel)
+    #logger.setLevel(config.loglevel)
 
     # -- check to see if the user wishes to --list things
     #    this function and friends is called 'detail', because
