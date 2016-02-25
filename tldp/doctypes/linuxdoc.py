@@ -10,18 +10,6 @@ from tldp.utils import arg_isexecutable, isexecutable
 from tldp.doctypes.common import BaseDoctype, SignatureChecker
 
 
-def config_fragment(p):
-    p.add_argument('--linuxdoc-sgml2html', type=arg_isexecutable,
-                   default=which('sgml2html'),
-                   help='full path to sgml2html [%(default)s]')
-    p.add_argument('--linuxdoc-html2text', type=arg_isexecutable,
-                   default=which('html2text'),
-                   help='full path to html2text [%(default)s]')
-    p.add_argument('--linuxdoc-htmldoc', type=arg_isexecutable,
-                   default=which('htmldoc'),
-                   help='full path to htmldoc [%(default)s]')
-
-
 class Linuxdoc(BaseDoctype, SignatureChecker):
     formatname = 'Linuxdoc'
     extensions = ['.sgml']
@@ -80,6 +68,20 @@ ln \
 
     def buildall(self):
         return self.shellscript(self.buildscript)
+
+    @staticmethod
+    def argparse(p):
+        p.add_argument('--linuxdoc-sgml2html', type=arg_isexecutable,
+                       default=which('sgml2html'),
+                       help='full path to sgml2html [%(default)s]')
+        p.add_argument('--linuxdoc-html2text', type=arg_isexecutable,
+                       default=which('html2text'),
+                       help='full path to html2text [%(default)s]')
+        p.add_argument('--linuxdoc-htmldoc', type=arg_isexecutable,
+                       default=which('htmldoc'),
+                       help='full path to htmldoc [%(default)s]')
+
+
 
 #
 # -- end of file

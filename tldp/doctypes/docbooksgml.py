@@ -27,30 +27,6 @@ def ldpdsl_finder():
     return firstfoundfile(locations)
 
 
-def config_fragment(p):
-    p.add_argument('--docbooksgml-docbookdsl', type=arg_isreadablefile,
-                   default=docbookdsl_finder(),
-                   help='full path to html/docbook.dsl [%(default)s]')
-    p.add_argument('--docbooksgml-ldpdsl', type=arg_isreadablefile,
-                   default=ldpdsl_finder(),
-                   help='full path to ldp/ldp.dsl [%(default)s]')
-    p.add_argument('--docbooksgml-jw', type=arg_isexecutable,
-                   default=which('jw'),
-                   help='full path to jw [%(default)s]')
-    p.add_argument('--docbooksgml-html2text', type=arg_isexecutable,
-                   default=which('html2text'),
-                   help='full path to html2text [%(default)s]')
-    p.add_argument('--docbooksgml-openjade', type=arg_isexecutable,
-                   default=which('openjade'),
-                   help='full path to openjade [%(default)s]')
-    p.add_argument('--docbooksgml-dblatex', type=arg_isexecutable,
-                   default=which('dblatex'),
-                   help='full path to dblatex [%(default)s]')
-    p.add_argument('--docbooksgml-collateindex', type=arg_isexecutable,
-                   default=which('collateindex'),
-                   help='full path to collateindex [%(default)s]')
-
-
 class DocbookSGML(BaseDoctype, SignatureChecker):
     formatname = 'DocBook SGML 3.x/4.x'
     extensions = ['.sgml']
@@ -191,6 +167,32 @@ ln \\
     def post_buildall(self):
         self.indexsgml()
         return True
+
+    @staticmethod
+    def argparse(p):
+        p.add_argument('--docbooksgml-docbookdsl', type=arg_isreadablefile,
+                       default=docbookdsl_finder(),
+                       help='full path to html/docbook.dsl [%(default)s]')
+        p.add_argument('--docbooksgml-ldpdsl', type=arg_isreadablefile,
+                       default=ldpdsl_finder(),
+                       help='full path to ldp/ldp.dsl [%(default)s]')
+        p.add_argument('--docbooksgml-jw', type=arg_isexecutable,
+                       default=which('jw'),
+                       help='full path to jw [%(default)s]')
+        p.add_argument('--docbooksgml-html2text', type=arg_isexecutable,
+                       default=which('html2text'),
+                       help='full path to html2text [%(default)s]')
+        p.add_argument('--docbooksgml-openjade', type=arg_isexecutable,
+                       default=which('openjade'),
+                       help='full path to openjade [%(default)s]')
+        p.add_argument('--docbooksgml-dblatex', type=arg_isexecutable,
+                       default=which('dblatex'),
+                       help='full path to dblatex [%(default)s]')
+        p.add_argument('--docbooksgml-collateindex', type=arg_isexecutable,
+                       default=which('collateindex'),
+                       help='full path to collateindex [%(default)s]')
+
+
 
 #
 # -- end of file
