@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import sys
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 import tldp
 
@@ -70,6 +70,9 @@ def build(config, args):
                 source = tldp.sources.SourceDocument(arg)
                 targets.append(source)
     for source in targets:
+        if source.stem in config.skip:
+            logger.info("%s skipping build per request", source.stem)
+            continue
         if not source.output:
             dirname = os.path.join(config.pubdir, source.stem)
             source.output = tldp.outputs.OutputDirectory(dirname)
