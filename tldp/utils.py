@@ -12,17 +12,9 @@ import subprocess
 import functools
 from tempfile import mkstemp
 import logging
+logger = logging.getLogger(__name__)
 
 logdir = 'tldp-document-build-logs'
-
-
-def getLogger(**opts):
-    level = opts.get('level', logging.INFO)
-    logging.basicConfig(stream=sys.stderr, level=level)
-    logger = logging.getLogger()
-    return logger
-
-logger = getLogger()
 
 
 def firstfoundfile(locations):
@@ -36,11 +28,11 @@ def firstfoundfile(locations):
 def arg_isloglevel(l):
     try:
         level = int(l)
+        return level
     except ValueError:
-        level = getattr(logging, l.upper(), None)
-    try:
-        logging.getLogger().setLevel(level)
-    except (TypeError, ValueError):
+        pass
+    level = getattr(logging, l.upper(), None)
+    if not level:
         level = logging.ERROR
     return level
 
