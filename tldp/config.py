@@ -51,10 +51,10 @@ def collectconfiguration(tag, argv):
 
     # -- collect up the distributed configuration fragments
     #
-    for module in tldp.typeguesser.knowndoctypemodules:
-        config_fragment = getattr(module, 'config_fragment', None)
-        if config_fragment:
-            config_fragment(ap)
+    for cls in tldp.typeguesser.knowndoctypes:
+        argparse_method = getattr(cls, 'argparse', None)
+        if argparse_method:
+            argparse_method(ap)
 
     cc = CascadingConfig(tag, ap, argv)
     config, args = cc.parse()
