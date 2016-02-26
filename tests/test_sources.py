@@ -19,7 +19,7 @@ import example
 # -- SUT
 from tldp.sources import SourceCollection, SourceDocument, scansourcedirs
 
-datadir = os.path.join(os.path.dirname(__file__), 'testdata')
+datadir = os.path.join(os.path.dirname(__file__), 'sample-documents')
 
 
 class TestFileSourceCollectionMultiDir(TestToolsFilesystem):

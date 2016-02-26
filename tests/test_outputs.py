@@ -13,8 +13,6 @@ from tldp.outputs import OutputCollection
 from tldp.outputs import OutputDirectory
 from tldp.outputs import OutputNamingConvention
 
-datadir = os.path.join(os.path.dirname(__file__), 'testdata')
-
 
 class TestOutputNamingConvention(unittest.TestCase):
 

@@ -13,48 +13,48 @@ import tldp.doctypes
 opj = os.path.join
 opd = os.path.dirname
 opa = os.path.abspath
-testdatadir = opa(opj(opd(__file__), 'testdata'))
+sampledocs = opa(opj(opd(__file__), 'sample-documents'))
 
 ex_linuxdoc = SimpleNamespace(
                ext='.sgml',
                type=tldp.doctypes.linuxdoc.Linuxdoc,
-               filename=opj(testdatadir, 'linuxdoc-simple.sgml'),
+               filename=opj(sampledocs, 'linuxdoc-simple.sgml'),
               )
 
 ex_docbooksgml = SimpleNamespace(
                   ext='.sgml',
                   type=tldp.doctypes.docbooksgml.DocbookSGML,
-                  filename=opj(testdatadir, 'docbooksgml-simple.sgml'),
+                  filename=opj(sampledocs, 'docbooksgml-simple.sgml'),
                  )
 
 ex_docbook4xml = SimpleNamespace(
                  ext='.xml',
                  type=tldp.doctypes.docbook4xml.Docbook4XML,
-                 filename=opj(testdatadir, 'docbook4xml-simple.xml'),
+                 filename=opj(sampledocs, 'docbook4xml-simple.xml'),
                 )
 
 ex_docbook5xml = SimpleNamespace(
                  ext='.xml',
                  type=tldp.doctypes.docbook5xml.Docbook5XML,
-                 filename=opj(testdatadir, 'docbook5xml-simple.xml'),
+                 filename=opj(sampledocs, 'docbook5xml-simple.xml'),
                 )
 
 ex_rst = SimpleNamespace(
           ext='.rst',
           type=tldp.doctypes.rst.RestructuredText,
-          filename=opj(testdatadir, 'restructuredtext-simple.rst'),
+          filename=opj(sampledocs, 'restructuredtext-simple.rst'),
          )
 
 ex_text = SimpleNamespace(
            ext='.txt',
            type=tldp.doctypes.text.Text,
-           filename=opj(testdatadir, 'text-simple.txt'),
+           filename=opj(sampledocs, 'text-simple.txt'),
           )
 
 ex_markdown = SimpleNamespace(
                ext='.md',
                type=tldp.doctypes.markdown.Markdown,
-               filename=opj(testdatadir, 'markdown-simple.md'),
+               filename=opj(sampledocs, 'markdown-simple.md'),
               )
 
 

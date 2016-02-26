@@ -15,8 +15,6 @@ import example
 # -- SUT
 from tldp.inventory import Inventory
 
-datadir = os.path.join(os.path.dirname(__file__), 'testdata')
-
 
 class TestOutputDirSkeleton(OutputNamingConvention):
 

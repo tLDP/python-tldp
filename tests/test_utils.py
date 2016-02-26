@@ -62,24 +62,24 @@ class Test_arg_isloglevel(unittest.TestCase):
 class Test_execute(TestToolsFilesystem):
 
     def test_execute_returns_zero(self):
-        exe = which ('true')
+        exe = which('true')
         result = execute([exe], logdir=self.tempdir)
         self.assertEqual(0, result)
 
     def test_execute_returns_nonzero(self):
-        exe = which ('false')
+        exe = which('false')
         result = execute([exe], logdir=self.tempdir)
         self.assertEqual(1, result)
 
     def test_execute_exception_when_logdir_none(self):
-        exe = which ('true')
+        exe = which('true')
         with self.assertRaises(ValueError) as ecm:
             execute([exe], logdir=None)
         e = ecm.exception
         self.assertTrue('logdir must be a directory' in e.message)
 
     def test_execute_exception_when_logdir_enoent(self):
-        exe = which ('true')
+        exe = which('true')
         logdir = os.path.join(self.tempdir, 'nonexistent-directory')
         with self.assertRaises(IOError) as ecm:
             execute([exe], logdir=logdir)
@@ -114,11 +114,11 @@ class Test_which(unittest.TestCase):
 class Test_statfiles(unittest.TestCase):
 
     def test_statfiles_dir_in_result(self):
-        '''Assumes that directory ./testdata/ exists here'''
+        '''Assumes that directory ./sample-documents/ exists here'''
         here = os.path.dirname(os.path.abspath(__file__))
         statinfo = statfiles(here, relative=here)
         self.assertIsInstance(statinfo, dict)
-        self.assertTrue(os.path.basename('testdata') in statinfo)
+        self.assertTrue(os.path.basename('sample-documents') in statinfo)
 
     def test_statfiles_dir_rel(self):
         here = os.path.dirname(os.path.abspath(__file__))
