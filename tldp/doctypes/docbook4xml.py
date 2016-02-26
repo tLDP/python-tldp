@@ -3,14 +3,17 @@
 
 from __future__ import absolute_import, division, print_function
 
+import os
 import logging
-logger = logging.getLogger(__name__)
+import networkx as nx
 
 from tldp.utils import which, firstfoundfile
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.utils import arg_isreadablefile, isreadablefile
 
-from tldp.doctypes.common import BaseDoctype, SignatureChecker
+from tldp.doctypes.common import BaseDoctype, SignatureChecker, depends
+
+logger = logging.getLogger(__name__)
 
 
 def xslchunk_finder():
@@ -48,70 +51,99 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
                 'docbook4xml_xslprint': isreadablefile,
                 }
 
+    graph = nx.DiGraph()
+
     buildorder = ['buildall']
 
-    buildscript = '''#! /bin/bash
-#
-# -- generate LDP outputs from DocBook XML 4.x
+    def chdir_output(self):
+        os.chdir(self.output.dirname)
+        return True
 
-set -x
-set -e
-set -o pipefail
+    @depends(graph, chdir_output)
+    def make_name_htmls(self):
+        '''create a single page HTML output'''
+        s = '''"{config.docbook4xml_xsltproc}" > "{output.name_htmls}" \\
+                  --nonet \\
+                  --stringparam admon.graphics.path images/ \\
+                  --stringparam base.dir . \\
+                  "{config.docbook4xml_xslsingle}" \\
+                  "{source.filename}"'''
+        return self.shellscript(s)
 
-cd "{output.dirname}"
+    @depends(graph, make_name_htmls)
+    def make_name_txt(self):
+        '''create text output'''
+        s = '''"{config.docbook4xml_html2text}" > "{output.name_txt}" \\
+                  -style pretty \\
+                  -nobs \\
+                  "{output.name_htmls}"'''
+        return self.shellscript(s)
 
-"{config.docbook4xml_xsltproc}" > "{output.name_htmls}" \\
-  --nonet \\
-  --stringparam admon.graphics.path images/ \\
-  --stringparam base.dir . \\
-  "{config.docbook4xml_xslsingle}" \\
-  "{source.filename}"
+    @depends(graph, chdir_output)
+    def make_fo(self):
+        '''generate the Formatting Objects intermediate output'''
+        s = '''"{config.docbook4xml_xsltproc}" > "{output.name_fo}" \\
+                  "{config.docbook4xml_xslprint}" \\
+                  "{source.filename}"'''
+        self.removals.append(self.output.name_fo)
+        return self.shellscript(s)
 
-"{config.docbook4xml_html2text}" > "{output.name_txt}" \\
-  -style pretty \\
-  -nobs \\
-  "{output.name_htmls}"
+    # -- this is conditionally built--see logic in make_name_pdf() below
+    # @depends(graph, make_fo)
+    def make_pdf_with_fop(self):
+        '''use FOP to create a PDF'''
+        s = '''"{config.docbook4xml_fop}" \\
+                  -fo "{output.name_fo}" \\
+                  -pdf "{output.name_pdf}"'''
+        return self.shellscript(s)
 
-"{config.docbook4xml_xsltproc}" > "{output.name_fo}" \\
-  "{config.docbook4xml_xslprint}" \\
-  "{source.filename}"
+    # -- this is conditionally built--see logic in make_name_pdf() below
+    # @depends(graph, chdir_output)
+    def make_pdf_with_dblatex(self):
+        '''use dblatex (fallback) to create a PDF'''
+        s = '''"{config.docbook4xml_dblatex}" \\
+                  -F xml \\
+                  -t pdf \\
+                  -o "{output.name_pdf}" \\
+                  "{source.filename}"'''
+        return self.shellscript(s)
 
-"{config.docbook4xml_fop}" \\
-  -fo "{output.name_fo}" \\
-  -pdf "{output.name_pdf}" \\
+    @depends(graph, make_fo)
+    def make_name_pdf(self):
+        stem = self.source.stem
+        classname = self.__class__.__name__
+        logger.info("%s calling method %s.%s",
+                    stem, classname, 'make_pdf_with_fop')
+        if self.make_pdf_with_fop():
+            return True
+        logger.error("%s %s failed creating PDF, falling back to dblatex...",
+                     stem, self.config.docbook4xml_fop)
+        logger.info("%s calling method %s.%s",
+                    stem, classname, 'make_pdf_with_dblatex')
+        return self.make_pdf_with_dblatex()
 
-test -e "{output.name_pdf}" \\
-  || "{config.docbook4xml_dblatex}" \\
-       -F xml \\
-       -t pdf \\
-       -o "{output.name_pdf}" \\
-       "{source.filename}"
+    @depends(graph, make_name_htmls)
+    def make_html(self):
+        '''create chunked HTML output'''
+        s = '''"{config.docbook4xml_xsltproc}" \\
+                  --nonet \\
+                  --stringparam admon.graphics.path images/ \\
+                  --stringparam base.dir . \\
+                  "{config.docbook4xml_xslchunk}" \\
+                  "{source.filename}"'''
+        return self.shellscript(s)
 
-test -e "{output.name_fo}" \\
-  && rm -f -- "{output.name_fo}"
+    @depends(graph, make_html)
+    def make_name_html(self):
+        '''rename xsltproc/docbook-XSL's index.html to LDP standard STEM.html'''
+        s = 'mv -v --no-clobber -- "{output.name_indexhtml}" "{output.name_html}"'
+        return self.shellscript(s)
 
-"{config.docbook4xml_xsltproc}" \\
-  --nonet \\
-  --stringparam admon.graphics.path images/ \\
-  --stringparam base.dir . \\
-  "{config.docbook4xml_xslchunk}" \\
-  "{source.filename}"
-
-mv \\
-  --no-clobber \\
-  --verbose \\
-  -- "{output.name_indexhtml}" "{output.name_html}"
-
-ln \\
-  --symbolic \\
-  --relative \\
-  --verbose \\
-  -- "{output.name_html}" "{output.name_indexhtml}"
-
-# -- end of file'''
-
-    def buildall(self):
-        return self.shellscript(self.buildscript)
+    @depends(graph, make_name_html)
+    def make_name_indexhtml(self):
+        '''create final index.html symlink'''
+        s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
+        return self.shellscript(s)
 
     @staticmethod
     def argparse(p):
@@ -136,8 +168,6 @@ ln \\
         p.add_argument('--docbook4xml-dblatex', type=arg_isexecutable,
                        default=which('dblatex'),
                        help='full path to dblatex [%(default)s]')
-
-
 
 #
 # -- end of file
