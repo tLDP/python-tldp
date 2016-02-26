@@ -35,7 +35,7 @@ def collectconfiguration(tag, argv):
                     default=logging.ERROR, type=arg_isloglevel,
                     help='set the loglevel')
     ap.add_argument('--skip',
-                    default=None, action='append', type=str,
+                    default=[], action='append', type=str,
                     help='skip this stem during processing')
     ap.add_argument('--sourcedir', '--source-dir', '--source-directory',
                     '-s',
