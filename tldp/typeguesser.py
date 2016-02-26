@@ -22,15 +22,6 @@ def getDoctypeMembers(membertype):
     return found
 
 
-def getDoctypeModules():
-    '''returns a list of the modules known in tldp.doctypes
-
-    This is the canonical list of doctypes which are recognized and capable of
-    being processed into outputs.  See tldp.doctypes for more information.
-    '''
-    return getDoctypeMembers(inspect.ismodule)
-
-
 def getDoctypeClasses():
     '''returns a list of the classes known in tldp.doctypes
 
