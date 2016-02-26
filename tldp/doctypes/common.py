@@ -103,7 +103,7 @@ class BaseDoctype(object):
         for dep in order:
             method = getattr(self, dep, None)
             assert method is not None
-            logger.debug("%s calling method %s", stem, dep)
+            logger.info("%s calling method %s", stem, dep)
             if not method():
                 logger.error("%s reported method %s failure, skipping...",
                              stem, dep)
