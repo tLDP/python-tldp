@@ -97,12 +97,16 @@ class BaseDoctype(object):
         return True
 
     def buildall(self):
+        stem = self.source.stem
         order = nx.dag.topological_sort(self.graph)
         logger.debug("%s build order %r", self.source.stem, order)
         for dep in order:
             method = getattr(self, dep, None)
             assert method is not None
+            logger.debug("%s calling method %s", stem, dep)
             if not method():
+                logger.error("%s reported method %s failure, skipping...",
+                             stem, dep)
                 return False
         return True
 
