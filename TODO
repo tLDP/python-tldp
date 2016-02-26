@@ -10,6 +10,10 @@ python-tldp TODO
 
   * Copy images into the output directory.
 
+  * DocBookSGML: post-build hook (even if build failure) make sure to remove
+    the generated index.sgml from the source directory [clean up after
+    yourself!]
+
 CascadingConfig
 ---------------
 
