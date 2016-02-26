@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-from tldp.doctypes.common import BaseDoctype, SignatureChecker
+from tldp.doctypes.common import BaseDoctype
 
 logger = logging.getLogger(__name__)
 
