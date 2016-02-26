@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import stat
+import errno
 import logging
 from tempfile import NamedTemporaryFile as ntf
 from functools import wraps
@@ -24,6 +25,7 @@ set -o pipefail
 postamble = '''
 
 '''
+
 
 def depends(graph, *predecessors):
     '''decorator to be used for constructing build order graph'''
@@ -62,14 +64,29 @@ class BaseDoctype(object):
         self.source = kwargs.get('source', None)
         self.output = kwargs.get('output', None)
         self.config = kwargs.get('config', None)
+        self.removals = list()
         assert None not in (self.source, self.output, self.config)
+
+    def cleanup(self):
+        stem = self.source.stem
+        removals = getattr(self, 'removals', None)
+        if removals:
+            for fn in removals:
+                logger.debug("%s cleaning up file %s", stem, fn)
+                try:
+                    os.unlink(fn)
+                except OSError as e:
+                    if e.errno is errno.ENOENT:
+                        logger.error("%s missing file at cleanup %s", stem, fn)
+                    else:
+                        raise e
 
     def build_precheck(self):
         classname = self.__class__.__name__
         for tool, validator in self.required.items():
             thing = getattr(self.config, tool, None)
             if thing is None:
-                logger.error("%s missing required tool %s, skipping...", 
+                logger.error("%s missing required tool %s, skipping...",
                              classname, tool)
                 return False
             assert validator(thing)
