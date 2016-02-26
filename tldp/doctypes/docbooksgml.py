@@ -4,6 +4,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import errno
 import logging
 import networkx as nx
 
@@ -52,6 +53,26 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
 
     buildorder = ['buildall']
 
+    def cleanup(self):
+        stem = self.source.stem
+        removals = getattr(self, 'removals', None)
+        if removals:
+            for fn in removals:
+                logger.debug("%s cleaning up file %s", stem, fn)
+                try:
+                    os.unlink(fn)
+                except OSError as e:
+                    if e.errno is errno.ENOENT:
+                        logger.error("%s missing file at cleanup %s", stem, fn)
+                    else:
+                        raise e
+
+    def hook_build_success(self):
+        self.cleanup()
+
+    def hook_build_failure(self):
+        self.cleanup()
+
     def chdir_output(self):
         os.chdir(self.output.dirname)
         return True
@@ -97,8 +118,8 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                  -- "index.sgml" "{source.dirname}/index.sgml"'''
         moved = self.shellscript(s)
         if moved:
-            self.removals = indexsgml
             logger.debug("%s created %s", self.source.stem, indexsgml)
+            self.removals = [indexsgml]
             return True
         return os.path.exists(indexsgml)
 
@@ -162,8 +183,16 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
 
     @depends(graph, cleaned_indexsgml)
     def make_name_pdf(self):
+        stem = self.source.stem
+        classname = self.__class__.__name__
+        logger.info("%s calling method %s.%s",
+                    stem, classname, 'make_pdf_with_jw')
         if self.make_pdf_with_jw():
              return True
+        logger.error("%s jw failed creating PDF, falling back to dblatex...",
+                     stem)
+        logger.info("%s calling method %s.%s",
+                    stem, classname, 'make_pdf_with_dblatex')
         return self.make_pdf_with_dblatex()
 
     @depends(graph, make_name_htmls)
