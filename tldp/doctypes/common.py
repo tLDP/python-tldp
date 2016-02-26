@@ -72,7 +72,7 @@ class BaseDoctype(object):
         removals = getattr(self, 'removals', None)
         if removals:
             for fn in removals:
-                logger.debug("%s cleaning up file %s", stem, fn)
+                logger.debug("%s cleaning up intermediate file %s", stem, fn)
                 try:
                     os.unlink(fn)
                 except OSError as e:
@@ -91,6 +91,12 @@ class BaseDoctype(object):
                 return False
             assert validator(thing)
         return True
+
+    def hook_build_success(self):
+        self.cleanup()
+
+    def hook_build_failure(self):
+        self.cleanup()
 
     def shellscript(self, script, preamble=preamble, postamble=postamble):
         source = self.source
@@ -155,41 +161,9 @@ class BaseDoctype(object):
                            'build_precheck', stem, classname)
             return False
 
-        # -- now, we can walk through build targets, and record a vector
-        #    of success or failure
+        # -- now, we can try to build everything; this is the BIG WORK!
         #
-        vector = list()
-
-        def last_command():
-            return vector[-1]
-
-        for target in self.buildorder:
-            premethod = getattr(self, 'pre_' + target, None)
-            mainmethod = getattr(self, target, None)
-            postmethod = getattr(self, 'post_' + target, None)
-            assert mainmethod is not None
-
-            if premethod:
-                vector.append(premethod())
-                if not last_command():
-                    logger.warning("%s pre_%s failed, skipping to next build",
-                                   stem, target)
-                    break
-
-            vector.append(mainmethod())
-            if not last_command():
-                logger.warning("%s %s failed, skipping to next build",
-                               stem, target)
-                break
-
-            if postmethod:
-                vector.append(postmethod())
-                if not last_command():
-                    logger.warning("%s post_%s failed, skipping to next build",
-                                   stem, target)
-                    break
-
-        result = all(vector)
+        result = self.buildall()
 
         if result:
             self.hook_build_success()  # -- processor
