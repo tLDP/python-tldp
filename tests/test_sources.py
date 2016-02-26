@@ -6,6 +6,8 @@ import errno
 import random
 import unittest
 
+from cStringIO import StringIO
+
 try:
     from types import SimpleNamespace
 except ImportError:
@@ -21,6 +23,7 @@ from tldp.sources import SourceCollection, SourceDocument, scansourcedirs
 
 sampledocs = os.path.join(os.path.dirname(__file__), 'sample-documents')
 
+widths = SimpleNamespace(status=20, stem=50)
 
 class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
 
@@ -129,10 +132,29 @@ class TestSourceDocument(unittest.TestCase):
             self.assertTrue(fn in str(doc))
             self.assertTrue(fn in doc.statinfo)
 
-    def test_detail(self):
-        fullpath = example.ex_linuxdoc_dir.filename
-        pass
+    def test_sourcedoc_fromdir(self):
+        dirname = os.path.dirname(example.ex_linuxdoc_dir.filename)
+        doc = SourceDocument(dirname)
+        self.assertIsInstance(doc, SourceDocument)
 
+    def test_detail(self):
+        ex = example.ex_linuxdoc_dir
+        s = SourceDocument(ex.filename)
+        fout = StringIO()
+        s.detail(widths, False, file=fout)
+        fout.seek(0)
+        result = fout.read()
+        fout.close()
+        self.assertTrue(ex.stem in result)
+        self.assertTrue('source' in result)
+
+
+    def test_bad_dir_multiple_doctypes(self):
+        fullpath = os.path.join(sampledocs, 'Bad-Dir-Multiple-Doctypes')
+        with self.assertRaises(Exception) as ecm:
+            SourceDocument(fullpath)
+        e = ecm.exception
+        self.assertTrue('multiple document choices' in e.message)
 
 class TestMissingSourceDocuments(TestToolsFilesystem):
 
@@ -143,10 +165,11 @@ class TestMissingSourceDocuments(TestToolsFilesystem):
         e = ecm.exception
         self.assertEquals(errno.ENOENT, e.errno)
 
-        with self.assertRaises(TypeError) as ecm:
+    def test_init_wrongtype(self):
+        with self.assertRaises(ValueError) as ecm:
             SourceDocument(self.tempdir)
         e = ecm.exception
-        self.assertTrue('Wrong type' in e.message)
+        self.assertTrue('not identifiable' in e.message)
 
 #
 # -- end of file
