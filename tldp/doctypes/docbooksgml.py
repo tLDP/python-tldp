@@ -4,7 +4,6 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-import errno
 import logging
 import networkx as nx
 
@@ -52,20 +51,6 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
     graph = nx.DiGraph()
 
     buildorder = ['buildall']
-
-    def cleanup(self):
-        stem = self.source.stem
-        removals = getattr(self, 'removals', None)
-        if removals:
-            for fn in removals:
-                logger.debug("%s cleaning up file %s", stem, fn)
-                try:
-                    os.unlink(fn)
-                except OSError as e:
-                    if e.errno is errno.ENOENT:
-                        logger.error("%s missing file at cleanup %s", stem, fn)
-                    else:
-                        raise e
 
     def hook_build_success(self):
         self.cleanup()
@@ -119,7 +104,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
         moved = self.shellscript(s)
         if moved:
             logger.debug("%s created %s", self.source.stem, indexsgml)
-            self.removals = [indexsgml]
+            self.removals.append(indexsgml)
             return True
         return os.path.exists(indexsgml)
 
@@ -166,6 +151,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
         return self.shellscript(s)
 
     def make_pdf_with_jw(self):
+        '''use jw (openjade) to create a PDF'''
         s = '''"{config.docbooksgml_jw}" \\
                   -f docbook \\
                   -b pdf \\
@@ -174,6 +160,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
         return self.shellscript(s)
 
     def make_pdf_with_dblatex(self):
+        '''use dblatex (fallback) to create a PDF'''
         s = '''"{config.docbooksgml_dblatex}" \\
                   -F sgml \\
                   -t pdf \\
@@ -188,7 +175,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
         logger.info("%s calling method %s.%s",
                     stem, classname, 'make_pdf_with_jw')
         if self.make_pdf_with_jw():
-             return True
+            return True
         logger.error("%s jw failed creating PDF, falling back to dblatex...",
                      stem)
         logger.info("%s calling method %s.%s",
@@ -197,7 +184,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
 
     @depends(graph, make_name_htmls)
     def make_html(self):
-        '''create final index.html symlink'''
+        '''create chunked HTML outputs'''
         s = '''"{config.docbooksgml_jw}" \\
                  -f docbook \\
                  -b html \\
@@ -243,8 +230,6 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
         p.add_argument('--docbooksgml-collateindex', type=arg_isexecutable,
                        default=which('collateindex'),
                        help='full path to collateindex [%(default)s]')
-
-
 
 #
 # -- end of file
