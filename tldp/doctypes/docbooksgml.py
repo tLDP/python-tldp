@@ -5,13 +5,15 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import logging
-logger = logging.getLogger(__name__)
+import networkx as nx
 
-from tldp.utils import which, execute, firstfoundfile
+from tldp.utils import which, firstfoundfile
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.utils import arg_isreadablefile, isreadablefile
 
-from tldp.doctypes.common import BaseDoctype, SignatureChecker
+from tldp.doctypes.common import BaseDoctype, SignatureChecker, depends
+
+logger = logging.getLogger(__name__)
 
 
 def docbookdsl_finder():
@@ -46,129 +48,148 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                 'docbooksgml_docbookdsl': isreadablefile,
                 }
 
-    buildorder = ['buildindex', 'buildall']
+    graph = nx.DiGraph()
 
-    indexscript = '''#! /bin/bash
-#
-# -- generate usable index.sgml from DocBook SGML 3.x/4.x
+    buildorder = ['buildall']
 
-set -x
-set -e
-set -o pipefail
-
-cd "{output.dirname}"
-
-"{config.docbooksgml_collateindex}" \\
-  -N \\
-  -o \\
-  "{source.dirname}/index.sgml"
-
-"{config.docbooksgml_openjade}" \\
-           -t sgml \\
-           -V html-index \\
-           -d "{config.docbooksgml_docbookdsl}" \\
-           "{source.filename}"
-
-"{config.docbooksgml_collateindex}" \\
-  -g \\
-  -t Index \\
-  -i doc-index \\
-  -o "index.sgml" \\
-     "HTML.index" \\
-     "{source.filename}"
-
-mv \\
-  --no-clobber \\
-  --verbose \\
-  -- "index.sgml" "{source.dirname}/index.sgml"
-
-find . -mindepth 1 -maxdepth 1 -type f -print0 \
-  | xargs --null --no-run-if-empty -- rm -f --
-
-# -- end of file'''
-
-    mainscript = '''#! /bin/bash
-#
-# -- generate LDP outputs from DocBook SGML 3.x/4.x
-
-set -x
-set -e
-set -o pipefail
-
-cd "{output.dirname}"
-
-"{config.docbooksgml_jw}" \\
-  -f docbook \\
-  -b html \\
-  --dsl "{config.docbooksgml_ldpdsl}#html" \\
-  -V nochunks \\
-  -V '%callout-graphics-path%=images/callouts/' \\
-  -V '%stock-graphics-extension%=.png' \\
-  --output . \\
-  "{source.filename}"
-
-mv \\
-  --no-clobber \\
-  --verbose \\
-  -- "{output.name_html}" "{output.name_htmls}"
-
-"{config.docbooksgml_html2text}" > "{output.name_txt}" \\
-  -style pretty \\
-  -nobs \\
-  "{output.name_htmls}"
-
-"{config.docbooksgml_jw}" \\
-  -f docbook \\
-  -b pdf \\
-  --output . \\
-  "{source.filename}" \\
-  || "{config.docbooksgml_dblatex}" \\
-      -F sgml \\
-      -t pdf \\
-      -o "{output.name_pdf}" \\
-         "{source.filename}"
-
-"{config.docbooksgml_jw}" \\
-  -f docbook \\
-  -b html \\
-  --dsl "{config.docbooksgml_ldpdsl}#html" \\
-  -V '%callout-graphics-path%=images/callouts/' \\
-  -V '%stock-graphics-extension%=.png' \\
-  --output . \\
-  "{source.filename}"
-
-mv \\
-  --no-clobber \\
-  --verbose \\
-  -- "{output.name_indexhtml}" "{output.name_html}"
-
-ln \\
-  --symbolic \\
-  --relative \\
-  --verbose \\
-  -- "{output.name_html}" "{output.name_indexhtml}"
-
-
-# -- end of file'''
-
-    def buildindex(self):
-        indexsgml = os.path.join(self.source.dirname, 'index.sgml')
-        if os.path.isfile(indexsgml):
-            self.indexsgml = lambda: None
-            return True
-
-        def unlink_indexsgml():
-            os.unlink(indexsgml)
-
-        self.indexsgml = unlink_indexsgml
-        return self.shellscript(self.indexscript)
-
-    def buildall(self):
-        return self.shellscript(self.mainscript)
-
-    def post_buildall(self):
-        self.indexsgml()
+    def chdir_output(self):
+        os.chdir(self.output.dirname)
         return True
+
+    @depends(graph, chdir_output)
+    def make_blank_indexsgml(self):
+        '''generate an empty index.sgml file (in output dir)'''
+        s = '''"{config.docbooksgml_collateindex}" \\
+                  -N \\
+                  -o \\
+                  "index.sgml"'''
+        return self.shellscript(s)
+
+    @depends(graph, make_blank_indexsgml)
+    def make_data_indexsgml(self):
+        '''collect document's index entries into a data file (HTML.index)'''
+        s = '''"{config.docbooksgml_openjade}" \\
+                  -t sgml \\
+                  -V html-index \\
+                  -d "{config.docbooksgml_docbookdsl}" \\
+                  "{source.filename}"'''
+        return self.shellscript(s)
+
+    @depends(graph, make_data_indexsgml)
+    def make_indexsgml(self):
+        '''generate the final document index file (index.sgml)'''
+        s = '''"{config.docbooksgml_collateindex}" \\
+                  -g \\
+                  -t Index \\
+                  -i doc-index \\
+                  -o "index.sgml" \\
+                     "HTML.index" \\
+                     "{source.filename}"'''
+        return self.shellscript(s)
+
+    @depends(graph, make_indexsgml)
+    def move_indexsgml_into_source(self):
+        '''move the generated index.sgml file into the source tree'''
+        indexsgml = os.path.join(self.source.dirname, 'index.sgml')
+        s = '''mv \\
+                 --no-clobber \\
+                 --verbose \\
+                 -- "index.sgml" "{source.dirname}/index.sgml"'''
+        moved = self.shellscript(s)
+        if moved:
+            self.removals = indexsgml
+            logger.debug("%s created %s", self.source.stem, indexsgml)
+            return True
+        return os.path.exists(indexsgml)
+
+    @depends(graph, move_indexsgml_into_source)
+    def cleaned_indexsgml(self):
+        '''clean the junk from the output dir after building the index.sgml'''
+        # -- be super cautious before removing a bunch of files
+        cwd = os.getcwd()
+        if not os.path.samefile(cwd, self.output.dirname):
+            logger.error("%s (cowardly) refusing to clean directory %s", cwd)
+            logger.error("%s expected to find %s", self.output.dirname)
+            return False
+        s = '''find . -mindepth 1 -maxdepth 1 -type f -print0 \
+               | xargs --null --no-run-if-empty -- rm -f --'''
+        return self.shellscript(s)
+
+    @depends(graph, cleaned_indexsgml)
+    def make_htmls(self):
+        '''create a single page HTML output (with incorrect name)'''
+        s = '''"{config.docbooksgml_jw}" \\
+                  -f docbook \\
+                  -b html \\
+                  --dsl "{config.docbooksgml_ldpdsl}#html" \\
+                  -V nochunks \\
+                  -V '%callout-graphics-path%=images/callouts/' \\
+                  -V '%stock-graphics-extension%=.png' \\
+                  --output . \\
+                  "{source.filename}"'''
+        return self.shellscript(s)
+
+    @depends(graph, make_htmls)
+    def make_name_htmls(self):
+        '''correct the single page HTML output name'''
+        s = 'mv -v --no-clobber -- "{output.name_html}" "{output.name_htmls}"'
+        return self.shellscript(s)
+
+    @depends(graph, make_name_htmls)
+    def make_name_txt(self):
+        '''create text output (from single-page HTML)'''
+        s = '''"{config.docbooksgml_html2text}" > "{output.name_txt}" \\
+                  -style pretty \\
+                  -nobs \\
+                  "{output.name_htmls}"'''
+        return self.shellscript(s)
+
+    def make_pdf_with_jw(self):
+        s = '''"{config.docbooksgml_jw}" \\
+                  -f docbook \\
+                  -b pdf \\
+                  --output . \\
+                  "{source.filename}"'''
+        return self.shellscript(s)
+
+    def make_pdf_with_dblatex(self):
+        s = '''"{config.docbooksgml_dblatex}" \\
+                  -F sgml \\
+                  -t pdf \\
+                  -o "{output.name_pdf}" \\
+                     "{source.filename}"'''
+        return self.shellscript(s)
+
+    @depends(graph, cleaned_indexsgml)
+    def make_name_pdf(self):
+        if self.make_pdf_with_jw():
+             return True
+        return self.make_pdf_with_dblatex()
+
+    @depends(graph, make_name_htmls)
+    def make_html(self):
+        '''create final index.html symlink'''
+        s = '''"{config.docbooksgml_jw}" \\
+                 -f docbook \\
+                 -b html \\
+                 --dsl "{config.docbooksgml_ldpdsl}#html" \\
+                 -V '%callout-graphics-path%=images/callouts/' \\
+                 -V '%stock-graphics-extension%=.png' \\
+                 --output . \\
+                 "{source.filename}"'''
+        return self.shellscript(s)
+
+    @depends(graph, make_html)
+    def make_name_html(self):
+        '''rename openjade's index.html to LDP standard name STEM.html'''
+        s = 'mv -v --no-clobber -- "{output.name_indexhtml}" "{output.name_html}"'
+        return self.shellscript(s)
+
+    @depends(graph, make_name_html)
+    def make_name_indexhtml(self):
+        '''create final index.html symlink'''
+        s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
+        return self.shellscript(s)
 
     @staticmethod
     def argparse(p):
