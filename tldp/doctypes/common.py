@@ -5,12 +5,33 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import stat
-from tempfile import NamedTemporaryFile as ntf
-
 import logging
-logger = logging.getLogger(__name__)
+from tempfile import NamedTemporaryFile as ntf
+from functools import wraps
+import networkx as nx
 
 from tldp.utils import execute
+
+logger = logging.getLogger(__name__)
+
+preamble = '''#! /bin/bash
+set -x
+set -e
+set -o pipefail
+
+'''
+
+def depends(graph, *predecessors):
+    '''decorator to be used for constructing build order graph'''
+    def anon(f):
+        for dep in predecessors:
+            graph.add_edge(dep.__name__, f.__name__)
+
+        @wraps(f)
+        def method(self, *args, **kwargs):
+            return f(self, *args, **kwargs)
+        return method
+    return anon
 
 
 class SignatureChecker(object):
@@ -51,7 +72,7 @@ class BaseDoctype(object):
             assert validator(thing)
         return True
 
-    def shellscript(self, script):
+    def shellscript(self, script, preamble=preamble):
         source = self.source
         output = self.output
         config = self.config
@@ -61,6 +82,8 @@ class BaseDoctype(object):
 
         s = script.format(output=output, source=source, config=config)
         tf = ntf(dir=logdir, prefix=prefix, suffix='.sh', delete=False)
+        if preamble:
+            tf.write(preamble)
         tf.write(s)
         tf.close()
 
@@ -71,6 +94,16 @@ class BaseDoctype(object):
         result = execute(cmd, logdir=logdir)
         if result != 0:
             return False
+        return True
+
+    def buildall(self):
+        order = nx.dag.topological_sort(self.graph)
+        logger.debug("%s build order %r", self.source.stem, order)
+        for dep in order:
+            method = getattr(self, dep, None)
+            assert method is not None
+            if not method():
+                return False
         return True
 
     def generate(self):
