@@ -135,12 +135,20 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
                             env=env, preexec_fn=os.setsid)
     result = proc.wait()
     if result != 0:
-        logger.warning("Return code (%s) for process: %r", result, cmd)
-        logger.warning("Find STDOUT/STDERR in %s/%s*", logdir, prefix)
+        logger.error("Non-zero exit (%s) for process: %r", result, cmd)
+        logger.error("Find STDOUT/STDERR in %s/%s*", logdir, prefix)
     if isinstance(stdout, int) and stdoutname:
         os.close(stdout)
+        if result != 0:
+            with open(stdoutname) as f:
+                for line in f:
+                    logger.debug("STDOUT: %s", line.rstrip())
     if isinstance(stderr, int) and stderrname:
         os.close(stderr)
+        if result != 0:
+            with open(stderrname) as f:
+                for line in f:
+                    logger.debug("STDERR: %s", line.rstrip())
     return result
 
 
