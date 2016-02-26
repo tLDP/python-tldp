@@ -21,6 +21,10 @@ set -o pipefail
 
 '''
 
+postamble = '''
+
+'''
+
 def depends(graph, *predecessors):
     '''decorator to be used for constructing build order graph'''
     def anon(f):
@@ -72,7 +76,7 @@ class BaseDoctype(object):
             assert validator(thing)
         return True
 
-    def shellscript(self, script, preamble=preamble):
+    def shellscript(self, script, preamble=preamble, postamble=postamble):
         source = self.source
         output = self.output
         config = self.config
@@ -85,6 +89,8 @@ class BaseDoctype(object):
         if preamble:
             tf.write(preamble)
         tf.write(s)
+        if postamble:
+            tf.write(postamble)
         tf.close()
 
         mode = stat.S_IXUSR | stat.S_IRUSR | stat.S_IWUSR
@@ -93,6 +99,9 @@ class BaseDoctype(object):
         cmd = [tf.name]
         result = execute(cmd, logdir=logdir)
         if result != 0:
+            with open(tf.name) as f:
+                for line in f:
+                    logger.debug("Script: %s", line.rstrip())
             return False
         return True
 
