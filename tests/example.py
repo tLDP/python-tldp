@@ -57,6 +57,12 @@ ex_markdown = SimpleNamespace(
                filename=opj(sampledocs, 'markdown-simple.md'),
               )
 
+ex_linuxdoc_dir = SimpleNamespace(
+               ext='.sgml',
+               type=tldp.doctypes.linuxdoc.Linuxdoc,
+               filename=opj(sampledocs, 'Linuxdoc-Larger', 'Linuxdoc-Larger.sgml'),
+              )
+
 
 # -- a bit ugly, but grab each dict
 sources = [y for x, y in locals().items() if x.startswith('ex_')]

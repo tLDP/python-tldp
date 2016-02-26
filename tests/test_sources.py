@@ -19,7 +19,7 @@ import example
 # -- SUT
 from tldp.sources import SourceCollection, SourceDocument, scansourcedirs
 
-datadir = os.path.join(os.path.dirname(__file__), 'sample-documents')
+sampledocs = os.path.join(os.path.dirname(__file__), 'sample-documents')
 
 
 class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
@@ -118,12 +118,20 @@ class TestInvalidSourceCollection(TestToolsFilesystem):
         self.assertEquals(0, len(s))
 
 
-class TestSourceDocuments(unittest.TestCase):
+class TestSourceDocument(unittest.TestCase):
 
-    def test_init_missing(self):
-        doc = SourceDocument(os.path.join(datadir, 'linuxdoc-simple.sgml'))
-        self.assertIsInstance(doc, SourceDocument)
-        self.assertTrue("linuxdoc-simple.sgml" in str(doc))
+    def test_init(self):
+        for ex in example.sources:
+            fullpath = ex.filename
+            fn = os.path.basename(fullpath)
+            doc = SourceDocument(fullpath)
+            self.assertIsInstance(doc, SourceDocument)
+            self.assertTrue(fn in str(doc))
+            self.assertTrue(fn in doc.statinfo)
+
+    def test_detail(self):
+        fullpath = example.ex_linuxdoc_dir.filename
+        pass
 
 
 class TestMissingSourceDocuments(TestToolsFilesystem):
