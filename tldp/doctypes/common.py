@@ -65,14 +65,13 @@ class BaseDoctype(object):
         assert None not in (self.source, self.output, self.config)
 
     def build_precheck(self):
-        try:
-            self.required.items()
-        except AttributeError:
-            return False
-
+        classname = self.__class__.__name__
         for tool, validator in self.required.items():
             thing = getattr(self.config, tool, None)
-            assert thing is not None
+            if thing is None:
+                logger.error("%s missing required tool %s, skipping...", 
+                             classname, tool)
+                return False
             assert validator(thing)
         return True
 
@@ -112,7 +111,8 @@ class BaseDoctype(object):
         for dep in order:
             method = getattr(self, dep, None)
             assert method is not None
-            logger.info("%s calling method %s", stem, dep)
+            classname = self.__class__.__name__
+            logger.info("%s calling method %s.%s", stem, classname, dep)
             if not method():
                 logger.error("%s reported method %s failure, skipping...",
                              stem, dep)
@@ -120,6 +120,9 @@ class BaseDoctype(object):
         return True
 
     def generate(self):
+        stem = self.source.stem
+        classname = self.__class__.__name__
+
         # -- the output directory gets to prepare; must return True
         #
         if not self.output.hook_prebuild():
@@ -132,8 +135,7 @@ class BaseDoctype(object):
         #
         if not self.build_precheck():
             logger.warning("%s %s failed (%s), skipping to next build",
-                           'build_precheck', self.source.stem,
-                           self.source.doctype.formatname)
+                           'build_precheck', stem, classname)
             return False
 
         # -- now, we can walk through build targets, and record a vector
@@ -154,28 +156,33 @@ class BaseDoctype(object):
                 vector.append(premethod())
                 if not last_command():
                     logger.warning("%s pre_%s failed, skipping to next build",
-                                   self.source.stem, target)
+                                   stem, target)
                     break
 
             vector.append(mainmethod())
             if not last_command():
                 logger.warning("%s %s failed, skipping to next build",
-                               self.source.stem, target)
+                               stem, target)
                 break
 
             if postmethod:
                 vector.append(postmethod())
                 if not last_command():
                     logger.warning("%s post_%s failed, skipping to next build",
-                                   self.source.stem, target)
+                                   stem, target)
                     break
 
         result = all(vector)
+
         if result:
-            self.output.hook_build_success()
+            self.hook_build_success()  # -- processor
+            self.output.hook_build_success()  # -- output document
         else:
-            self.output.hook_build_failure()
+            self.hook_build_failure()  # -- processor
+            self.output.hook_build_failure()  # -- output document
+
         os.chdir(opwd)
+
         return result
 
 #
