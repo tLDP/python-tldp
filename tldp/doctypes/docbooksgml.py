@@ -52,12 +52,6 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
 
     buildorder = ['buildall']
 
-    def hook_build_success(self):
-        self.cleanup()
-
-    def hook_build_failure(self):
-        self.cleanup()
-
     def chdir_output(self):
         os.chdir(self.output.dirname)
         return True
