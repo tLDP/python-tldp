@@ -4,10 +4,11 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-logger = logging.getLogger(__name__)
 
 from tldp.utils import which
 from tldp.doctypes.common import BaseDoctype, SignatureChecker
+
+logger = logging.getLogger(__name__)
 
 
 class Docbook5XML(BaseDoctype, SignatureChecker):

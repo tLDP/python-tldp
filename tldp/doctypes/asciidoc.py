@@ -2,9 +2,10 @@
 # -*- coding: utf8 -*-
 
 import logging
-logger = logging.getLogger(__name__)
 
 from tldp.doctypes.common import BaseDoctype
+
+logger = logging.getLogger(__name__)
 
 
 class Asciidoc(BaseDoctype):
