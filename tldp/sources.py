@@ -153,12 +153,22 @@ class SourceDocument(object):
         source document file) will be collected.
         '''
         self.filename = os.path.abspath(filename)
+
         if not os.path.exists(self.filename):
             logger.critical("Missing source document: %s", self.filename)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), self.filename)
-        if not os.path.isfile(self.filename):
-            logger.critical("Source document is not a plain file: %s", self.filename)
-            raise TypeError("Wrong type, not a plain file: " + self.filename)
+
+        if os.path.isdir(self.filename):
+            self.filename = sourcedoc_fromdir(self.filename)
+        elif os.path.isfile(self.filename):
+            pass
+        else:
+            # -- we did not receive a useable document file or directory name
+            self.filename = None
+
+        if self.filename is None:
+            logger.critical("Source document is not a plain file: %s", filename)
+            raise ValueError(filename + " not identifiable as a document")
 
         self.doctype = guess(self.filename)
         self.status = 'source'
@@ -174,18 +184,17 @@ class SourceDocument(object):
             self.statinfo = statfiles(self.filename, relative=self.dirname)
 
     def detail(self, widths, verbose, file=sys.stdout):
-        '''
-        '''
+        '''produce a small tabular output about the document'''
         template = '{s.status:{w.status}} {s.stem:{w.stem}}'
         outstr = template.format(s=self, w=widths)
-        print(outstr)
+        print(outstr, file=file)
         if verbose:
             for f in self.newer:
                 fname = os.path.join(self.dirname, f)
-                print('  newer file {}'.format(fname))
+                print('  newer file {}'.format(fname), file=file)
             if self.output:
                 for f in self.output.missing:
-                    print('  missing file {}'.format(f))
+                    print('  missing file {}'.format(f), file=file)
 
 #
 # -- end of file
