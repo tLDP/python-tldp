@@ -25,6 +25,7 @@ sampledocs = os.path.join(os.path.dirname(__file__), 'sample-documents')
 
 widths = SimpleNamespace(status=20, stem=50)
 
+
 class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
 
     def test_multidir_finding_singlefiles(self):
@@ -148,13 +149,13 @@ class TestSourceDocument(unittest.TestCase):
         self.assertTrue(ex.stem in result)
         self.assertTrue('source' in result)
 
-
     def test_bad_dir_multiple_doctypes(self):
         fullpath = os.path.join(sampledocs, 'Bad-Dir-Multiple-Doctypes')
         with self.assertRaises(Exception) as ecm:
             SourceDocument(fullpath)
         e = ecm.exception
         self.assertTrue('multiple document choices' in e.message)
+
 
 class TestMissingSourceDocuments(TestToolsFilesystem):
 

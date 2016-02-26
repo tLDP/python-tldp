@@ -54,7 +54,8 @@ ex_markdown = SimpleNamespace(
 
 ex_linuxdoc_dir = SimpleNamespace(
                type=tldp.doctypes.linuxdoc.Linuxdoc,
-               filename=opj(sampledocs, 'Linuxdoc-Larger', 'Linuxdoc-Larger.sgml'),
+               filename=opj(sampledocs, 'Linuxdoc-Larger',
+                            'Linuxdoc-Larger.sgml'),
               )
 
 # -- a bit ugly, but grab each dict
