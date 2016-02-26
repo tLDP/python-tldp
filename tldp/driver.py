@@ -18,6 +18,12 @@ def detail(config, args):
     width = Namespace()
     width.status = max([len(x) for x in tldp.inventory.status_types])
     width.stem = max([len(x) for x in i.source.keys()])
+    # -- if user just said "list" with no args, then give the user something
+    #    sane, "all"; it would make sense for this to be "work", too, but
+    #    "all" seems to be less surprising
+    #
+    if not args:
+        args.append('all')
     for arg in args:
         status_class = tldp.inventory.status_classes[arg]
         for status in status_class:
@@ -90,10 +96,6 @@ def run():
     tag = os.path.basename(sys.argv[0]).strip('.py')
     argv = sys.argv[1:]
     config, args = tldp.config.collectconfiguration(tag, argv)
-
-    # -- first, and foremost, set requested logging level
-    #
-    #logger.setLevel(config.loglevel)
 
     # -- check to see if the user wishes to --list things
     #    this function and friends is called 'detail', because
