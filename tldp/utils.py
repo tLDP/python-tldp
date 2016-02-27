@@ -6,15 +6,31 @@ from __future__ import absolute_import, division, print_function
 import os
 import io
 import sys
+import time
 import errno
 import operator
 import subprocess
 import functools
+from functools import wraps
 from tempfile import mkstemp
 import logging
 logger = logging.getLogger(__name__)
 
 logdir = 'tldp-document-build-logs'
+
+
+def logtimings(logmethod):
+    def anon(f):
+        @wraps(f)
+        def timedfunc(*args, **kwargs):
+            s = time.time()
+            result = f(*args, **kwargs)
+            e = time.time()
+            logmethod('running %s(%r, %r) took %.3f s',
+                      f.__name__, args, kwargs, e - s)
+            return result
+        return timedfunc
+    return anon
 
 
 def firstfoundfile(locations):

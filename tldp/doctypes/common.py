@@ -11,7 +11,7 @@ from tempfile import NamedTemporaryFile as ntf
 from functools import wraps
 import networkx as nx
 
-from tldp.utils import execute
+from tldp.utils import execute, logtimings
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +98,7 @@ class BaseDoctype(object):
     def hook_build_failure(self):
         self.cleanup()
 
+    @logtimings(logger.debug)
     def shellscript(self, script, preamble=preamble, postamble=postamble):
         source = self.source
         output = self.output
@@ -127,6 +128,7 @@ class BaseDoctype(object):
             return False
         return True
 
+    @logtimings(logger.debug)
     def buildall(self):
         stem = self.source.stem
         order = nx.dag.topological_sort(self.graph)
@@ -142,6 +144,7 @@ class BaseDoctype(object):
                 return False
         return True
 
+    @logtimings(logger.info)
     def generate(self):
         stem = self.source.stem
         classname = self.__class__.__name__
