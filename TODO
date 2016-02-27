@@ -10,9 +10,13 @@ python-tldp TODO
 
   * Copy images into the output directory.
 
-  * DocBookSGML: post-build hook (even if build failure) make sure to remove
-    the generated index.sgml from the source directory [clean up after
-    yourself!]
+  * Test out on Ubuntu (and any other conveniently accessible platforms).
+
+  * Packaging.
+
+  * Consider adding --skip broken, --skip docbook4xml, ...
+
+
 
 CascadingConfig
 ---------------
