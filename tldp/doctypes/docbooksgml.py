@@ -70,6 +70,18 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
         return self.shellscript(s)
 
     @depends(graph, make_blank_indexsgml)
+    def move_blank_indexsgml_into_source(self):
+        '''move a blank index.sgml file into the source tree'''
+        if self.indexsgml:
+            return True
+        indexsgml = os.path.join(self.source.dirname, 'index.sgml')
+        s = '''mv \\
+                 --no-clobber \\
+                 --verbose \\
+                 -- "index.sgml" "{source.dirname}/index.sgml"'''
+        return self.shellscript(s)
+
+    @depends(graph, move_blank_indexsgml_into_source)
     def make_data_indexsgml(self):
         '''collect document's index entries into a data file (HTML.index)'''
         if self.indexsgml:
@@ -102,8 +114,8 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
             return True
         indexsgml = os.path.join(self.source.dirname, 'index.sgml')
         s = '''mv \\
-                 --no-clobber \\
                  --verbose \\
+                 --force \\
                  -- "index.sgml" "{source.dirname}/index.sgml"'''
         moved = self.shellscript(s)
         if moved:
