@@ -60,6 +60,20 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
         return True
 
     @depends(graph, chdir_output)
+    def copy_static_resources(self):
+        source = list()
+        for d in ('images', 'resources'):
+            fullpath = os.path.join(self.source.dirname, d)
+            fullpath = os.path.abspath(fullpath)
+            if os.path.isdir(fullpath):
+                source.append('"' + fullpath + '"')
+            if not source:
+                logger.debug("%s no images or resources to copy", self.source.stem)
+                return True
+            s = 'rsync --archive --verbose %s ./' % (' '.join(source))
+        return self.shellscript(s)
+
+    @depends(graph, copy_static_resources)
     def make_name_htmls(self):
         '''create a single page HTML output'''
         s = '''"{config.docbook4xml_xsltproc}" > "{output.name_htmls}" \\

@@ -33,6 +33,20 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         return True
 
     @depends(graph, chdir_output)
+    def copy_static_resources(self):
+        source = list()
+        for d in ('images', 'resources'):
+            fullpath = os.path.join(self.source.dirname, d)
+            fullpath = os.path.abspath(fullpath)
+            if os.path.isdir(fullpath):
+                source.append('"' + fullpath + '"')
+            if not source:
+                logger.debug("%s no images or resources to copy", self.source.stem)
+                return True
+            s = 'rsync --archive --verbose %s ./' % (' '.join(source))
+        return self.shellscript(s)
+
+    @depends(graph, copy_static_resources)
     def make_htmls(self):
         '''create a single page HTML output (with incorrect name)'''
         s = '"{config.linuxdoc_sgml2html}" --split=0 "{source.filename}"'
@@ -57,8 +71,8 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
     def make_name_pdf(self):
         s = '''"{config.linuxdoc_htmldoc}" \\
                  --size universal \\
-                 -t pdf \\
                  --firstpage p1 \\
+                 --format pdf \\
                  --outfile "{output.name_pdf}" \\
                  "{output.name_htmls}"'''
         return self.shellscript(s)
