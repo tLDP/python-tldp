@@ -61,11 +61,5 @@ def collectconfiguration(tag, argv):
     config, args = cc.parse()
     return config, args
 
-def validateconfiguration(config):
-    fuckedup = False
-    if fuckedup:
-        return False
-    return True
-
 #
 # -- end of file
