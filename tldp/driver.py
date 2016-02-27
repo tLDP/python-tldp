@@ -65,16 +65,24 @@ def status(config, args):
 
 def build(config, args):
     targets = list()
-    if not args:
-        i = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
-        targets.extend(i.new.values())
-        targets.extend(i.stale.values())
-        targets.extend(i.broken.values())
-    else:
+    stems = list()
+    if args:
         for arg in args:
             if os.path.isfile(arg) or os.path.isdir(arg):
                 source = tldp.sources.SourceDocument(arg)
                 targets.append(source)
+            else:
+                stems.append(arg)
+    if stems or not args:
+        i = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+        if stems:
+            for source in i.source.values():
+                if source.stem in stems:
+                    targets.append(source)
+        else:
+            targets.extend(i.new.values())
+            targets.extend(i.stale.values())
+            targets.extend(i.broken.values())
     for source in targets:
         if source.stem in config.skip:
             logger.info("%s skipping build per request", source.stem)
