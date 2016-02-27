@@ -72,7 +72,7 @@ def build(config, args):
         targets.extend(i.broken.values())
     else:
         for arg in args:
-            if os.path.isfile(arg):
+            if os.path.isfile(arg) or os.path.isdir(arg):
                 source = tldp.sources.SourceDocument(arg)
                 targets.append(source)
     for source in targets:
