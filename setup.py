@@ -18,7 +18,10 @@ setup(
     long_description=readme,
     packages=find_packages(),
     test_suite='tests',
-    install_requires=[],
+    install_requires=['networkx',],
+    entry_points = {
+        'console_scripts': ['ldptool = tldp.driver:run',],
+    },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
