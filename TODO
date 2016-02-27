@@ -11,8 +11,6 @@ python-tldp TODO
 
   * Consider adding --skip broken, --skip docbook4xml, ...
 
-  * Consider adding timing information for document processing...
-
   * Add a verb to produce a runnable shell-script instead of having 
     ldptool do the job.
 
