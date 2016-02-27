@@ -69,6 +69,7 @@ def status(config, args):
 def build(config, args):
     targets = list()
     stems = list()
+    args = set(args)
     if args:
         for arg in args:
             if os.path.isfile(arg) or os.path.isdir(arg):
@@ -86,6 +87,12 @@ def build(config, args):
             targets.extend(i.new.values())
             targets.extend(i.stale.values())
             targets.extend(i.broken.values())
+    if len(targets) != len(args):
+        targets = [x.stem for x in targets]
+        missing = args.difference(set(targets))
+        logger.error("Could not find matching file or stem for args: %s",
+                     ', '.join(missing))
+        return 1
     for source in targets:
         if source.stem in config.skip:
             logger.info("%s skipping build per request", source.stem)
