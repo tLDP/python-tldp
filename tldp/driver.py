@@ -6,11 +6,12 @@ from __future__ import absolute_import, division, print_function
 import os
 import sys
 import logging
-logger = logging.getLogger(__name__)
+from argparse import Namespace
 
 import tldp
+from tldp.utils import arg_isloglevel
 
-from argparse import Namespace
+logger = logging.getLogger(__name__)
 
 
 def detail(config, args):
@@ -54,12 +55,14 @@ def status(config, args):
             print('\t'.join(getattr(i, status).keys()))
         else:
             abbrev = getattr(i, status).keys()
-            displaynum = 3
-            if len(abbrev) > displaynum:
-                abbrev = abbrev[:displaynum]
-                remainder = count - displaynum
-                abbrev.append('[and %d more]' % (remainder,))
-            print('\t'.join(abbrev))
+            s = ''
+            if abbrev:
+                s = s + abbrev.pop(0)
+                while abbrev and len(s) < 50:
+                    s = s + ', ' + abbrev.pop()
+                if abbrev:
+                    s = s + ', and %d more ...' % (len(abbrev))
+            print(s)
     return 0
 
 
@@ -101,9 +104,19 @@ def build(config, args):
 
 
 def run():
+    # -- may want to see option parsing, so set --loglevel as
+    #    soon as possible
+    if '--loglevel' in sys.argv:
+        levelarg = 1 + sys.argv.index('--loglevel')
+        level = arg_isloglevel(sys.argv[levelarg])
+        logger.setLevel(level)
+
+    # -- produce a configuration from CLI, ENV and CFG
+    #
     tag = os.path.basename(sys.argv[0]).strip('.py')
     argv = sys.argv[1:]
     config, args = tldp.config.collectconfiguration(tag, argv)
+
 
     # -- check to see if the user wishes to --list things
     #    this function and friends is called 'detail', because
@@ -126,6 +139,10 @@ def run():
     if config.build is None:
         config.all = True
     sys.exit(build(config, args))
+
+
+if __name__ == '__main__':
+    run()
 
 #
 # -- end of file
