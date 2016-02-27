@@ -11,6 +11,8 @@ from argparse import Namespace
 import tldp
 from tldp.utils import arg_isloglevel
 
+logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s %(funcName)s %(message)s'
+logging.basicConfig(stream=sys.stderr, format=logformat, level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
@@ -116,14 +118,14 @@ def run():
     if '--loglevel' in sys.argv:
         levelarg = 1 + sys.argv.index('--loglevel')
         level = arg_isloglevel(sys.argv[levelarg])
-        logger.setLevel(level)
+        # -- set the root logger's level
+        logging.getLogger().setLevel(level)
 
     # -- produce a configuration from CLI, ENV and CFG
     #
-    tag = os.path.basename(sys.argv[0]).strip('.py')
+    tag = 'ldptool'
     argv = sys.argv[1:]
     config, args = tldp.config.collectconfiguration(tag, argv)
-
 
     # -- check to see if the user wishes to --list things
     #    this function and friends is called 'detail', because
