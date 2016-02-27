@@ -5,17 +5,16 @@ python-tldp TODO
     methods called detail() which define a format string; probably
     should be defined once in a parent class or something
 
-  * Add a verb to produce a runnable shell-script instead of having 
-    ldptool do the job.
-
-  * Copy images into the output directory.
-
   * Test out on Ubuntu (and any other conveniently accessible platforms).
 
   * Packaging.
 
   * Consider adding --skip broken, --skip docbook4xml, ...
 
+  * Consider adding timing information for document processing...
+
+  * Add a verb to produce a runnable shell-script instead of having 
+    ldptool do the job.
 
 
 CascadingConfig
