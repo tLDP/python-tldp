@@ -52,7 +52,7 @@ def status(config, args):
         s = '{0:{w.status}}  {1:{w.count}}  '.format(status, count, w=width)
         print(s, end="")
         if config.verbose:
-            print('\t'.join(getattr(i, status).keys()))
+            print(', '.join(getattr(i, status).keys()))
         else:
             abbrev = getattr(i, status).keys()
             s = ''
