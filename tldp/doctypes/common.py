@@ -154,18 +154,20 @@ class BaseDoctype(object):
 
         # -- the output directory gets to prepare; must return True
         #
-        if not self.output.hook_prebuild():
-            return False
-
-        opwd = os.getcwd()
-        os.chdir(self.output.dirname)
-
         # -- the processor gets to prepare; must return True
         #
         if not self.build_precheck():
             logger.warning("%s %s failed (%s), skipping to next build",
-                           'build_precheck', stem, classname)
+                           stem, 'build_precheck', classname)
             return False
+
+        if not self.output.hook_prebuild():
+            logger.warning("%s %s failed (%s), skipping to next build",
+                           stem, 'hook_prebuild', classname)
+            return False
+
+        opwd = os.getcwd()
+        os.chdir(self.output.dirname)
 
         # -- now, we can try to build everything; this is the BIG WORK!
         #
