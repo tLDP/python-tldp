@@ -60,6 +60,9 @@ class SignatureChecker(object):
 
 class BaseDoctype(object):
 
+    def __repr__(self):
+        return '<%s:%s>' % (self.__class__.__name__, self.source.stem,)
+
     def __init__(self, *args, **kwargs):
         self.source = kwargs.get('source', None)
         self.output = kwargs.get('output', None)
