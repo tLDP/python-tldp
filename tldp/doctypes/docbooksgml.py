@@ -147,8 +147,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
             logger.error("%s (cowardly) refusing to clean directory %s", cwd)
             logger.error("%s expected to find %s", self.output.dirname)
             return False
-        s = '''find . -mindepth 1 -maxdepth 1 -type f -print0 \
-               | xargs --null --no-run-if-empty -- rm -f --'''
+        s = '''find . -mindepth 1 -maxdepth 1 -not -type d -delete -print'''
         return self.shellscript(s)
 
     @depends(graph, cleaned_indexsgml)
