@@ -58,6 +58,10 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
 
     @depends(graph, chdir_output)
     def make_blank_indexsgml(self):
+        indexsgml = os.path.join(self.source.dirname, 'index.sgml')
+        self.indexsgml = os.path.isfile(indexsgml)
+        if self.indexsgml:
+            return True
         '''generate an empty index.sgml file (in output dir)'''
         s = '''"{config.docbooksgml_collateindex}" \\
                   -N \\
@@ -68,6 +72,8 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
     @depends(graph, make_blank_indexsgml)
     def make_data_indexsgml(self):
         '''collect document's index entries into a data file (HTML.index)'''
+        if self.indexsgml:
+            return True
         s = '''"{config.docbooksgml_openjade}" \\
                   -t sgml \\
                   -V html-index \\
@@ -78,6 +84,8 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
     @depends(graph, make_data_indexsgml)
     def make_indexsgml(self):
         '''generate the final document index file (index.sgml)'''
+        if self.indexsgml:
+            return True
         s = '''"{config.docbooksgml_collateindex}" \\
                   -g \\
                   -t Index \\
@@ -90,6 +98,8 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
     @depends(graph, make_indexsgml)
     def move_indexsgml_into_source(self):
         '''move the generated index.sgml file into the source tree'''
+        if self.indexsgml:
+            return True
         indexsgml = os.path.join(self.source.dirname, 'index.sgml')
         s = '''mv \\
                  --no-clobber \\
@@ -100,7 +110,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
             logger.debug("%s created %s", self.source.stem, indexsgml)
             self.removals.append(indexsgml)
             return True
-        return os.path.exists(indexsgml)
+        return False
 
     @depends(graph, move_indexsgml_into_source)
     def cleaned_indexsgml(self):
