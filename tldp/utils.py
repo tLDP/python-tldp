@@ -22,14 +22,14 @@ logdir = 'tldp-document-build-logs'
 def logtimings(logmethod):
     def anon(f):
         @wraps(f)
-        def timedfunc(*args, **kwargs):
+        def timing(*args, **kwargs):
             s = time.time()
             result = f(*args, **kwargs)
             e = time.time()
             logmethod('running %s(%r, %r) took %.3f s',
                       f.__name__, args, kwargs, e - s)
             return result
-        return timedfunc
+        return timing
     return anon
 
 
