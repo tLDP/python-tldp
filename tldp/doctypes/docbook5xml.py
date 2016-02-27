@@ -30,18 +30,20 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
     def create_htmls(self):
         logger.info("Creating single page HTML for %s", self.source.stem)
 
-    @staticmethod
-    def argparse(p):
-        p.add_argument('--docbook5xml-xsltproc', type=which,
+    @classmethod
+    def argparse(cls, p):
+        descrip = 'executables for %s' % (cls.formatname,)
+        g = p.add_argument_group(title=cls.__name__, description=descrip)
+        g.add_argument('--docbook5xml-xsltproc', type=which,
                        default=which('xsltproc'),
                        help='full path to xsltproc [%(default)s]')
-        p.add_argument('--docbook5xml-html2text', type=which,
+        g.add_argument('--docbook5xml-html2text', type=which,
                        default=which('html2text'),
                        help='full path to html2text [%(default)s]')
-        p.add_argument('--docbook5xml-fop', type=which,
+        g.add_argument('--docbook5xml-fop', type=which,
                        default=which('fop'),
                        help='full path to fop [%(default)s]')
-        p.add_argument('--docbook5xml-dblatex', type=which,
+        g.add_argument('--docbook5xml-dblatex', type=which,
                        default=which('dblatex'),
                        help='full path to dblatex [%(default)s]')
 

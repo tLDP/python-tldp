@@ -89,15 +89,17 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
         return self.shellscript(s)
 
-    @staticmethod
-    def argparse(p):
-        p.add_argument('--linuxdoc-sgml2html', type=arg_isexecutable,
+    @classmethod
+    def argparse(cls, p):
+        descrip = 'executables and data files for %s' % (cls.formatname,)
+        g = p.add_argument_group(title=cls.__name__, description=descrip)
+        g.add_argument('--linuxdoc-sgml2html', type=arg_isexecutable,
                        default=which('sgml2html'),
                        help='full path to sgml2html [%(default)s]')
-        p.add_argument('--linuxdoc-html2text', type=arg_isexecutable,
+        g.add_argument('--linuxdoc-html2text', type=arg_isexecutable,
                        default=which('html2text'),
                        help='full path to html2text [%(default)s]')
-        p.add_argument('--linuxdoc-htmldoc', type=arg_isexecutable,
+        g.add_argument('--linuxdoc-htmldoc', type=arg_isexecutable,
                        default=which('htmldoc'),
                        help='full path to htmldoc [%(default)s]')
 
