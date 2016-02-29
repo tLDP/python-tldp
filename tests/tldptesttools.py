@@ -124,6 +124,8 @@ class TestSourceDocSkeleton(object):
 class TestInventoryBase(TestToolsFilesystem):
 
     def setupcollections(self):
+        attrs = ('pubdir', 'sourcedir', 'sourcedirs')
+        already = all([hasattr(self, x) for x in attrs])
         self.pubdir = os.path.join(self.tempdir, 'outputs')
         self.sourcedir = os.path.join(self.tempdir, 'sources')
         self.sourcedirs = [self.sourcedir]
