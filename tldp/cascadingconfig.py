@@ -174,7 +174,7 @@ def dict_from_envdict(env=os.environ, base=None, envsep=ENVSEP, clisep=CLISEP):
     for k, v in env.items():
         if k.startswith(tag):
             k = k.lower().replace(envsep, clisep)
-        d[k] = str(v)
+            d[k] = str(v)
     return d
 
 
