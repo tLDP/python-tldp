@@ -209,14 +209,11 @@ def makefh(thing):
 def statfile(name):
     '''return posix.stat_result (or None) for a single file name'''
     try:
-        st = os.stat(name)
+        st = os.lstat(name)
     except OSError as e:
         if e.errno != errno.ENOENT:
             raise e
-        if os.path.islink(name):
-            st = os.lstat(name)
-        else:
-            st = None
+        st = None
     return st
 
 

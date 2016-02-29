@@ -11,11 +11,10 @@ from tldptesttools import TestToolsFilesystem
 
 # -- SUT
 from tldp.utils import makefh, which, execute
-from tldp.utils import statfiles, stem_and_ext
+from tldp.utils import statfile, statfiles, stem_and_ext
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.utils import arg_isreadablefile, isreadablefile
-from tldp.utils import arg_isdirectory
-from tldp.utils import arg_isloglevel
+from tldp.utils import arg_isdirectory, arg_isloglevel
 
 
 class Test_isexecutable_and_friends(unittest.TestCase):
@@ -157,6 +156,17 @@ class Test_statfiles(unittest.TestCase):
         statinfo = statfiles(this)
         self.assertIsInstance(statinfo, dict)
         self.assertEquals(0, len(statinfo))
+
+
+class Test_statfile(TestToolsFilesystem):
+
+    def test_statfile_bogustype(self):
+        with self.assertRaises(TypeError) as ecm:
+            statfile(0)
+
+    def test_statfile_enoent(self):
+        f = ntf(dir=self.tempdir)
+        st = statfile(f.name + '-ENOENT_TEST')
 
 
 class Test_stem_and_ext(unittest.TestCase):
