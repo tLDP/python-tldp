@@ -59,6 +59,14 @@ class Test_arg_isloglevel(unittest.TestCase):
         self.assertEquals(10, arg_isloglevel('DEBUG'))
 
 
+class Test_arg_isdirectory(TestToolsFilesystem):
+
+    def test_arg_isdirectory(self):
+        self.assertTrue(arg_isdirectory(self.tempdir))
+        f = ntf(dir=self.tempdir)
+        self.assertFalse(arg_isdirectory(f.name))
+
+
 class Test_execute(TestToolsFilesystem):
 
     def test_execute_returns_zero(self):
