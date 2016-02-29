@@ -1,101 +1,15 @@
 
 from __future__ import absolute_import, division, print_function
 
-import os
-import time
 import random
-import shutil
 
-from tldp.outputs import OutputNamingConvention
-from tldptesttools import TestToolsFilesystem
+from tldptesttools import TestInventoryBase
 
 # -- Test Data
 import example
 
 # -- SUT
 from tldp.inventory import Inventory
-
-
-class TestOutputDirSkeleton(OutputNamingConvention):
-
-    def mkdir(self):
-        if not os.path.isdir(self.dirname):
-            os.mkdir(self.dirname)
-
-    def create_expected_docs(self):
-        for name in self.expected:
-            fname = getattr(self, name)
-            with open(fname, 'w'):
-                pass
-
-
-class TestSourceDocSkeleton(object):
-
-    def __init__(self, dirname):
-        if not os.path.abspath(dirname):
-            raise Exception("Please use absolute path in unit tests....")
-        self.dirname = dirname
-        if not os.path.isdir(self.dirname):
-            os.mkdir(self.dirname)
-
-    def addsourcefile(self, filename, content):
-        fname = os.path.join(self.dirname, filename)
-        if os.path.isfile(content):
-            shutil.copy(content, fname)
-        else:
-            with open(fname, 'w') as f:
-                f.write(content)
-
-
-class TestInventoryBase(TestToolsFilesystem):
-
-    def setupcollections(self):
-        self.pubdir = os.path.join(self.tempdir, 'outputs')
-        self.sourcedir = os.path.join(self.tempdir, 'sources')
-        self.sourcedirs = [self.sourcedir]
-        for d in (self.sourcedir, self.pubdir):
-            if not os.path.isdir(d):
-                os.mkdir(d)
-
-    def add_stale(self, stem, ex):
-        self.setupcollections()
-        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
-        myoutput.mkdir()
-        myoutput.create_expected_docs()
-        time.sleep(0.002)
-        mysource = TestSourceDocSkeleton(self.sourcedir)
-        mysource.addsourcefile(stem + ex.ext, ex.filename)
-
-    def add_broken(self, stem, ex):
-        self.setupcollections()
-        mysource = TestSourceDocSkeleton(self.sourcedir)
-        mysource.addsourcefile(stem + ex.ext, ex.filename)
-        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
-        myoutput.mkdir()
-        myoutput.create_expected_docs()
-        prop = random.choice(myoutput.expected)
-        fname = getattr(myoutput, prop, None)
-        assert fname is not None
-        os.unlink(fname)
-
-    def add_new(self, stem, ex):
-        self.setupcollections()
-        mysource = TestSourceDocSkeleton(self.sourcedir)
-        mysource.addsourcefile(stem + ex.ext, ex.filename)
-
-    def add_orphan(self, stem, ex):
-        self.setupcollections()
-        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
-        myoutput.mkdir()
-        myoutput.create_expected_docs()
-
-    def add_published(self, stem, ex):
-        self.setupcollections()
-        mysource = TestSourceDocSkeleton(self.sourcedir)
-        mysource.addsourcefile(stem + ex.ext, ex.filename)
-        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
-        myoutput.mkdir()
-        myoutput.create_expected_docs()
 
 
 class TestInventoryUsage(TestInventoryBase):

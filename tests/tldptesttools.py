@@ -2,9 +2,14 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import time
+import random
+import shutil
 import unittest
 from tempfile import mkdtemp
-import shutil
+from tempfile import NamedTemporaryFile as ntf
+
+from tldp.outputs import OutputNamingConvention
 
 
 def stem_and_ext(name):
@@ -27,9 +32,15 @@ def dir_to_components(reldir):
 class TestToolsFilesystem(unittest.TestCase):
 
     def setUp(self):
-        self.tempdir = mkdtemp(prefix='tldp-test-')
+        self.makeTempdir()
 
     def tearDown(self):
+        self.removeTempdir()
+
+    def makeTempdir(self):
+        self.tempdir = mkdtemp(prefix='tldp-test-')
+
+    def removeTempdir(self):
         shutil.rmtree(self.tempdir)
 
     def adddir(self, reldir):
@@ -56,6 +67,109 @@ class TestToolsFilesystem(unittest.TestCase):
                 pass
         relname = os.path.relpath(newname, self.tempdir)
         return relname, newname
+
+
+class CCTestTools(unittest.TestCase):
+
+    def setUp(self):
+        self.makeTempdir()
+
+    def tearDown(self):
+        self.removeTempdir()
+
+    def makeTempdir(self):
+        self.tempdir = mkdtemp(prefix='tldp-test-')
+
+    def removeTempdir(self):
+        shutil.rmtree(self.tempdir)
+
+    def writeconfig(self, case):
+        f = ntf(prefix=case.tag, suffix='.cfg', dir=self.tempdir, delete=False)
+        f.write(case.cfg)
+        f.close()
+        case.configfile = f.name
+
+
+class TestOutputDirSkeleton(OutputNamingConvention):
+
+    def mkdir(self):
+        if not os.path.isdir(self.dirname):
+            os.mkdir(self.dirname)
+
+    def create_expected_docs(self):
+        for name in self.expected:
+            fname = getattr(self, name)
+            with open(fname, 'w'):
+                pass
+
+
+class TestSourceDocSkeleton(object):
+
+    def __init__(self, dirname):
+        if not os.path.abspath(dirname):
+            raise Exception("Please use absolute path in unit tests....")
+        self.dirname = dirname
+        if not os.path.isdir(self.dirname):
+            os.mkdir(self.dirname)
+
+    def addsourcefile(self, filename, content):
+        fname = os.path.join(self.dirname, filename)
+        if os.path.isfile(content):
+            shutil.copy(content, fname)
+        else:
+            with open(fname, 'w') as f:
+                f.write(content)
+
+
+class TestInventoryBase(TestToolsFilesystem):
+
+    def setupcollections(self):
+        self.pubdir = os.path.join(self.tempdir, 'outputs')
+        self.sourcedir = os.path.join(self.tempdir, 'sources')
+        self.sourcedirs = [self.sourcedir]
+        for d in (self.sourcedir, self.pubdir):
+            if not os.path.isdir(d):
+                os.mkdir(d)
+
+    def add_stale(self, stem, ex):
+        self.setupcollections()
+        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
+        myoutput.mkdir()
+        myoutput.create_expected_docs()
+        time.sleep(0.002)
+        mysource = TestSourceDocSkeleton(self.sourcedir)
+        mysource.addsourcefile(stem + ex.ext, ex.filename)
+
+    def add_broken(self, stem, ex):
+        self.setupcollections()
+        mysource = TestSourceDocSkeleton(self.sourcedir)
+        mysource.addsourcefile(stem + ex.ext, ex.filename)
+        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
+        myoutput.mkdir()
+        myoutput.create_expected_docs()
+        prop = random.choice(myoutput.expected)
+        fname = getattr(myoutput, prop, None)
+        assert fname is not None
+        os.unlink(fname)
+
+    def add_new(self, stem, ex):
+        self.setupcollections()
+        mysource = TestSourceDocSkeleton(self.sourcedir)
+        mysource.addsourcefile(stem + ex.ext, ex.filename)
+
+    def add_orphan(self, stem, ex):
+        self.setupcollections()
+        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
+        myoutput.mkdir()
+        myoutput.create_expected_docs()
+
+    def add_published(self, stem, ex):
+        self.setupcollections()
+        mysource = TestSourceDocSkeleton(self.sourcedir)
+        mysource.addsourcefile(stem + ex.ext, ex.filename)
+        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
+        myoutput.mkdir()
+        myoutput.create_expected_docs()
 
 #
 # -- end of file
