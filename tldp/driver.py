@@ -120,7 +120,7 @@ def getDocumentClasses(args):
             sought.append(cls)
         else:
             sought.append(None)
-    remainder = set([y for x, y in zip(sought, args) if x])
+    remainder = set([y for x, y in zip(sought, args) if not x])
     sought = set(filter(None, sought))
     return sought, remainder
 
