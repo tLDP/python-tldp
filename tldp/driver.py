@@ -239,6 +239,8 @@ def run(argv):
         if not config.sourcedir:
             return " --sourcedir (and --pubdir) required for inventory."
         inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+        logger.info("Collected inventory containing %s documents.", 
+                    len(inv.all.keys()))
     else:
         inv = None
 
@@ -246,7 +248,6 @@ def run(argv):
         oldsize = len(workset)
         for status in stati:
             collection = getattr(inv, status)
-            assert isinstance(collection, tldp.sources.SourceCollection)
             workset.update(collection.values())
         growth = len(workset) - oldsize
         if growth:
@@ -259,17 +260,28 @@ def run(argv):
         logger.info("Added %d docs, found by stem name.", len(docs))
 
     if unknownargs:
-        return "Unknown argument (not stem, file nor status_class): " \
+        return "Unknown arguments (neither stem, file, nor status_class): " \
                + ' '.join(remainder)
 
+    # -- without any arguments (no files, no stems, no status_classes), the
+    #    default behaviour is to either --build, --list or --script any
+    #    available work, i.e. documents that have status new, orphan, broken,
+    #    or stale.
+    #
     if not workset:
-        workset.update(inv.work.values())
+        if not stati and not remainder:
+            workset.update(inv.work.values())
 
+    # -- and, of course, apply the skipping logic
+    #
     workset, excluded = processSkips(config, workset)
 
     if not workset:
-        return "No work to do."
+        logger.info("No work to do.")
+        return 0
     
+    # -- listify the set and sort it
+    #
     docs = sorted(workset, key=lambda x: x.stem.lower())
 
     if config.detail:
