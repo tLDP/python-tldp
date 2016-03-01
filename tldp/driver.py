@@ -9,93 +9,67 @@ import logging
 from argparse import Namespace
 
 import tldp
+
+from tldp.inventory import status_classes, status_types
 from tldp.utils import arg_isloglevel
+from tldp.sources import arg_issourcedoc
 
 logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s %(funcName)s %(message)s'
 logging.basicConfig(stream=sys.stderr, format=logformat, level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
-def detail(config, args):
-    i = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+def summary(config, inv=None):
+    if inv is None:
+        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
     width = Namespace()
-    width.status = max([len(x) for x in tldp.inventory.status_types])
-    width.stem = max([len(x) for x in i.source.keys()])
-    # -- if user just said "list" with no args, then give the user something
-    #    sane, "all"; it would make sense for this to be "work", too, but
-    #    "all" seems to be less surprising
-    #
-    if not args:
-        args.append('all')
-    for arg in args:
-        status_class = tldp.inventory.status_classes[arg]
-        for status in status_class:
-            s = getattr(i, status, None)
-            assert s is not None
-            for stem, doc in s.items():
-                # -- a 'stale' or 'broken' document is implicitly a 'published'
-                #    document as well, but we only want to list each document
-                #    once
-                #
-                if doc.status == status:
-                    doc.detail(width, config.verbose, file=sys.stdout)
-    return 0
-
-
-def status(config, args):
-    i = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
-    width = Namespace()
-    width.status = max([len(x) for x in tldp.inventory.status_types])
-    width.count = len(str(len(i.source.keys())))
-    for status in tldp.inventory.status_types:
+    width.status = max([len(x) for x in status_types])
+    width.count = len(str(len(inv.source.keys())))
+    for status in status_types:
         if status == 'all':
             continue
-        count = len(getattr(i, status, 0))
+        count = len(getattr(inv, status, 0))
         s = '{0:{w.status}}  {1:{w.count}}  '.format(status, count, w=width)
         print(s, end="")
         if config.verbose:
-            print(', '.join(getattr(i, status).keys()))
+            print(', '.join(getattr(inv, status).keys()))
         else:
-            abbrev = getattr(i, status).keys()
+            abbrev = getattr(inv, status).keys()
             s = ''
             if abbrev:
                 s = s + abbrev.pop(0)
                 while abbrev and len(s) < 50:
-                    s = s + ', ' + abbrev.pop()
+                    s = s + ', ' + abbrev.pop(0)
                 if abbrev:
                     s = s + ', and %d more ...' % (len(abbrev))
             print(s)
     return 0
 
 
-def build(config, args):
-    targets = list()
-    stems = list()
-    args = set(args)
-    if args:
-        for arg in args:
-            if os.path.isfile(arg) or os.path.isdir(arg):
-                source = tldp.sources.SourceDocument(arg)
-                targets.append(source)
-            else:
-                stems.append(arg)
-    if stems or not args:
-        i = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
-        if stems:
-            for source in i.source.values():
-                if source.stem in stems:
-                    targets.append(source)
-        else:
-            targets.extend(i.new.values())
-            targets.extend(i.stale.values())
-            targets.extend(i.broken.values())
-    if len(targets) != len(args):
-        targets = [x.stem for x in targets]
-        missing = args.difference(set(targets))
-        logger.error("Could not find matching file or stem for args: %s",
-                     ', '.join(missing))
-        return 1
-    for source in targets:
+def detail(config, docs, inv, **kwargs):
+    if inv is None:
+        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+    if not docs:
+        docs = inv.work.values()
+    width = Namespace()
+    width.status = max([len(x) for x in status_types])
+    width.stem = max([len(x) for x in inv.source.keys()])
+    # -- if user just said "list" with no args, then give the user something
+    #    sane, "all"; it would make sense for this to be "work", too, but
+    #    "all" seems to be less surprising
+    #
+    for doc in docs:
+        stdout = kwargs.get('file', sys.stdout)
+        doc.detail(width, config.verbose, file=stdout)
+    return 0
+
+
+def build(config, docs, inv):
+    if inv is None:
+        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+    if not docs:
+        docs = inv.work.values()
+    for source in docs:
         if source.stem in config.skip:
             logger.info("%s skipping build per request", source.stem)
             continue
@@ -103,7 +77,7 @@ def build(config, args):
             dirname = os.path.join(config.pubdir, source.stem)
             source.output = tldp.outputs.OutputDirectory(dirname)
         if not source.doctype:
-            logger.warning("%s skipping document of unknown doctype", 
+            logger.warning("%s skipping document of unknown doctype",
                            source.stem)
             continue
         output = source.output
@@ -112,46 +86,122 @@ def build(config, args):
     return 0
 
 
-def run():
+def script(config, docs, inv):
+    return 0
+
+
+def getDocumentNames(args):
+    sought = set()
+    for arg in args:
+        doc = arg_issourcedoc(arg)
+        if doc is not None:
+            sought.add(doc)
+    remainder = set(args).difference(sought)
+    return sought, remainder
+
+
+def getStatusNames(args):
+    found = set()
+    sought = set()
+    for arg in args:
+        stati = status_classes.get(arg, None)
+        if stati:
+            sought.update(stati)
+            found.add(arg)
+    remainder = set(args).difference(found)
+    return sought, remainder
+
+
+def getStemNames(config, stati, args, inv=None):
+    if inv is None:
+        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+    sought = set()
+    for stem, doc in inv.all.items():
+        if stem in args:
+            sought.add(doc)
+        if doc.status in stati:
+            sought.add(doc)
+    soughtstems = [x.stem for x in sought]
+    remainder = set(args).difference(soughtstems)
+    return sought, remainder, inv
+
+
+def run(argv):
     # -- may want to see option parsing, so set --loglevel as
     #    soon as possible
-    if '--loglevel' in sys.argv:
-        levelarg = 1 + sys.argv.index('--loglevel')
-        level = arg_isloglevel(sys.argv[levelarg])
+    if '--loglevel' in argv:
+        levelarg = 1 + argv.index('--loglevel')
+        level = arg_isloglevel(argv[levelarg])
         # -- set the root logger's level
         logging.getLogger().setLevel(level)
 
     # -- produce a configuration from CLI, ENV and CFG
     #
     tag = 'ldptool'
-    argv = sys.argv[1:]
     config, args = tldp.config.collectconfiguration(tag, argv)
 
-    # -- check to see if the user wishes to --list things
-    #    this function and friends is called 'detail', because
-    #    Python reserves a special (fundamental) meaning for the word
-    #    list; but for the end-user they are synonyms
-    #
-    if config.detail:
-        sys.exit(detail(config, args))
+    # -- summary does not require any args
+    if config.summary:
 
-    # -- check to see if the user wants --status output
-    #
-    if config.status:
-        if config.pubdir is None:
-            sys.exit("Option --pubdir required for --status.")
+        if args:
+            return "Unknown args received for --summary: " + ' '.join(args)
+        if not config.pubdir:
+            return "Option --pubdir (and --sourcedir) required for --summary."
         if not config.sourcedir:
-            sys.exit("Option --sourcedir required for --status.")
-        sys.exit(status(config, args))
+            return "Option --sourcedir (and --pubdir) required for --summary."
 
-    # -- our primary action is to try to build
-    if config.build is None:
-        config.all = True
-    sys.exit(build(config, args))
+        return summary(config)
 
+    # -- args can be a mix of full paths to documents (file or directory)
+    #    stem names (for operating on inventory) and status_type names
+    #
+    # -- sort them out into each of the different types
+    #
+    docs = list()
+    inv = None
+    if args:
+        rawdocs, remainder = getDocumentNames(args)
+        logger.debug("args included %d documents in filesystem: %r",
+                     len(rawdocs), rawdocs)
+        if rawdocs:
+            for doc in rawdocs:
+                docs.append(tldp.sources.SourceDocument(doc))
+
+        if remainder:
+            stati, remainder = getStatusNames(remainder)
+            logger.debug("args included %d status type args: %r",
+                         len(stati), stati)
+
+        if remainder or stati:
+            logger.debug("Checking inventory (%d stems, %d status_classes).",
+                         len(remainder), len(stati))
+            if not config.pubdir:
+                return " --pubdir (and --sourcedir) required for inventory."
+            if not config.sourcedir:
+                return " --sourcedir (and --pubdir) required for inventory."
+
+            stems, remainder, inv = getStemNames(config, stati, remainder)
+            if stems:
+                for doc in stems:
+                    docs.append(doc)
+
+        if remainder:
+            return "Unknown argument (not stem, file nor status_class): " \
+                   + ' '.join(remainder)
+
+    if config.detail:
+        return detail(config, docs, inv)
+
+    if config.script:
+        return script(config, docs, inv)
+
+    if not config.build:
+        logger.info("Assuming --build, since no other action was specified...")
+
+    return build(config, docs, inv)
 
 if __name__ == '__main__':
-    run()
+    sys.exit(run(sys.argv[1:]))
 
 #
 # -- end of file
