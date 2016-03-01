@@ -126,5 +126,84 @@ class TestDriverRun(TestInventoryBase):
         inv = tldp.inventory.Inventory(self.pubdir, self.sourcedirs)
         self.assertEquals(3, len(inv.published.keys()))
 
+    def test_run_no_action(self):
+        ex = example.ex_linuxdoc
+        self.add_new('New-HOWTO', ex)
+        argv = ['--pubdir', self.pubdir, '--sourcedir', self.sourcedir]
+        tldp.driver.run(argv)
+        inv = tldp.inventory.Inventory(self.pubdir, self.sourcedirs)
+        self.assertEquals(1, len(inv.published.keys()))
+
+    def test_run_oops_no_sourcedir(self):
+        ex = example.ex_linuxdoc
+        self.add_new('New-HOWTO', ex)
+        argv = ['--pubdir', self.pubdir]
+        exit = tldp.driver.run(argv)
+        self.assertTrue('required for inventory' in exit)
+
+    def test_run_oops_no_pubdir(self):
+        ex = example.ex_linuxdoc
+        self.add_new('New-HOWTO', ex)
+        argv = ['--sourcedir', self.sourcedir]
+        exit = tldp.driver.run(argv)
+        self.assertTrue('required for inventory' in exit)
+
+
+class TestDriverSkipDocuments(TestInventoryBase):
+
+    def test_skipDocuments_status(self):
+        ex = example.ex_linuxdoc
+        self.add_published('Published-HOWTO', ex)
+        self.add_new('New-HOWTO', ex)
+        self.add_stale('Stale-HOWTO', ex)
+        self.add_orphan('Orphan-HOWTO', ex)
+        self.add_broken('Broken-HOWTO', ex)
+        config, args = tldp.config.collectconfiguration('ldptool', [])
+        config.pubdir = self.pubdir
+        config.sourcedir = self.sourcedirs
+        config.skip = ['stale']
+        inv = tldp.inventory.Inventory(self.pubdir, self.sourcedirs)
+        docs = inv.all.values()
+        inc, exc = tldp.driver.skipDocuments(config, docs, inv)
+        self.assertTrue(1, len(exc))
+        excluded = exc.pop()
+        self.assertEquals(excluded.stem, 'Stale-HOWTO')
+        self.assertEquals(len(inc) + 1, len(inv.all.keys()))
+
+    def test_skipDocuments_stem(self):
+        ex = example.ex_linuxdoc
+        self.add_published('Published-HOWTO', ex)
+        self.add_new('New-HOWTO', ex)
+        self.add_stale('Stale-HOWTO', ex)
+        self.add_orphan('Orphan-HOWTO', ex)
+        self.add_broken('Broken-HOWTO', ex)
+        config, args = tldp.config.collectconfiguration('ldptool', [])
+        config.pubdir = self.pubdir
+        config.sourcedir = self.sourcedirs
+        config.skip = ['Published-HOWTO']
+        inv = tldp.inventory.Inventory(self.pubdir, self.sourcedirs)
+        docs = inv.all.values()
+        inc, exc = tldp.driver.skipDocuments(config, docs, inv)
+        self.assertTrue(1, len(exc))
+        excluded = exc.pop()
+        self.assertEquals(excluded.stem, 'Published-HOWTO')
+        self.assertEquals(len(inc) + 1, len(inv.all.keys()))
+
+    def test_skipDocuments_stem(self):
+        ex = example.ex_linuxdoc
+        self.add_published('Linuxdoc-HOWTO', example.ex_linuxdoc)
+        self.add_new('Docbook4XML-HOWTO', example.ex_docbook4xml)
+        config, args = tldp.config.collectconfiguration('ldptool', [])
+        config.pubdir = self.pubdir
+        config.sourcedir = self.sourcedirs
+        config.skip = ['Docbook4XML']
+        inv = tldp.inventory.Inventory(self.pubdir, self.sourcedirs)
+        docs = inv.all.values()
+        inc, exc = tldp.driver.skipDocuments(config, docs, inv)
+        self.assertTrue(1, len(exc))
+        excluded = exc.pop()
+        self.assertEquals(excluded.stem, 'Docbook4XML-HOWTO')
+        self.assertEquals(len(inc) + 1, len(inv.all.keys()))
+
 #
 # -- end of file
