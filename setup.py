@@ -19,6 +19,8 @@ setup(
     packages=find_packages(),
     test_suite='tests',
     install_requires=['networkx',],
+    data_files = [('/etc/ldptool', ['etc/ldptool.ini']),
+                  ]
     entry_points = {
         'console_scripts': ['ldptool = tldp.driver:main',],
     },
