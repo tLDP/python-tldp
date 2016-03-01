@@ -115,11 +115,15 @@ def getStatusNames(args):
 
 
 def getDocumentClasses(args):
-    sought = set()
+    largs = [x.lower() for x in args]
+    sought = list()
     for cls in tldp.typeguesser.knowndoctypes:
-        if cls.__name__.lower() in args:
-            sought.add(cls)
-    remainder = set(args).difference(sought)
+        if cls.__name__.lower() in largs:
+            sought.append(cls)
+        else:
+            sought.append(None)
+    remainder = set([y for x, y in zip(sought, args) if x])
+    sought = set(sought)
     return sought, remainder
 
 
