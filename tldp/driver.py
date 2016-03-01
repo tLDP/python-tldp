@@ -48,14 +48,10 @@ def summary(config, inv=None, **kwargs):
     return 0
 
 
-def detail(config, docs, inv, **kwargs):
-    if inv is None:
-        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
-    if not docs:
-        docs = inv.work.values()
+def detail(config, docs, **kwargs):
     width = Namespace()
     width.status = max([len(x) for x in status_types])
-    width.stem = max([len(x) for x in inv.source.keys()])
+    width.stem = max([len(x.stem) for x in docs])
     # -- if user just said "list" with no args, then give the user something
     #    sane, "all"; it would make sense for this to be "work", too, but
     #    "all" seems to be less surprising
@@ -66,24 +62,23 @@ def detail(config, docs, inv, **kwargs):
     return 0
 
 
-def build(config, docs, inv, **kwargs):
-    if inv is None:
-        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
-    if not docs:
-        docs = inv.work.values()
-    for source in docs:
+def build(config, docs, **kwargs):
+    for x, source in enumerate(docs, 1):
         if not isinstance(source, tldp.sources.SourceDocument):
-            logger.info("%s skipping, no source for orphan", source.stem)
+            logger.info("%s (%d of %d) skipping, no source for orphan",
+                        source.stem, x, len(docs))
             continue
         if not source.output:
             dirname = os.path.join(config.pubdir, source.stem)
             source.output = tldp.outputs.OutputDirectory(dirname)
         if not source.doctype:
-            logger.warning("%s skipping document of unknown doctype",
-                           source.stem)
+            logger.warning("%s (%d of %d) skipping unknown doctype",
+                           source.stem, x, len(docs))
             continue
         output = source.output
         runner = source.doctype(source=source, output=output, config=config)
+        logger.info("%s (%d of %d) initiating build",
+                    source.stem, x, len(docs))
         runner.generate()
     return 0
 
@@ -93,12 +88,15 @@ def build(config, docs, inv, **kwargs):
 
 
 def getDocumentNames(args):
-    sought = set()
+    sought = list()
     for arg in args:
         doc = arg_issourcedoc(arg)
         if doc is not None:
-            sought.add(doc)
-    remainder = set(args).difference(sought)
+            sought.append(doc)
+        else:
+            sought.append(None)
+    remainder = set([y for x, y in zip(sought, args) if not x])
+    sought = set(filter(None, sought))
     return sought, remainder
 
 
@@ -123,29 +121,29 @@ def getDocumentClasses(args):
         else:
             sought.append(None)
     remainder = set([y for x, y in zip(sought, args) if x])
-    sought = set(sought)
+    sought = set(filter(None, sought))
     return sought, remainder
 
 
-def getStemNames(config, stati, args, inv=None):
-    if inv is None:
-        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+def getDocumentsByStemNames(docs, args):
     sought = set()
-    for stem, doc in inv.all.items():
-        if stem in args:
-            sought.add(doc)
-        if doc.status in stati:
+    for doc in docs:
+        if doc.stem in args:
             sought.add(doc)
     soughtstems = [x.stem for x in sought]
     remainder = set(args).difference(soughtstems)
-    return sought, remainder, inv
+    return sought, remainder
 
 
-def skipDocuments(config, docs, inv):
-    if not docs:
-        if inv is None:
-            inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
-        docs = inv.all.values()
+def getDocumentsByStatus(docs, stati):
+    sought = set()
+    for doc in docs:
+        if doc.status in stati:
+            sought.add(doc)
+    return sought
+
+
+def processSkips(config, docs):
     included = list()
     excluded = list()
     skip_stati, remainder = getStatusNames(config.skip)
@@ -168,6 +166,17 @@ def skipDocuments(config, docs, inv):
         included.append(doc)
     return included, excluded
 
+
+def extractExplicitDocumentArgs(config, args):
+    docs = list()
+    rawdocs, remainder = getDocumentNames(args)
+    logger.debug("args included %d documents in filesystem: %r",
+                 len(rawdocs), rawdocs)
+    for doc in rawdocs:
+        docs.append(tldp.sources.SourceDocument(doc))
+    return docs, remainder
+
+
 def run(argv):
     # -- may want to see option parsing, so set --loglevel as
     #    soon as possible
@@ -182,6 +191,11 @@ def run(argv):
     tag = 'ldptool'
     config, args = tldp.config.collectconfiguration(tag, argv)
 
+    logger.debug("Received the following configuration:")
+    for param, value in sorted(vars(config).items()):
+        logger.debug("  %s = %r", param, value)
+    logger.debug("  args: %r", args)
+
     # -- summary does not require any args
     if config.summary:
 
@@ -194,65 +208,67 @@ def run(argv):
 
         return summary(config)
 
-    # -- args can be a mix of full paths to documents (file or directory)
-    #    stem names (for operating on inventory) and status_type names
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # -- argument handling logic; try to avoid creating an inventory unless it
+    #    is necessary
     #
-    # -- sort them out into each of the different types
+    docs, remainder = extractExplicitDocumentArgs(config, args)
+    stati, remainder = getStatusNames(remainder)
+    logger.debug("args included %d status type args: %r", len(stati), stati)
+
+    need_inventory = False
+    if remainder or stati:
+        need_inventory = True
+    if not docs:
+        need_inventory = True
+
+    # -- by default, we only --list, --script or --build on work-to-be-done
+    #    so, if there have been no special arguments at this point, we will
+    #    simply grab the work to be done; see below the line that says:
     #
-    docs = list()
-    inv = None
-    if args:
-        rawdocs, remainder = getDocumentNames(args)
-        logger.debug("args included %d documents in filesystem: %r",
-                     len(rawdocs), rawdocs)
-        if rawdocs:
-            for doc in rawdocs:
-                docs.append(tldp.sources.SourceDocument(doc))
-
-        if remainder:
-            stati, remainder = getStatusNames(remainder)
-            logger.debug("args included %d status type args: %r",
-                         len(stati), stati)
-
-        if remainder or stati:
-            logger.debug("Checking inventory (%d stems, %d status_classes).",
-                         len(remainder), len(stati))
-            if not config.pubdir:
-                return " --pubdir (and --sourcedir) required for inventory."
-            if not config.sourcedir:
-                return " --sourcedir (and --pubdir) required for inventory."
-
-            stems, remainder, inv = getStemNames(config, stati, remainder)
-            if stems:
-                for doc in stems:
-                    docs.append(doc)
-
-        if remainder:
-            return "Unknown argument (not stem, file nor status_class): " \
-                   + ' '.join(remainder)
-
-    if config.skip:
-        docs, excluded = skipDocuments(config, docs, inv)
-
-    # -- one last check to see that config.pubdir and config.sourcedir are set
-    #    appropriately; before we try to use them
+    #      docs = inv.work.values()
     #
-    if not inv:
+    # -- also make one last check to see that config.pubdir and
+    #    config.sourcedir are set appropriately; just before creating an
+    #    Inventory
+    #
+    if need_inventory:
         if not config.pubdir:
             return " --pubdir (and --sourcedir) required for inventory."
         if not config.sourcedir:
             return " --sourcedir (and --pubdir) required for inventory."
+        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+        docs.extend(inv.work.values())
+    else:
+        inv = None
+
+    if stati:
+        docs.extend(getDocumentsByStatus(docs, stati))
+
+    if remainder:
+        moredocs, moreargs = getDocumentsByStemNames(docs, remainder)
+        docs.extend(moredocs)
+
+    if remainder:
+        return "Unknown argument (not stem, file nor status_class): " \
+               + ' '.join(remainder)
+
+    docs, excluded = processSkips(config, docs)
+
+    if docs:
+        docs.sort(key=lambda x: x.stem.lower())
 
     if config.detail:
-        return detail(config, docs, inv)
+        return detail(config, docs)
 
     if config.script:
-        return script(config, docs, inv)
+        return script(config, docs)
 
     if not config.build:
         logger.info("Assuming --build, since no other action was specified...")
 
-    return build(config, docs, inv)
+    return build(config, docs)
+
 
 def main():
     sys.exit(run(sys.argv[1:]))
