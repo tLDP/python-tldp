@@ -19,9 +19,10 @@ logging.basicConfig(stream=sys.stderr, format=logformat, level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
-def summary(config, inv=None):
+def summary(config, inv=None, **kwargs):
     if inv is None:
         inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+    file = kwargs.get('file', sys.stdout)
     width = Namespace()
     width.status = max([len(x) for x in status_types])
     width.count = len(str(len(inv.source.keys())))
@@ -30,9 +31,9 @@ def summary(config, inv=None):
             continue
         count = len(getattr(inv, status, 0))
         s = '{0:{w.status}}  {1:{w.count}}  '.format(status, count, w=width)
-        print(s, end="")
+        print(s, end="", file=file)
         if config.verbose:
-            print(', '.join(getattr(inv, status).keys()))
+            print(', '.join(getattr(inv, status).keys()), file=file)
         else:
             abbrev = getattr(inv, status).keys()
             s = ''
@@ -42,7 +43,7 @@ def summary(config, inv=None):
                     s = s + ', ' + abbrev.pop(0)
                 if abbrev:
                     s = s + ', and %d more ...' % (len(abbrev))
-            print(s)
+            print(s, file=file)
     return 0
 
 
@@ -64,18 +65,18 @@ def detail(config, docs, inv, **kwargs):
     return 0
 
 
-def build(config, docs, inv):
+def build(config, docs, inv, **kwargs):
     if inv is None:
         inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
     if not docs:
         docs = inv.work.values()
     for source in docs:
-        if source.stem in config.skip:
-            logger.info("%s skipping build per request", source.stem)
-            continue
         if not source.output:
             dirname = os.path.join(config.pubdir, source.stem)
             source.output = tldp.outputs.OutputDirectory(dirname)
+        if source.stem in config.skip:
+            logger.info("%s skipping build per request", source.stem)
+            continue
         if not source.doctype:
             logger.warning("%s skipping document of unknown doctype",
                            source.stem)
@@ -86,8 +87,8 @@ def build(config, docs, inv):
     return 0
 
 
-def script(config, docs, inv):
-    return 0
+# def script(config, docs, inv, **kwargs):
+#     return 0
 
 
 def getDocumentNames(args):
