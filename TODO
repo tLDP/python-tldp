@@ -1,18 +1,12 @@
 python-tldp TODO
 ----------------
 
+  * Add a verb to produce a runnable shell-script instead of having 
+    ldptool do the job.
+
   * SourceDocument and OutputDirectory both have nearly-identical
     methods called detail() which define a format string; probably
     should be defined once in a parent class or something
-
-  * Test out on Ubuntu (and any other conveniently accessible platforms).
-
-  * Packaging.
-
-  * Consider adding --skip broken, --skip docbook4xml, ...
-
-  * Add a verb to produce a runnable shell-script instead of having 
-    ldptool do the job.
 
 
 CascadingConfig
