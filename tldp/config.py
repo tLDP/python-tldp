@@ -32,11 +32,11 @@ def collectconfiguration(tag, argv):
     g.add_argument('--summary',
                    '-t',
                    action='store_true', default=False,
-                   help='dump inventory status report [%(default)s]')
+                   help='dump inventory summary report [%(default)s]')
 
     ap.add_argument('--verbose',
                     action='store_true', default=False,
-                    help='more info in --list and --status [%(default)s]')
+                    help='more info in --list/--detail [%(default)s]')
     ap.add_argument('--loglevel',
                     default=logging.ERROR, type=arg_isloglevel,
                     help='set the loglevel')
