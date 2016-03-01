@@ -98,6 +98,7 @@ class TestNullSourceCollection(TestToolsFilesystem):
     def test_SourceCollection_no_dirnames(self):
         s = SourceCollection()
         self.assertIsInstance(s, SourceCollection)
+        self.assertTrue('docs' in str(s))
 
 
 class TestInvalidSourceCollection(TestToolsFilesystem):
