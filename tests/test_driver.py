@@ -2,14 +2,9 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-import time
-import random
-import shutil
-import unittest
 from cStringIO import StringIO
 from argparse import Namespace
 
-from tldp.outputs import OutputNamingConvention
 from tldptesttools import TestInventoryBase
 
 # -- Test Data
@@ -31,8 +26,10 @@ class TestDriverDetail(TestInventoryBase):
                            sourcedir=self.sourcedirs,
                            verbose=True,
                            )
+        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+        docs = inv.all.values()
         stdout = StringIO()
-        tldp.driver.detail(config, None, None, file=stdout)
+        tldp.driver.detail(config, docs, file=stdout)
         stdout.seek(0)
         self.assertTrue('newer file' in stdout.read())
 
@@ -43,8 +40,10 @@ class TestDriverDetail(TestInventoryBase):
                            sourcedir=self.sourcedirs,
                            verbose=True,
                            )
+        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+        docs = inv.all.values()
         stdout = StringIO()
-        tldp.driver.detail(config, None, None, file=stdout)
+        tldp.driver.detail(config, docs, file=stdout)
         stdout.seek(0)
         self.assertTrue('missing file' in stdout.read())
 
@@ -56,11 +55,11 @@ class TestDriverBuild(TestInventoryBase):
         config, args = tldp.config.collectconfiguration('ldptool', [])
         config.pubdir = self.pubdir
         config.sourcedir = self.sourcedirs
-        config.skip=[]
+        config.skip = []
         inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
-        tldp.driver.build(config, docs, inv)
+        tldp.driver.build(config, docs)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -69,11 +68,11 @@ class TestDriverBuild(TestInventoryBase):
         config, args = tldp.config.collectconfiguration('ldptool', [])
         config.pubdir = self.pubdir
         config.sourcedir = self.sourcedirs
-        config.skip=['Frobnitz-DocBook-SGML-HOWTO']
+        config.skip = ['Frobnitz-DocBook-SGML-HOWTO']
         inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
-        tldp.driver.build(config, docs, inv)
+        tldp.driver.build(config, docs)
         doc = docs.pop(0)
         self.assertFalse(doc.output.iscomplete)
         # -- after figuring out collateindex and friends, this should say
@@ -84,11 +83,11 @@ class TestDriverBuild(TestInventoryBase):
         config, args = tldp.config.collectconfiguration('ldptool', [])
         config.pubdir = self.pubdir
         config.sourcedir = self.sourcedirs
-        config.skip=['Frobnitz-DocBook-XML-4-HOWTO']
+        config.skip = ['Frobnitz-DocBook-XML-4-HOWTO']
         inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
-        tldp.driver.build(config, docs, inv)
+        tldp.driver.build(config, docs)
         doc = docs.pop(0)
         self.assertFalse(doc.output.iscomplete)
         # -- after figuring out the XSL files at test time, this should say
@@ -120,7 +119,7 @@ class TestDriverRun(TestInventoryBase):
         self.add_orphan('Orphan-HOWTO', ex)
         self.add_broken('Broken-HOWTO', ex)
         argv = ['--pubdir', self.pubdir, '--sourcedir', self.sourcedir]
-        fullpath = os.path.join(self.tempdir, 'sources', 'Published-HOWTO')
+        fullpath = os.path.join(self.tempdir, 'sources', 'Published-HOWTO.sgml')
         argv.extend(['stale', 'Orphan-HOWTO', fullpath])
         tldp.driver.run(argv)
         inv = tldp.inventory.Inventory(self.pubdir, self.sourcedirs)
@@ -149,7 +148,7 @@ class TestDriverRun(TestInventoryBase):
         self.assertTrue('required for inventory' in exit)
 
 
-class TestDriverSkipDocuments(TestInventoryBase):
+class TestDriverProcessSkips(TestInventoryBase):
 
     def test_skipDocuments_status(self):
         ex = example.ex_linuxdoc
@@ -164,7 +163,7 @@ class TestDriverSkipDocuments(TestInventoryBase):
         config.skip = ['stale']
         inv = tldp.inventory.Inventory(self.pubdir, self.sourcedirs)
         docs = inv.all.values()
-        inc, exc = tldp.driver.skipDocuments(config, docs, inv)
+        inc, exc = tldp.driver.processSkips(config, docs)
         self.assertTrue(1, len(exc))
         excluded = exc.pop()
         self.assertEquals(excluded.stem, 'Stale-HOWTO')
@@ -183,14 +182,13 @@ class TestDriverSkipDocuments(TestInventoryBase):
         config.skip = ['Published-HOWTO']
         inv = tldp.inventory.Inventory(self.pubdir, self.sourcedirs)
         docs = inv.all.values()
-        inc, exc = tldp.driver.skipDocuments(config, docs, inv)
+        inc, exc = tldp.driver.processSkips(config, docs)
         self.assertTrue(1, len(exc))
         excluded = exc.pop()
         self.assertEquals(excluded.stem, 'Published-HOWTO')
         self.assertEquals(len(inc) + 1, len(inv.all.keys()))
 
-    def test_skipDocuments_stem(self):
-        ex = example.ex_linuxdoc
+    def test_skipDocuments_doctype(self):
         self.add_published('Linuxdoc-HOWTO', example.ex_linuxdoc)
         self.add_new('Docbook4XML-HOWTO', example.ex_docbook4xml)
         config, args = tldp.config.collectconfiguration('ldptool', [])
@@ -199,7 +197,7 @@ class TestDriverSkipDocuments(TestInventoryBase):
         config.skip = ['Docbook4XML']
         inv = tldp.inventory.Inventory(self.pubdir, self.sourcedirs)
         docs = inv.all.values()
-        inc, exc = tldp.driver.skipDocuments(config, docs, inv)
+        inc, exc = tldp.driver.processSkips(config, docs)
         self.assertTrue(1, len(exc))
         excluded = exc.pop()
         self.assertEquals(excluded.stem, 'Docbook4XML-HOWTO')
