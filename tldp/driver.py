@@ -71,11 +71,14 @@ def build(config, docs, inv, **kwargs):
     if not docs:
         docs = inv.work.values()
     for source in docs:
+        if not isinstance(source, tldp.sources.SourceDocument):
+            logger.info("%s skipping, no source for orphan", source.stem)
+            continue
         if not source.output:
             dirname = os.path.join(config.pubdir, source.stem)
             source.output = tldp.outputs.OutputDirectory(dirname)
         if source.stem in config.skip:
-            logger.info("%s skipping build per request", source.stem)
+            logger.info("%s skipping, per user request", source.stem)
             continue
         if not source.doctype:
             logger.warning("%s skipping document of unknown doctype",
