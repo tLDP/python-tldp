@@ -58,14 +58,14 @@ def scansourcedirs(dirnames):
         raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), sdir)
 
     for sdir in sorted(dirs):
+        logger.debug("Scanning for source documents in %s.", sdir)
         for fname in sorted(os.listdir(sdir)):
             candidates = list()
             possible = arg_issourcedoc(os.path.join(sdir, fname))
             if possible:
                 candidates.append(SourceDocument(possible))
             else:
-                logger.warning("Skipping non-directory, non-plain file %s",
-                               possible)
+                logger.warning("Skipping non-document %s", fname)
                 continue
             for candy in candidates:
                 if candy.stem in found:
