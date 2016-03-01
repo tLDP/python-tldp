@@ -201,8 +201,11 @@ def run(argv):
 
     return build(config, docs, inv)
 
-if __name__ == '__main__':
+def main():
     sys.exit(run(sys.argv[1:]))
+
+if __name__ == '__main__':
+    main()
 
 #
 # -- end of file
