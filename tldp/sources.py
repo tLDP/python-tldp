@@ -79,6 +79,7 @@ def scansourcedirs(dirnames):
 
 
 def arg_issourcedoc(filename):
+    filename = os.path.abspath(filename)
     if os.path.isfile(filename):
         return filename
     elif os.path.isdir(filename):
@@ -101,7 +102,9 @@ def sourcedoc_fromdir(dirname):
     elif len(candidates) == 0:
         return None
     else:
-        return candidates.pop()
+        doc = candidates.pop()
+        logger.debug("%s identified main document %s.", stem, doc)
+        return doc
 
 
 class SourceCollection(LDPDocumentCollection):
