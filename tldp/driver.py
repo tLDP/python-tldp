@@ -9,6 +9,7 @@ import logging
 from argparse import Namespace
 
 import tldp
+import tldp.typeguesser
 
 from tldp.inventory import status_classes, status_types
 from tldp.utils import arg_isloglevel
@@ -77,9 +78,6 @@ def build(config, docs, inv, **kwargs):
         if not source.output:
             dirname = os.path.join(config.pubdir, source.stem)
             source.output = tldp.outputs.OutputDirectory(dirname)
-        if source.stem in config.skip:
-            logger.info("%s skipping, per user request", source.stem)
-            continue
         if not source.doctype:
             logger.warning("%s skipping document of unknown doctype",
                            source.stem)
@@ -116,6 +114,15 @@ def getStatusNames(args):
     return sought, remainder
 
 
+def getDocumentClasses(args):
+    sought = set()
+    for cls in tldp.typeguesser.knowndoctypes:
+        if cls.__name__.lower() in args:
+            sought.add(cls)
+    remainder = set(args).difference(sought)
+    return sought, remainder
+
+
 def getStemNames(config, stati, args, inv=None):
     if inv is None:
         inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
@@ -129,6 +136,33 @@ def getStemNames(config, stati, args, inv=None):
     remainder = set(args).difference(soughtstems)
     return sought, remainder, inv
 
+
+def skipDocuments(config, docs, inv):
+    if not docs:
+        if inv is None:
+            inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+        docs = inv.all.values()
+    included = list()
+    excluded = list()
+    skip_stati, remainder = getStatusNames(config.skip)
+    skip_doctypes, skip_stems = getDocumentClasses(remainder)
+    for doc in docs:
+        stem = doc.stem
+        if hasattr(doc, 'doctype'):
+            if doc.doctype in skip_doctypes:
+                logger.info("%s skipping doctype %s", stem, doc.doctype)
+                excluded.append(doc)
+                continue
+        if doc.status in skip_stati:
+            logger.info("%s skipping status %s", stem, doc.status)
+            excluded.append(doc)
+            continue
+        if doc.stem in skip_stems:
+            logger.info("%s skipping stem %s", stem, stem)
+            excluded.append(doc)
+            continue
+        included.append(doc)
+    return included, excluded
 
 def run(argv):
     # -- may want to see option parsing, so set --loglevel as
@@ -192,6 +226,18 @@ def run(argv):
         if remainder:
             return "Unknown argument (not stem, file nor status_class): " \
                    + ' '.join(remainder)
+
+    if config.skip:
+        docs, excluded = skipDocuments(config, docs, inv)
+
+    # -- one last check to see that config.pubdir and config.sourcedir are set
+    #    appropriately; before we try to use them
+    #
+    if not inv:
+        if not config.pubdir:
+            return " --pubdir (and --sourcedir) required for inventory."
+        if not config.sourcedir:
+            return " --sourcedir (and --pubdir) required for inventory."
 
     if config.detail:
         return detail(config, docs, inv)
