@@ -7,12 +7,13 @@ import os
 import sys
 import errno
 import logging
-logger = logging.getLogger(__name__)
 
 from tldp.ldpcollection import LDPDocumentCollection
 
 from tldp.utils import statfiles, stem_and_ext
 from tldp.typeguesser import guess, knownextensions
+
+logger = logging.getLogger(__name__)
 
 
 def scansourcedirs(dirnames):

@@ -5,14 +5,13 @@ from __future__ import absolute_import, division, print_function
 
 import copy
 import logging
-logger = logging.getLogger(__name__)
 
 from tldp.utils import max_mtime, mtime_gt
 
 from tldp.sources import SourceCollection
 from tldp.outputs import OutputCollection
 
-from argparse import Namespace
+logger = logging.getLogger(__name__)
 
 # -- any individual document (source or output) will have a status
 #    from the following list of status_types
@@ -99,7 +98,7 @@ class Inventory(object):
             del o[doc]
             self.orphan[doc].status = 'orphan'
         logger.debug("Identified %d orphan documents: %r.", len(self.orphan),
-                    self.orphan.keys())
+                     self.orphan.keys())
 
         # -- unpublished ('new') identification
         #
@@ -109,7 +108,7 @@ class Inventory(object):
             del s[doc]
             self.new[doc].status = 'new'
         logger.debug("Identified %d new documents: %r.", len(self.new),
-                    self.new.keys())
+                     self.new.keys())
 
         # -- published identification; source and output should be same size
         assert len(s) == len(o)
@@ -135,7 +134,7 @@ class Inventory(object):
                 odoc.status = sdoc.status = 'stale'
                 self.stale[stem] = sdoc
         logger.debug("Identified %d stale documents: %r.", len(self.stale),
-                    self.stale.keys())
+                     self.stale.keys())
 
         # -- stale identification
         #
@@ -145,7 +144,7 @@ class Inventory(object):
                 self.broken[stem] = sdoc
                 sdoc.status = sdoc.output.status = 'broken'
         logger.debug("Identified %d broken documents: %r.", len(self.broken),
-                    self.broken.keys())
+                     self.broken.keys())
 
     def getByStatusClass(self, status_class):
         desired = status_classes.get(status_class, None)
