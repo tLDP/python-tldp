@@ -147,5 +147,41 @@ class Inventory(object):
         logger.debug("Identified %d broken documents: %r.", len(self.broken),
                     self.broken.keys())
 
+    def getByStatusClass(self, status_class):
+        desired = status_classes.get(status_class, None)
+        assert isinstance(desired, list)
+        collection = SourceCollection()
+        for status_type in desired:
+            collection.update(getattr(self, status_type))
+        return collection
+
+    @property
+    def outputs(self):
+        return self.getByStatusClass('outputs')
+
+    @property
+    def sources(self):
+        return self.getByStatusClass('sources')
+
+    @property
+    def problems(self):
+        return self.getByStatusClass('problems')
+
+    @property
+    def work(self):
+        return self.getByStatusClass('work')
+
+    @property
+    def orphans(self):
+        return self.getByStatusClass('orphans')
+
+    @property
+    def orphaned(self):
+        return self.getByStatusClass('orphaned')
+
+    @property
+    def all(self):
+        return self.getByStatusClass('all')
+
 #
 # -- end of file
