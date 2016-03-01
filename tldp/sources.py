@@ -59,13 +59,9 @@ def scansourcedirs(dirnames):
     for sdir in sorted(dirs):
         for fname in sorted(os.listdir(sdir)):
             candidates = list()
-            possible = os.path.join(sdir, fname)
-            if os.path.isfile(possible):
+            possible = arg_issourcedoc(os.path.join(sdir, fname))
+            if possible:
                 candidates.append(SourceDocument(possible))
-            elif os.path.isdir(possible):
-                possible = sourcedoc_fromdir(possible)
-                if possible:
-                    candidates.append(SourceDocument(possible))
             else:
                 logger.warning("Skipping non-directory, non-plain file %s",
                                possible)
@@ -79,6 +75,14 @@ def scansourcedirs(dirnames):
                     found[candy.stem] = candy
     logger.debug("Discovered %s documents total", len(found))
     return found
+
+
+def arg_issourcedoc(filename):
+    if os.path.isfile(filename):
+        return filename
+    elif os.path.isdir(filename):
+        return sourcedoc_fromdir(filename)
+    return None
 
 
 def sourcedoc_fromdir(dirname):
