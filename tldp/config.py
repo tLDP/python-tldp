@@ -53,7 +53,8 @@ def collectconfiguration(tag, argv):
                     help='a directory containing LDP output documents')
     ap.add_argument('--configfile', '--config-file', '--cfg',
                     '-c',
-                    default=None, type=arg_isreadablefile,
+                    default='/etc/ldptool/ldptool.ini',
+                    type=arg_isreadablefile,
                     help='a configuration file')
 
     # -- collect up the distributed configuration fragments
