@@ -20,7 +20,7 @@ setup(
     test_suite='tests',
     install_requires=['networkx',],
     entry_points = {
-        'console_scripts': ['ldptool = tldp.driver:run',],
+        'console_scripts': ['ldptool = tldp.driver:main',],
     },
     classifiers=[
         'Development Status :: 3 - Alpha',
