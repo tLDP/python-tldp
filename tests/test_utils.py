@@ -161,12 +161,12 @@ class Test_statfiles(unittest.TestCase):
 class Test_statfile(TestToolsFilesystem):
 
     def test_statfile_bogustype(self):
-        with self.assertRaises(TypeError) as ecm:
+        with self.assertRaises(TypeError):
             statfile(0)
 
     def test_statfile_enoent(self):
         f = ntf(dir=self.tempdir)
-        st = statfile(f.name + '-ENOENT_TEST')
+        self.assertIsNone(statfile(f.name + '-ENOENT_TEST'))
 
 
 class Test_stem_and_ext(unittest.TestCase):
