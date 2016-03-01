@@ -125,7 +125,7 @@ def getDocumentClasses(args):
     return sought, remainder
 
 
-def getDocumentsByStemNames(docs, args):
+def getDocumentsByStems(docs, args):
     sought = set()
     for doc in docs:
         if doc.stem in args:
@@ -144,8 +144,8 @@ def getDocumentsByStatus(docs, stati):
 
 
 def processSkips(config, docs):
-    included = list()
-    excluded = list()
+    included = set()
+    excluded = set()
     skip_stati, remainder = getStatusNames(config.skip)
     skip_doctypes, skip_stems = getDocumentClasses(remainder)
     for doc in docs:
@@ -153,27 +153,27 @@ def processSkips(config, docs):
         if hasattr(doc, 'doctype'):
             if doc.doctype in skip_doctypes:
                 logger.info("%s skipping doctype %s", stem, doc.doctype)
-                excluded.append(doc)
+                excluded.add(doc)
                 continue
         if doc.status in skip_stati:
             logger.info("%s skipping status %s", stem, doc.status)
-            excluded.append(doc)
+            excluded.add(doc)
             continue
         if doc.stem in skip_stems:
             logger.info("%s skipping stem %s", stem, stem)
-            excluded.append(doc)
+            excluded.add(doc)
             continue
-        included.append(doc)
+        included.add(doc)
     return included, excluded
 
 
 def extractExplicitDocumentArgs(config, args):
-    docs = list()
+    docs = set()
     rawdocs, remainder = getDocumentNames(args)
     logger.debug("args included %d documents in filesystem: %r",
                  len(rawdocs), rawdocs)
     for doc in rawdocs:
-        docs.append(tldp.sources.SourceDocument(doc))
+        docs.add(tldp.sources.SourceDocument(doc))
     return docs, remainder
 
 
@@ -212,14 +212,15 @@ def run(argv):
     # -- argument handling logic; try to avoid creating an inventory unless it
     #    is necessary
     #
-    docs, remainder = extractExplicitDocumentArgs(config, args)
+    workset, remainder = extractExplicitDocumentArgs(config, args)
     stati, remainder = getStatusNames(remainder)
-    logger.debug("args included %d status type args: %r", len(stati), stati)
+    if len(workset):
+        logger.info("Added %d explicit file paths from args.", len(workset))
 
     need_inventory = False
     if remainder or stati:
         need_inventory = True
-    if not docs:
+    if not workset:
         need_inventory = True
 
     # -- by default, we only --list, --script or --build on work-to-be-done
@@ -238,25 +239,38 @@ def run(argv):
         if not config.sourcedir:
             return " --sourcedir (and --pubdir) required for inventory."
         inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
-        docs.extend(inv.work.values())
     else:
         inv = None
 
     if stati:
-        docs.extend(getDocumentsByStatus(docs, stati))
+        oldsize = len(workset)
+        for status in stati:
+            collection = getattr(inv, status)
+            assert isinstance(collection, tldp.sources.SourceCollection)
+            workset.update(collection.values())
+        growth = len(workset) - oldsize
+        if growth:
+            logger.info("Added %d docs, found by status class .", growth)
 
+    unknownargs = None
     if remainder:
-        moredocs, moreargs = getDocumentsByStemNames(docs, remainder)
-        docs.extend(moredocs)
+        docs, unknownargs = getDocumentsByStems(inv.work.values(), remainder)
+        workset.update(docs)
+        logger.info("Added %d docs, found by stem name.", len(docs))
 
-    if remainder:
+    if unknownargs:
         return "Unknown argument (not stem, file nor status_class): " \
                + ' '.join(remainder)
 
-    docs, excluded = processSkips(config, docs)
+    if not workset:
+        workset.update(inv.work.values())
 
-    if docs:
-        docs.sort(key=lambda x: x.stem.lower())
+    workset, excluded = processSkips(config, workset)
+
+    if not workset:
+        return "No work to do."
+    
+    docs = sorted(workset, key=lambda x: x.stem.lower())
 
     if config.detail:
         return detail(config, docs)
