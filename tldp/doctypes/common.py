@@ -68,7 +68,9 @@ class BaseDoctype(object):
         self.output = kwargs.get('output', None)
         self.config = kwargs.get('config', None)
         self.removals = list()
-        assert None not in (self.source, self.output, self.config)
+        assert self.source is not None
+        assert self.output is not None
+        assert self.config is not None
 
     def cleanup(self):
         stem = self.source.stem
