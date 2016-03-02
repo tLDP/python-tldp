@@ -63,7 +63,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
     def test_finding_nonfile(self):
         maindir = 'LDP/LDP/howto'
         reldir, absdir = self.adddir(maindir)
-        os.mkfifo(os.path.join(absdir, 'non-dir-non-file.rst'))
+        os.mkfifo(os.path.join(absdir, 'non-dir-non-file.xml'))
         s = scansourcedirs([absdir])
         self.assertEquals(0, len(s))
 
