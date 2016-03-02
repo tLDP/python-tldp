@@ -49,11 +49,11 @@ class SignatureChecker(object):
         for sig in cls.signatures:
             try:
                 sindex = buf.index(sig.lower())
-                logger.debug("Found signature %s in %s at %s; doctype %s.",
+                logger.debug("Found signature %r in %s at %s; doctype %s.",
                              sig, f.name, sindex, cls)
                 return sindex
             except ValueError:
-                logger.debug("Signature %s not found in %s for type %s",
+                logger.debug("Signature %r not found in %s for type %s",
                              sig, f.name, cls.__name__)
         return None
 
