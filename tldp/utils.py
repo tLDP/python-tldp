@@ -157,13 +157,13 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
         if result != 0:
             with open(stdoutname) as f:
                 for line in f:
-                    logger.debug("STDOUT: %s", line.rstrip())
+                    logger.info("STDOUT: %s", line.rstrip())
     if isinstance(stderr, int) and stderrname:
         os.close(stderr)
         if result != 0:
             with open(stderrname) as f:
                 for line in f:
-                    logger.debug("STDERR: %s", line.rstrip())
+                    logger.info("STDERR: %s", line.rstrip())
     return result
 
 
