@@ -19,7 +19,8 @@ from tldptesttools import TestToolsFilesystem
 import example
 
 # -- SUT
-from tldp.sources import SourceCollection, SourceDocument, scansourcedirs
+from tldp.sources import SourceCollection, SourceDocument
+from tldp.sources import scansourcedirs, sourcedoc_fromdir
 
 sampledocs = os.path.join(os.path.dirname(__file__), 'sample-documents')
 
@@ -138,6 +139,11 @@ class TestSourceDocument(unittest.TestCase):
         dirname = os.path.dirname(example.ex_linuxdoc_dir.filename)
         doc = SourceDocument(dirname)
         self.assertIsInstance(doc, SourceDocument)
+
+    def test_sourcedoc_fromdir_withdots(self):
+        dirname = os.path.dirname(example.ex_docbook4xml_dir.filename)
+        doc = sourcedoc_fromdir(dirname)
+        self.assertIsNotNone(doc)
 
     def test_detail(self):
         ex = example.ex_linuxdoc_dir

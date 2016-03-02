@@ -87,18 +87,19 @@ def arg_issourcedoc(filename):
     return None
 
 
-def sourcedoc_fromdir(dirname):
+def sourcedoc_fromdir(name):
     candidates = list()
-    stem, _ = stem_and_ext(dirname)
-    parentdir = os.path.dirname(dirname)
+    if not os.path.isdir(name):
+        return None
+    stem = os.path.basename(name)
     for ext in knownextensions:
-        possible = os.path.join(parentdir, stem, stem + ext)
+        possible = os.path.join(name, stem + ext)
         if os.path.isfile(possible):
             candidates.append(possible)
     if len(candidates) > 1:
         logger.warning("%s multiple document choices in dir %s, bailing....",
-                       stem, dirname)
-        raise Exception("multiple document choices in " + dirname)
+                       stem, name)
+        raise Exception("multiple document choices in " + name)
     elif len(candidates) == 0:
         return None
     else:
