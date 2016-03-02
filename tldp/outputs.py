@@ -146,13 +146,11 @@ class OutputDirectory(OutputNamingConvention):
         return True
 
     def detail(self, widths, verbose, file=sys.stdout):
-        '''
-        '''
         template = '{s.status:{w.status}} {s.stem:{w.stem}}'
         outstr = template.format(s=self, w=widths)
         print(outstr)
         if verbose:
-            pass
+            print('  missing source', file=file)
 
 
 class OutputCollection(LDPDocumentCollection):
