@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<article>
+  <articleinfo>
+    <title>T</title>
+    <author><firstname>A</firstname><surname>B</surname></author>
+    <authorinitials>AB</authorinitials>
+    <revhistory> <revision>
+         <revnumber>v0.0</revnumber>
+         <date>2016-02-11</date>
+         <authorinitials>AB</authorinitials>
+          <revremark> Initial release.  </revremark>
+      </revision> </revhistory>
+    <abstract> <para> abstract </para> </abstract>
+  </articleinfo>
+
+  <sect1 id="intro">
+    <title>Intro</title>
+    <para>Text</para>
+    <sect2>
+      <title>Intro</title>
+      <para>Text</para>
+    </sect2>
+  </sect1>
+
+</article>
