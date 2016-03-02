@@ -121,8 +121,8 @@ class OutputDirectory(OutputNamingConvention):
         This is done as a matter of course when the output documents must be
         regenerated.  Better to start fresh.
         '''
-        logger.debug("%s removing dir   %s.", self.stem, self.dirname)
         if os.path.isdir(self.dirname):
+            logger.debug("%s removing dir   %s.", self.stem, self.dirname)
             shutil.rmtree(self.dirname)
 
     def hook_prebuild(self):
