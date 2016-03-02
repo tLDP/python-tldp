@@ -89,8 +89,9 @@ def build(config, docs, **kwargs):
     return 1
 
 
-# def script(config, docs, inv, **kwargs):
-#     return 0
+def script(config, docs, inv, **kwargs):
+    raise NotImplementedError
+    return 0
 
 
 def getDocumentNames(args):
@@ -245,7 +246,7 @@ def run(argv):
         if not config.sourcedir:
             return " --sourcedir (and --pubdir) required for inventory."
         inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
-        logger.info("Collected inventory containing %s documents.", 
+        logger.info("Collected inventory containing %s documents.",
                     len(inv.all.keys()))
     else:
         inv = None
@@ -285,7 +286,7 @@ def run(argv):
     if not workset:
         logger.info("No work to do.")
         return 0
-    
+
     # -- listify the set and sort it
     #
     docs = sorted(workset, key=lambda x: x.stem.lower())

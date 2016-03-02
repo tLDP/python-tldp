@@ -164,8 +164,9 @@ class SourceDocument(object):
         self.filename = os.path.abspath(filename)
 
         if not os.path.exists(self.filename):
-            logger.critical("Missing source document: %s", self.filename)
-            raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), self.filename)
+            fn = self.filename
+            logger.critical("Missing source document: %s", fn)
+            raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), fn)
 
         if os.path.isdir(self.filename):
             self.filename = sourcedoc_fromdir(self.filename)
@@ -176,8 +177,9 @@ class SourceDocument(object):
             self.filename = None
 
         if self.filename is None:
-            logger.critical("Source document is not a plain file: %s", filename)
-            raise ValueError(filename + " not identifiable as a document")
+            fn = filename
+            logger.critical("Source document is not a plain file: %s", fn)
+            raise ValueError(fn + " not identifiable as a document")
 
         self.doctype = guess(self.filename)
         self.status = 'source'

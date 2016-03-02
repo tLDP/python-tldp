@@ -8,10 +8,11 @@ import sys
 import errno
 import shutil
 import logging
-logger = logging.getLogger(__name__)
 
 from tldp.ldpcollection import LDPDocumentCollection
 from tldp.utils import logdir, statfiles
+
+logger = logging.getLogger(__name__)
 
 
 class OutputNamingConvention(object):
@@ -166,8 +167,8 @@ class OutputCollection(LDPDocumentCollection):
         '''construct an OutputCollection
 
         If dirname is not supplied, OutputCollection is basically, a dict().
-        If dirname is supplied, then OutputCollection scans the filesystem
-        for subdirectories of dirname and creates an OutputDirectory for each
+        If dirname is supplied, then OutputCollection scans the filesystem for
+        subdirectories of dirname and creates an OutputDirectory for each
         subdir.  Each subdir name is used as the stem (or key) for holding the
         OutputDirectory in the OutputCollection.
 
