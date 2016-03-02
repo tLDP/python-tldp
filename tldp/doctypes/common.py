@@ -129,7 +129,7 @@ class BaseDoctype(object):
         if result != 0:
             with open(tf.name) as f:
                 for line in f:
-                    logger.debug("Script: %s", line.rstrip())
+                    logger.info("Script: %s", line.rstrip())
             return False
         return True
 
