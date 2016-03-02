@@ -261,7 +261,7 @@ def run(argv):
 
     unknownargs = None
     if remainder:
-        docs, unknownargs = getDocumentsByStems(inv.work.values(), remainder)
+        docs, unknownargs = getDocumentsByStems(inv.all.values(), remainder)
         workset.update(docs)
         logger.info("Added %d docs, found by stem name.", len(docs))
 

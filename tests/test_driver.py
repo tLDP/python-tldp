@@ -28,7 +28,7 @@ class TestDriverDetail(TestInventoryBase):
     def test_stale_detail_verbosity(self):
         c = self.config
         self.add_stale('Frobnitz-HOWTO', example.ex_docbook4xml)
-        c.verbose=True,
+        c.verbose = True,
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         docs = inv.all.values()
         stdout = StringIO()
@@ -39,7 +39,7 @@ class TestDriverDetail(TestInventoryBase):
     def test_broken_detail_verbosity(self):
         c = self.config
         self.add_broken('Frobnitz-HOWTO', example.ex_docbook4xml)
-        c.verbose=True,
+        c.verbose = True,
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         docs = inv.all.values()
         stdout = StringIO()
@@ -157,6 +157,7 @@ class TestDriverProcessSkips(TestInventoryBase):
         self.assertEquals(excluded.stem, 'Docbook4XML-HOWTO')
         self.assertEquals(len(inc) + 1, len(inv.all.keys()))
 
+
 @unittest.skip("Except when you want to spend time....")
 class TestDriverBuild(TestInventoryBase):
 
@@ -196,13 +197,12 @@ class TestDriverBuild(TestInventoryBase):
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
-
     def test_build_one_broken(self):
         c = self.config
         self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
         # -- mangle the content of a valid DocBook XML file
         borked = example.ex_docbook4xml.content[:-12]
-        self.add_new('Frobnitz-Borked-XML-4-HOWTO', 
+        self.add_new('Frobnitz-Borked-XML-4-HOWTO',
                      example.ex_docbook4xml, content=borked)
         c.docbook4xml_xslsingle = os.path.join(extras, 'ldp-html.xsl')
         c.docbook4xml_xslprint = os.path.join(extras, 'ldp-print.xsl')
@@ -212,6 +212,18 @@ class TestDriverBuild(TestInventoryBase):
         docs = inv.all.values()
         result = tldp.driver.build(c, docs)
         self.assertEquals(1, result)
+
+    def test_build_only_requested_stem(self):
+        c = self.config
+        ex = example.ex_linuxdoc
+        self.add_published('Published-HOWTO', ex)
+        self.add_new('New-HOWTO', ex)
+        argv = ['--pubdir', c.pubdir, '--sourcedir', c.sourcedir[0]]
+        argv.extend(['--build', 'Published-HOWTO'])
+        tldp.driver.run(argv)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEquals(1, len(inv.published.keys()))
+        self.assertEquals(1, len(inv.work.keys()))
 
 #
 # -- end of file
