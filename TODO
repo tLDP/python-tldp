@@ -8,6 +8,14 @@ python-tldp TODO
     methods called detail() which define a format string; probably
     should be defined once in a parent class or something
 
+  * add a manpage
+
+  * build should return 0, only if all documents build successfully
+
+  * figure out how/if to build the outputs in a separate place
+    rather than in the real output directory
+
+  * smart_bool for config handling
 
 CascadingConfig
 ---------------
