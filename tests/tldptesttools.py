@@ -66,7 +66,7 @@ class TestToolsFilesystem(unittest.TestCase):
         if os.path.isfile(filename):
             shutil.copy(filename, newname)
         else:
-            with open(newname, 'w') as f:
+            with open(newname, 'w'):
                 pass
         relname = os.path.relpath(newname, self.tempdir)
         return relname, newname

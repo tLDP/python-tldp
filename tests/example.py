@@ -41,12 +41,12 @@ ex_docbook5xml = SimpleNamespace(
 #           type=tldp.doctypes.rst.RestructuredText,
 #           filename=opj(sampledocs, 'restructuredtext-simple.rst'),
 #          )
-# 
+#
 # ex_text = SimpleNamespace(
 #            type=tldp.doctypes.text.Text,
 #            filename=opj(sampledocs, 'text-simple.txt'),
 #           )
-# 
+#
 # ex_markdown = SimpleNamespace(
 #                type=tldp.doctypes.markdown.Markdown,
 #                filename=opj(sampledocs, 'markdown-simple.md'),
