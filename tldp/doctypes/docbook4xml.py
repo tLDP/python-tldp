@@ -68,7 +68,8 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
             if os.path.isdir(fullpath):
                 source.append('"' + fullpath + '"')
             if not source:
-                logger.debug("%s no images or resources to copy", self.source.stem)
+                logger.debug("%s no images or resources to copy",
+                             self.source.stem)
                 return True
             s = 'rsync --archive --verbose %s ./' % (' '.join(source))
         return self.shellscript(s)
@@ -149,7 +150,7 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
 
     @depends(graph, make_html)
     def make_name_html(self):
-        '''rename xsltproc/docbook-XSL's index.html to LDP standard STEM.html'''
+        '''rename DocBook XSL's index.html to LDP standard STEM.html'''
         s = 'mv -v --no-clobber -- "{output.name_indexhtml}" "{output.name_html}"'
         return self.shellscript(s)
 

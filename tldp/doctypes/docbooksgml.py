@@ -65,7 +65,8 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
             if os.path.isdir(fullpath):
                 source.append('"' + fullpath + '"')
             if not source:
-                logger.debug("%s no images or resources to copy", self.source.stem)
+                logger.debug("%s no images or resources to copy",
+                             self.source.stem)
                 return True
             s = 'rsync --archive --verbose %s ./' % (' '.join(source))
         return self.shellscript(s)
@@ -88,7 +89,6 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
         '''move a blank index.sgml file into the source tree'''
         if self.indexsgml:
             return True
-        indexsgml = os.path.join(self.source.dirname, 'index.sgml')
         s = '''mv \\
                  --no-clobber \\
                  --verbose \\
