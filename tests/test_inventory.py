@@ -15,19 +15,21 @@ from tldp.inventory import Inventory
 class TestInventoryUsage(TestInventoryBase):
 
     def test_inventory_repr(self):
+        c = self.config
         ex = random.choice(example.sources)
         self.add_published('Frobnitz-HOWTO', ex)
-        i = Inventory(self.pubdir, self.sourcedirs)
+        i = Inventory(c.pubdir, c.sourcedir)
         self.assertTrue('1 published' in str(i))
 
     def test_status_class_accessors(self):
+        c = self.config
         ex = random.choice(example.sources)
         self.add_published('Published-HOWTO', ex)
         self.add_new('New-HOWTO', ex)
         self.add_stale('Stale-HOWTO', ex)
         self.add_orphan('Orphan-HOWTO', ex)
         self.add_broken('Broken-HOWTO', ex)
-        i = Inventory(self.pubdir, self.sourcedirs)
+        i = Inventory(c.pubdir, c.sourcedir)
         self.assertTrue('Orphan-HOWTO' in i.orphans.keys())
         self.assertTrue('Orphan-HOWTO' in i.orphaned.keys())
         self.assertTrue(3, len(i.problems.keys()))
@@ -37,9 +39,10 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertTrue(5, len(i.outputs.keys()))
 
     def test_detect_status_published(self):
+        c = self.config
         ex = random.choice(example.sources)
         self.add_published('Frobnitz-HOWTO', ex)
-        i = Inventory(self.pubdir, self.sourcedirs)
+        i = Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(0, len(i.stale))
         self.assertEquals(1, len(i.published))
         self.assertEquals(0, len(i.new))
@@ -47,9 +50,10 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertEquals(0, len(i.broken))
 
     def test_detect_status_new(self):
+        c = self.config
         ex = random.choice(example.sources)
         self.add_new('Frobnitz-HOWTO', ex)
-        i = Inventory(self.pubdir, self.sourcedirs)
+        i = Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(0, len(i.stale))
         self.assertEquals(0, len(i.published))
         self.assertEquals(1, len(i.new))
@@ -57,9 +61,10 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertEquals(0, len(i.broken))
 
     def test_detect_status_orphan(self):
+        c = self.config
         ex = random.choice(example.sources)
         self.add_orphan('Frobnitz-HOWTO', ex)
-        i = Inventory(self.pubdir, self.sourcedirs)
+        i = Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(0, len(i.stale))
         self.assertEquals(0, len(i.published))
         self.assertEquals(0, len(i.new))
@@ -67,9 +72,10 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertEquals(0, len(i.broken))
 
     def test_detect_status_stale(self):
+        c = self.config
         ex = random.choice(example.sources)
         self.add_stale('Frobnitz-HOWTO', ex)
-        i = Inventory(self.pubdir, self.sourcedirs)
+        i = Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(1, len(i.stale))
         self.assertEquals(1, len(i.published))
         self.assertEquals(0, len(i.new))
@@ -77,9 +83,10 @@ class TestInventoryUsage(TestInventoryBase):
         self.assertEquals(0, len(i.broken))
 
     def test_detect_status_broken(self):
+        c = self.config
         ex = random.choice(example.sources)
         self.add_broken('Frobnitz-HOWTO', ex)
-        i = Inventory(self.pubdir, self.sourcedirs)
+        i = Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(0, len(i.stale))
         self.assertEquals(1, len(i.published))
         self.assertEquals(0, len(i.new))

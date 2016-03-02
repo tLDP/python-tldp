@@ -9,6 +9,7 @@ import unittest
 from tempfile import mkdtemp
 from tempfile import NamedTemporaryFile as ntf
 
+from tldp.config import collectconfiguration
 from tldp.outputs import OutputNamingConvention
 
 
@@ -55,15 +56,17 @@ class TestToolsFilesystem(unittest.TestCase):
         return relpath, absdir
 
     def addfile(self, reldir, filename, stem=None, ext=None):
+        dirname = os.path.join(self.tempdir, reldir)
+        assert os.path.isdir(dirname)
         if stem is None:
             stem, _ = stem_and_ext(filename)
         if ext is None:
             _, ext = stem_and_ext(filename)
-        newname = os.path.join(self.tempdir, reldir, stem + ext)
+        newname = os.path.join(dirname, stem + ext)
         if os.path.isfile(filename):
             shutil.copy(filename, newname)
         else:
-            with open(newname):
+            with open(newname, 'w') as f:
                 pass
         relname = os.path.relpath(newname, self.tempdir)
         return relname, newname
@@ -106,6 +109,8 @@ class TestOutputDirSkeleton(OutputNamingConvention):
 class TestSourceDocSkeleton(object):
 
     def __init__(self, dirname):
+        if isinstance(dirname, list):
+            dirname = dirname[0]
         if not os.path.abspath(dirname):
             raise Exception("Please use absolute path in unit tests....")
         self.dirname = dirname
@@ -121,34 +126,42 @@ class TestSourceDocSkeleton(object):
                 f.write(content)
 
 
-class TestInventoryBase(TestToolsFilesystem):
+class TestInventoryBase(unittest.TestCase):
 
-    def setupcollections(self):
-        attrs = ('pubdir', 'sourcedir', 'sourcedirs')
-        already = all([hasattr(self, x) for x in attrs])
-        if already:
-            return
-        self.pubdir = os.path.join(self.tempdir, 'outputs')
-        self.sourcedir = os.path.join(self.tempdir, 'sources')
-        self.sourcedirs = [self.sourcedir]
-        for d in (self.sourcedir, self.pubdir):
+    def setUp(self):
+        self.makeTempdir()
+        self.config, _ = collectconfiguration('ldptool', [])
+        c = self.config
+        c.pubdir = os.path.join(self.tempdir, 'outputs')
+        c.sourcedir = os.path.join(self.tempdir, 'sources')
+        for d in (c.sourcedir, c.pubdir):
             if not os.path.isdir(d):
                 os.mkdir(d)
+        c.sourcedir = [c.sourcedir]
+
+    def tearDown(self):
+        self.removeTempdir()
+
+    def makeTempdir(self):
+        self.tempdir = mkdtemp(prefix='tldp-test-')
+
+    def removeTempdir(self):
+        shutil.rmtree(self.tempdir)
 
     def add_stale(self, stem, ex):
-        self.setupcollections()
-        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
+        c = self.config
+        myoutput = TestOutputDirSkeleton(os.path.join(c.pubdir, stem), stem)
         myoutput.mkdir()
         myoutput.create_expected_docs()
-        time.sleep(0.002)
-        mysource = TestSourceDocSkeleton(self.sourcedir)
+        time.sleep(0.001)
+        mysource = TestSourceDocSkeleton(c.sourcedir)
         mysource.addsourcefile(stem + ex.ext, ex.filename)
 
     def add_broken(self, stem, ex):
-        self.setupcollections()
-        mysource = TestSourceDocSkeleton(self.sourcedir)
+        c = self.config
+        mysource = TestSourceDocSkeleton(c.sourcedir)
         mysource.addsourcefile(stem + ex.ext, ex.filename)
-        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
+        myoutput = TestOutputDirSkeleton(os.path.join(c.pubdir, stem), stem)
         myoutput.mkdir()
         myoutput.create_expected_docs()
         prop = random.choice(myoutput.expected)
@@ -157,21 +170,21 @@ class TestInventoryBase(TestToolsFilesystem):
         os.unlink(fname)
 
     def add_new(self, stem, ex):
-        self.setupcollections()
-        mysource = TestSourceDocSkeleton(self.sourcedir)
+        c = self.config
+        mysource = TestSourceDocSkeleton(c.sourcedir)
         mysource.addsourcefile(stem + ex.ext, ex.filename)
 
     def add_orphan(self, stem, ex):
-        self.setupcollections()
-        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
+        c = self.config
+        myoutput = TestOutputDirSkeleton(os.path.join(c.pubdir, stem), stem)
         myoutput.mkdir()
         myoutput.create_expected_docs()
 
     def add_published(self, stem, ex):
-        self.setupcollections()
-        mysource = TestSourceDocSkeleton(self.sourcedir)
+        c = self.config
+        mysource = TestSourceDocSkeleton(c.sourcedir)
         mysource.addsourcefile(stem + ex.ext, ex.filename)
-        myoutput = TestOutputDirSkeleton(os.path.join(self.pubdir, stem), stem)
+        myoutput = TestOutputDirSkeleton(os.path.join(c.pubdir, stem), stem)
         myoutput.mkdir()
         myoutput.create_expected_docs()
 
