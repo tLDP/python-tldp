@@ -198,11 +198,11 @@ class SourceDocument(object):
         outstr = template.format(s=self, w=widths)
         print(outstr, file=file)
         if verbose:
-            for f in self.newer:
+            for f in sorted(self.newer):
                 fname = os.path.join(self.dirname, f)
                 print('    newer source {}'.format(fname), file=file)
             if self.output:
-                for f in self.output.missing:
+                for f in sorted(self.output.missing):
                     print('  missing output {}'.format(f), file=file)
 
 #
