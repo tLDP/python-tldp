@@ -200,10 +200,10 @@ class SourceDocument(object):
         if verbose:
             for f in self.newer:
                 fname = os.path.join(self.dirname, f)
-                print('  newer file {}'.format(fname), file=file)
+                print('    newer source {}'.format(fname), file=file)
             if self.output:
                 for f in self.output.missing:
-                    print('  missing file {}'.format(f), file=file)
+                    print('  missing output {}'.format(f), file=file)
 
 #
 # -- end of file

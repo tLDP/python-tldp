@@ -34,7 +34,7 @@ class TestDriverDetail(TestInventoryBase):
         stdout = StringIO()
         tldp.driver.detail(c, docs, file=stdout)
         stdout.seek(0)
-        self.assertTrue('newer file' in stdout.read())
+        self.assertTrue('newer source' in stdout.read())
 
     def test_broken_detail_verbosity(self):
         c = self.config
@@ -45,7 +45,7 @@ class TestDriverDetail(TestInventoryBase):
         stdout = StringIO()
         tldp.driver.detail(c, docs, file=stdout)
         stdout.seek(0)
-        self.assertTrue('missing file' in stdout.read())
+        self.assertTrue('missing output' in stdout.read())
 
 
 class TestDriverSummary(TestInventoryBase):
