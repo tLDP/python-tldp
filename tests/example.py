@@ -37,20 +37,20 @@ ex_docbook5xml = SimpleNamespace(
                  filename=opj(sampledocs, 'docbook5xml-simple.xml'),
                 )
 
-ex_rst = SimpleNamespace(
-          type=tldp.doctypes.rst.RestructuredText,
-          filename=opj(sampledocs, 'restructuredtext-simple.rst'),
-         )
-
-ex_text = SimpleNamespace(
-           type=tldp.doctypes.text.Text,
-           filename=opj(sampledocs, 'text-simple.txt'),
-          )
-
-ex_markdown = SimpleNamespace(
-               type=tldp.doctypes.markdown.Markdown,
-               filename=opj(sampledocs, 'markdown-simple.md'),
-              )
+# ex_rst = SimpleNamespace(
+#           type=tldp.doctypes.rst.RestructuredText,
+#           filename=opj(sampledocs, 'restructuredtext-simple.rst'),
+#          )
+# 
+# ex_text = SimpleNamespace(
+#            type=tldp.doctypes.text.Text,
+#            filename=opj(sampledocs, 'text-simple.txt'),
+#           )
+# 
+# ex_markdown = SimpleNamespace(
+#                type=tldp.doctypes.markdown.Markdown,
+#                filename=opj(sampledocs, 'markdown-simple.md'),
+#               )
 
 ex_linuxdoc_dir = SimpleNamespace(
                type=tldp.doctypes.linuxdoc.Linuxdoc,
