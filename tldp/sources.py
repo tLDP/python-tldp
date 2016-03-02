@@ -74,7 +74,7 @@ def scansourcedirs(dirnames):
                     logger.warning("Existing dup-entry is %s", dup)
                 else:
                     found[candy.stem] = candy
-    logger.debug("Discovered %s documents total", len(found))
+    logger.debug("Discovered %s source documents", len(found))
     return found
 
 
