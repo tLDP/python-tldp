@@ -196,5 +196,22 @@ class TestDriverBuild(TestInventoryBase):
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
+
+    def test_build_one_broken(self):
+        c = self.config
+        self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
+        # -- mangle the content of a valid DocBook XML file
+        borked = example.ex_docbook4xml.content[:-12]
+        self.add_new('Frobnitz-Borked-XML-4-HOWTO', 
+                     example.ex_docbook4xml, content=borked)
+        c.docbook4xml_xslsingle = os.path.join(extras, 'ldp-html.xsl')
+        c.docbook4xml_xslprint = os.path.join(extras, 'ldp-print.xsl')
+        c.docbook4xml_xslchunk = os.path.join(extras, 'ldp-html-chunk.xsl')
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEquals(2, len(inv.all.keys()))
+        docs = inv.all.values()
+        result = tldp.driver.build(c, docs)
+        self.assertEquals(1, result)
+
 #
 # -- end of file

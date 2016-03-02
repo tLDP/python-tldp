@@ -63,6 +63,7 @@ def detail(config, docs, **kwargs):
 
 
 def build(config, docs, **kwargs):
+    result = list()
     for x, source in enumerate(docs, 1):
         if not isinstance(source, tldp.sources.SourceDocument):
             logger.info("%s (%d of %d) skipping, no source for orphan",
@@ -79,8 +80,13 @@ def build(config, docs, **kwargs):
         runner = source.doctype(source=source, output=output, config=config)
         logger.info("%s (%d of %d) initiating build",
                     source.stem, x, len(docs))
-        runner.generate()
-    return 0
+        result.append(runner.generate())
+    if all(result):
+        return 0
+    for errcode, source in zip(result, docs):
+        if not errcode:
+            logger.error("%s build failed", source.stem)
+    return 1
 
 
 # def script(config, docs, inv, **kwargs):

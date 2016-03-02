@@ -169,10 +169,13 @@ class TestInventoryBase(unittest.TestCase):
         assert fname is not None
         os.unlink(fname)
 
-    def add_new(self, stem, ex):
+    def add_new(self, stem, ex, content=None):
         c = self.config
         mysource = TestSourceDocSkeleton(c.sourcedir)
-        mysource.addsourcefile(stem + ex.ext, ex.filename)
+        if content:
+            mysource.addsourcefile(stem + ex.ext, content)
+        else:
+            mysource.addsourcefile(stem + ex.ext, ex.filename)
 
     def add_orphan(self, stem, ex):
         c = self.config
