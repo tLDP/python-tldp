@@ -58,6 +58,12 @@ ex_linuxdoc_dir = SimpleNamespace(
                             'Linuxdoc-Larger.sgml'),
               )
 
+ex_docbook4xml_dir = SimpleNamespace(
+               type=tldp.doctypes.docbook4xml.Docbook4XML,
+               filename=opj(sampledocs, 'DocBook-4.2-WHYNOT',
+                            'DocBook-4.2-WHYNOT.xml'),
+              )
+
 # -- a bit ugly, but grab each dict
 sources = [y for x, y in locals().items() if x.startswith('ex_')]
 
