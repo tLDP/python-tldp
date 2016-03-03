@@ -72,7 +72,7 @@ class TestDriverRun(TestInventoryBase):
         self.add_orphan('Orphan-HOWTO', ex)
         self.add_broken('Broken-HOWTO', ex)
         argv = ['--pubdir', c.pubdir, '--sourcedir', c.sourcedir[0]]
-        fullpath = os.path.join(self.tempdir, 'sources', 'New-HOWTO.sgml')
+        fullpath = opj(self.tempdir, 'sources', 'New-HOWTO.sgml')
         argv.extend(['--build', 'stale', 'Orphan-HOWTO', fullpath])
         tldp.driver.run(argv)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
@@ -83,7 +83,7 @@ class TestDriverRun(TestInventoryBase):
         c = self.config
         self.add_new('New-HOWTO', example.ex_linuxdoc)
         argv = ['--pubdir', c.pubdir, '--sourcedir', c.sourcedir[0]]
-        fullpath = os.path.join(self.tempdir, 'sources', 'New-HOWTO.sgml')
+        fullpath = opj(self.tempdir, 'sources', 'New-HOWTO.sgml')
         argv.extend(['--build', 'stale', 'Orphan-HOWTO', fullpath, 'extra'])
         val = tldp.driver.run(argv)
         self.assertTrue('Unknown arguments' in val)
@@ -163,6 +163,7 @@ class TestDriverBuild(TestInventoryBase):
 
     def test_build_linuxdoc(self):
         c = self.config
+        c.build = True
         self.add_new('Frobnitz-Linuxdoc-HOWTO', example.ex_linuxdoc)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
@@ -174,9 +175,10 @@ class TestDriverBuild(TestInventoryBase):
 
     def test_build_docbooksgml(self):
         c = self.config
+        c.build = True
         self.add_new('Frobnitz-DocBook-SGML-HOWTO', example.ex_docbooksgml)
-        c.docbooksgml_collateindex = os.path.join(extras, 'collateindex.pl')
-        c.docbooksgml_ldpdsl = os.path.join(extras, 'ldp.dsl')
+        c.docbooksgml_collateindex = opj(extras, 'collateindex.pl')
+        c.docbooksgml_ldpdsl = opj(extras, 'dsssl', 'ldp.dsl')
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
@@ -184,12 +186,17 @@ class TestDriverBuild(TestInventoryBase):
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
-    def test_build_docbook4xml(self):
+    def add_docbook4xml_xsl_to_config(self):
         c = self.config
+        c.docbook4xml_xslprint = opj(extras, 'xsl', 'tldp-print.xsl')
+        c.docbook4xml_xslsingle = opj(extras, 'xsl', 'tldp-one-page.xsl')
+        c.docbook4xml_xslchunk = opj(extras, 'xsl', 'tldp-chapters.xsl')
+
+    def test_build_docbook4xml(self):
+        self.add_docbook4xml_xsl_to_config()
+        c = self.config
+        c.build = True
         self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
-        c.docbook4xml_xslsingle = os.path.join(extras, 'ldp-html.xsl')
-        c.docbook4xml_xslprint = os.path.join(extras, 'ldp-print.xsl')
-        c.docbook4xml_xslchunk = os.path.join(extras, 'ldp-html-chunk.xsl')
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
@@ -198,15 +205,14 @@ class TestDriverBuild(TestInventoryBase):
         self.assertTrue(doc.output.iscomplete)
 
     def test_build_one_broken(self):
+        self.add_docbook4xml_xsl_to_config()
         c = self.config
+        c.build = True
         self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
         # -- mangle the content of a valid DocBook XML file
         borked = example.ex_docbook4xml.content[:-12]
         self.add_new('Frobnitz-Borked-XML-4-HOWTO',
                      example.ex_docbook4xml, content=borked)
-        c.docbook4xml_xslsingle = os.path.join(extras, 'ldp-html.xsl')
-        c.docbook4xml_xslprint = os.path.join(extras, 'ldp-print.xsl')
-        c.docbook4xml_xslchunk = os.path.join(extras, 'ldp-html-chunk.xsl')
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(2, len(inv.all.keys()))
         docs = inv.all.values()
