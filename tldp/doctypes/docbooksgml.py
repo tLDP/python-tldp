@@ -50,8 +50,6 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
 
     graph = nx.DiGraph()
 
-    buildorder = ['buildall']
-
     def chdir_output(self):
         os.chdir(self.output.dirname)
         return True
