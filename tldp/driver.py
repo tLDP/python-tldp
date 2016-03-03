@@ -8,10 +8,12 @@ import sys
 import logging
 from argparse import Namespace
 
-import tldp
 import tldp.typeguesser
 
-from tldp.inventory import status_classes, status_types
+from tldp.doctypes.common import preamble, postamble
+from tldp.sources import SourceDocument
+from tldp.outputs import OutputDirectory
+from tldp.inventory import Inventory, status_classes, status_types
 from tldp.utils import arg_isloglevel
 from tldp.sources import arg_issourcedoc
 
@@ -22,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 def summary(config, inv=None, **kwargs):
     if inv is None:
-        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+        inv = Inventory(config.pubdir, config.sourcedir)
     file = kwargs.get('file', sys.stdout)
     width = Namespace()
     width.status = max([len(x) for x in status_types])
@@ -65,17 +67,17 @@ def detail(config, docs, **kwargs):
 def build(config, docs, **kwargs):
     result = list()
     for x, source in enumerate(docs, 1):
-        if not isinstance(source, tldp.sources.SourceDocument):
+        if not isinstance(source, SourceDocument):
             logger.info("%s (%d of %d) skipping, no source for orphan",
                         source.stem, x, len(docs))
             continue
-        if not source.output:
-            dirname = os.path.join(config.pubdir, source.stem)
-            source.output = tldp.outputs.OutputDirectory(dirname)
         if not source.doctype:
             logger.warning("%s (%d of %d) skipping unknown doctype",
                            source.stem, x, len(docs))
             continue
+        if not source.output:
+            dirname = os.path.join(config.pubdir, source.stem)
+            source.output = OutputDirectory.fromsource(config.pubdir, source)
         output = source.output
         runner = source.doctype(source=source, output=output, config=config)
         logger.info("%s (%d of %d) initiating build",
@@ -89,9 +91,13 @@ def build(config, docs, **kwargs):
     return 1
 
 
-def script(config, docs, inv, **kwargs):
-    raise NotImplementedError
-    return 0
+def script(config, docs, **kwargs):
+    if preamble:
+        print(preamble, file=sys.stdout)
+    result = build(config, docs, **kwargs)
+    if postamble:
+        print(postamble, file=sys.stdout)
+    return result
 
 
 def getDocumentNames(args):
@@ -180,7 +186,7 @@ def extractExplicitDocumentArgs(config, args):
     logger.debug("args included %d documents in filesystem: %r",
                  len(rawdocs), rawdocs)
     for doc in rawdocs:
-        docs.add(tldp.sources.SourceDocument(doc))
+        docs.add(SourceDocument(doc))
     return docs, remainder
 
 
@@ -245,7 +251,7 @@ def run(argv):
             return " --pubdir (and --sourcedir) required for inventory."
         if not config.sourcedir:
             return " --sourcedir (and --pubdir) required for inventory."
-        inv = tldp.inventory.Inventory(config.pubdir, config.sourcedir)
+        inv = Inventory(config.pubdir, config.sourcedir)
         logger.info("Collected inventory containing %s documents.",
                     len(inv.all.keys()))
     else:
@@ -295,11 +301,14 @@ def run(argv):
         return detail(config, docs)
 
     if config.script:
-        return script(config, docs)
+        return script(config, docs, preamble=preamble, postamble=postamble)
 
     if not config.build:
         logger.info("Assuming --build, since no other action was specified...")
+        config.build = True
 
+    if not config.pubdir:
+        return " --pubdir required to --build."
     return build(config, docs)
 
 
