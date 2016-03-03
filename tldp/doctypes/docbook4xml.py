@@ -46,6 +46,7 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
                 'docbook4xml_html2text': isexecutable,
                 'docbook4xml_dblatex': isexecutable,
                 'docbook4xml_fop': isexecutable,
+                'docbook4xml_xmllint': isexecutable,
                 'docbook4xml_xslchunk': isreadablefile,
                 'docbook4xml_xslsingle': isreadablefile,
                 'docbook4xml_xslprint': isreadablefile,
@@ -60,6 +61,16 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
         return True
 
     @depends(graph, chdir_output)
+    def make_validated_source(self):
+        s = '''"{config.docbook4xml_xmllint}" > "{output.validsource}" \\
+                  --nonet \\
+                  --noent \\
+                  --xinclude \\
+                  --postvalid \\
+                  "{source.filename}"'''
+        return self.shellscript(s)
+
+    @depends(graph, make_validated_source)
     def copy_static_resources(self):
         source = list()
         for d in ('images', 'resources'):
@@ -82,7 +93,7 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
                   --stringparam admon.graphics.path images/ \\
                   --stringparam base.dir . \\
                   "{config.docbook4xml_xslsingle}" \\
-                  "{source.filename}"'''
+                  "{output.validsource}"'''
         return self.shellscript(s)
 
     @depends(graph, make_name_htmls)
@@ -94,12 +105,12 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
                   "{output.name_htmls}"'''
         return self.shellscript(s)
 
-    @depends(graph, chdir_output)
+    @depends(graph, copy_static_resources)
     def make_fo(self):
         '''generate the Formatting Objects intermediate output'''
         s = '''"{config.docbook4xml_xsltproc}" > "{output.name_fo}" \\
                   "{config.docbook4xml_xslprint}" \\
-                  "{source.filename}"'''
+                  "{output.validsource}"'''
         self.removals.append(self.output.name_fo)
         return self.shellscript(s)
 
@@ -120,7 +131,7 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
                   -F xml \\
                   -t pdf \\
                   -o "{output.name_pdf}" \\
-                  "{source.filename}"'''
+                  "{output.validsource}"'''
         return self.shellscript(s)
 
     @depends(graph, make_fo)
@@ -145,7 +156,7 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
                   --stringparam admon.graphics.path images/ \\
                   --stringparam base.dir . \\
                   "{config.docbook4xml_xslchunk}" \\
-                  "{source.filename}"'''
+                  "{output.validsource}"'''
         return self.shellscript(s)
 
     @depends(graph, make_html)
@@ -158,6 +169,12 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
     def make_name_indexhtml(self):
         '''create final index.html symlink'''
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
+        return self.shellscript(s)
+
+    @depends(graph, make_name_html)
+    def remove_validated_source(self):
+        '''create final index.html symlink'''
+        s = 'rm --verbose -- "{output.validsource}"'
         return self.shellscript(s)
 
     @classmethod
@@ -173,6 +190,9 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
         g.add_argument('--docbook4xml-xslprint', type=arg_isreadablefile,
                        default=xslprint_finder(),
                        help='full path to LDP FO print XSL [%(default)s]')
+        g.add_argument('--docbook4xml-xmllint', type=arg_isexecutable,
+                       default=which('xmllint'),
+                       help='full path to xmllint [%(default)s]')
         g.add_argument('--docbook4xml-xsltproc', type=arg_isexecutable,
                        default=which('xsltproc'),
                        help='full path to xsltproc [%(default)s]')
