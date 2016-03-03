@@ -8,14 +8,13 @@ import sys
 import logging
 from argparse import Namespace
 
-import tldp.typeguesser
-
-from tldp.doctypes.common import preamble, postamble
-from tldp.sources import SourceDocument
+from tldp.typeguesser import knowndoctypes
+from tldp.sources import SourceDocument, arg_issourcedoc
 from tldp.outputs import OutputDirectory
 from tldp.inventory import Inventory, status_classes, status_types
+from tldp.config import collectconfiguration
 from tldp.utils import arg_isloglevel
-from tldp.sources import arg_issourcedoc
+from tldp.doctypes.common import preamble, postamble
 
 logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s %(funcName)s %(message)s'
 logging.basicConfig(stream=sys.stderr, format=logformat, level=logging.ERROR)
@@ -128,7 +127,7 @@ def getStatusNames(args):
 def getDocumentClasses(args):
     largs = [x.lower() for x in args]
     sought = list()
-    for cls in tldp.typeguesser.knowndoctypes:
+    for cls in knowndoctypes:
         if cls.__name__.lower() in largs:
             sought.append(cls)
         else:
@@ -202,7 +201,7 @@ def run(argv):
     # -- produce a configuration from CLI, ENV and CFG
     #
     tag = 'ldptool'
-    config, args = tldp.config.collectconfiguration(tag, argv)
+    config, args = collectconfiguration(tag, argv)
 
     logger.debug("Received the following configuration:")
     for param, value in sorted(vars(config).items()):
