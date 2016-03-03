@@ -4,6 +4,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import sys
 import stat
 import errno
 import logging
@@ -19,12 +20,10 @@ preamble = '''#! /bin/bash
 set -x
 set -e
 set -o pipefail
-
 '''
 
 postamble = '''
-
-'''
+# -- end of file'''
 
 
 def depends(graph, *predecessors):
@@ -73,6 +72,8 @@ class BaseDoctype(object):
         assert self.config is not None
 
     def cleanup(self):
+        if self.config.script:
+            return
         stem = self.source.stem
         removals = getattr(self, 'removals', None)
         if removals:
@@ -90,6 +91,7 @@ class BaseDoctype(object):
         classname = self.__class__.__name__
         for tool, validator in self.required.items():
             thing = getattr(self.config, tool, None)
+            logger.info("%s, tool = %s, thing = %s", classname, tool, thing)
             if thing is None:
                 logger.error("%s missing required tool %s, skipping...",
                              classname, tool)
@@ -103,8 +105,27 @@ class BaseDoctype(object):
     def hook_build_failure(self):
         self.cleanup()
 
+    def shellscript(self, script, **kwargs):
+        if self.config.build:
+            return self.execute_shellscript(script, **kwargs)
+        elif self.config.script:
+            return self.dump_shellscript(script, **kwargs)
+        else:
+            etext = '%s in shellscript, neither --build nor --script'
+            raise Exception(etext % (self.source.stem,))
+
     @logtimings(logger.debug)
-    def shellscript(self, script, preamble=preamble, postamble=postamble):
+    def dump_shellscript(self, script, preamble=preamble, postamble=postamble):
+        source = self.source
+        output = self.output
+        config = self.config
+        s = script.format(output=output, source=source, config=config)
+        print('', file=sys.stdout)
+        print(s, file=sys.stdout)
+        return True
+
+    @logtimings(logger.debug)
+    def execute_shellscript(self, script, preamble=preamble, postamble=postamble):
         source = self.source
         output = self.output
         config = self.config
