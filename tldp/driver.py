@@ -203,6 +203,9 @@ def run(argv):
     tag = 'ldptool'
     config, args = collectconfiguration(tag, argv)
 
+    # -- and reset the loglevel (after reading envar, and config)
+    logging.getLogger().setLevel(config.loglevel)
+
     logger.debug("Received the following configuration:")
     for param, value in sorted(vars(config).items()):
         logger.debug("  %s = %r", param, value)
