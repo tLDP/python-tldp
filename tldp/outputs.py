@@ -60,6 +60,10 @@ class OutputNamingConvention(object):
         return os.path.join(self.dirname, 'index.html')
 
     @property
+    def validsource(self):
+        return os.path.join(self.dirname, self.stem + '.xml')  # -- burp
+
+    @property
     def iscomplete(self):
         '''True if the output directory contains all expected documents'''
         present = list()
