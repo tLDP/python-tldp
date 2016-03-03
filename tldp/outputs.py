@@ -98,7 +98,12 @@ class OutputDirectory(OutputNamingConvention):
     def __repr__(self):
         return '<%s:%s>' % (self.__class__.__name__, self.dirname)
 
-    def __init__(self, dirname):
+    @classmethod
+    def fromsource(cls, dirname, source):
+        newname = os.path.join(dirname, source.stem)
+        return cls(newname, source=source)
+
+    def __init__(self, dirname, source=None):
         '''constructor
         :param dirname: directory name for all output documents
 
@@ -117,7 +122,7 @@ class OutputDirectory(OutputNamingConvention):
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), parent)
         self.statinfo = statfiles(self.dirname, relative=self.dirname)
         self.status = 'output'
-        self.source = None
+        self.source = source
         self.logdir = os.path.join(self.dirname, logdir)
 
     def clean(self):
