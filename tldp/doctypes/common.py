@@ -92,7 +92,7 @@ class BaseDoctype(object):
         classname = self.__class__.__name__
         for tool, validator in self.required.items():
             thing = getattr(self.config, tool, None)
-            logger.info("%s, tool = %s, thing = %s", classname, tool, thing)
+            logger.debug("%s, tool = %s, thing = %s", classname, tool, thing)
             if thing is None:
                 logger.error("%s missing required tool %s, skipping...",
                              classname, tool)
