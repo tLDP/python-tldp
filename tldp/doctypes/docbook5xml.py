@@ -72,20 +72,20 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
         return True
 
     @depends(graph, chdir_output)
-    def validate_source(self):
-        '''consider lxml.etree and other validators'''
-        s = '''"{config.docbook5xml_jing}" \\
-                  "{config.docbook5xml_rngfile}" \\
-                  "{source.filename}"'''
-        return self.shellscript(s)
-
-    @depends(graph, validate_source)
     def make_xincluded_source(self):
         s = '''"{config.docbook5xml_xmllint}" > "{output.validsource}" \\
                   --nonet \\
                   --noent \\
                   --xinclude \\
                   "{source.filename}"'''
+        return self.shellscript(s)
+
+    @depends(graph, make_xincluded_source)
+    def validate_source(self):
+        '''consider lxml.etree and other validators'''
+        s = '''"{config.docbook5xml_jing}" \\
+                  "{config.docbook5xml_rngfile}" \\
+                  "{output.validsource}"'''
         return self.shellscript(s)
 
     @depends(graph, make_xincluded_source)
