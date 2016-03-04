@@ -41,7 +41,7 @@ def summary(config, inv=None, **kwargs):
             s = ''
             if abbrev:
                 s = s + abbrev.pop(0)
-                while abbrev and len(s) < 50:
+                while abbrev and len(s) < 40:
                     s = s + ', ' + abbrev.pop(0)
                 if abbrev:
                     s = s + ', and %d more ...' % (len(abbrev))
