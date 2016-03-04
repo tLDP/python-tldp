@@ -15,9 +15,12 @@ user-visible needs
     a bad document update kills the real output directory and leaves
     an empty result]
 
+  * create TLDP DocBook 5.0 XSL files (if we care)
 
 code internals
 --------------
+
+  * generate contrib/tldp.spec at build time (?)
 
   * figure out suppression of system configuration (testing borkage)
 
