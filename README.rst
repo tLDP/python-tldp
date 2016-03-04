@@ -149,8 +149,9 @@ setuptools stock-generated specfile.  Specifically, the package gets named
 `python-tldp` instead of `tldp` and the configuration file is marked
 `%config(noreplace)`.
 
-I know less about packaging for Debian, so this works and builds a usable
-Debian package which has been tested out on an Ubuntu 14.04.3 system.
+I know less about packaging for Debian.  Relying on python-stdeb yields a
+working and usable Debian package which has been tested out on an Ubuntu
+14.04.3 system.
 
 Build a DEB:::
 
