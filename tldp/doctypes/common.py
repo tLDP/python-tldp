@@ -23,7 +23,8 @@ set -o pipefail
 '''
 
 postamble = '''
-# -- end of file'''
+# -- end of file
+'''
 
 
 def depends(graph, *predecessors):
