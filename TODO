@@ -1,21 +1,39 @@
 python-tldp TODO
-----------------
+================
 
-  * Add a verb to produce a runnable shell-script instead of having 
-    ldptool do the job.
+user-visible needs
+------------------
+
+  * add features for --list-doctypes, --list-status-classes
+
+  * add a manpage
+
+  * add support for .epub3 (or just .epub?)
+
+  * figure out how/if to build the outputs in a separate place
+    rather than in the real output directory [prevent the problem that
+    a bad document update kills the real output directory and leaves
+    an empty result]
+
+
+code internals
+--------------
+
+  * figure out suppression of system configuration (testing borkage)
 
   * SourceDocument and OutputDirectory both have nearly-identical
     methods called detail() which define a format string; probably
     should be defined once in a parent class or something
 
-  * add a manpage
-
-  * figure out how/if to build the outputs in a separate place
-    rather than in the real output directory
-
-  * smart_bool for config handling
 
 CascadingConfig
 ---------------
+  * consider replacing CascadingConfig with something (better?) from PyPI
 
   * factor out CascadingConfig into its own project
+
+  * smart_bool for config handling; /usr/lib64/python2.7/ConfigParser.py
+    around line 364ff.
+    _boolean_states = {'1': True, 'yes': True, 'true': True, 'on': True,
+                       '0': False, 'no': False, 'false': False, 'off': False}
+
