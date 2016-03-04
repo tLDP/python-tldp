@@ -211,7 +211,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
 
         g.add_argument('--docbook5xml-rngfile', type=arg_isreadablefile,
                        default=rngfile_finder(),
-                       help='full path to jing [%(default)s]')
+                       help='full path to docbook.rng [%(default)s]')
         g.add_argument('--docbook5xml-xmllint', type=arg_isexecutable,
                        default=which('xmllint'),
                        help='full path to xmllint [%(default)s]')
