@@ -1,13 +1,82 @@
 tldp - tools for publishing from TLDP sources
 =============================================
-A toolset for publishing multiple output formats of a source document to an
-output directory.  The supported source formats can be listed, but contain at
-least, Linuxdoc, DocBookSGML and DocBook XML 4.x.
+This package was written for the Linux Documentation Project to help with
+management and automation of publication of source documents.  The primary
+interface provided is a command-line toolset.
+
+The supported source formats can be listed, but contain at least, Linuxdoc,
+DocBookSGML and DocBook XML 4.x.
 
 TLDP = The Linux Documentation Project.
 
-These are a set of scripts that process committed documents in the
-TLDP document source repository to an output tree of choice.
+The tools in this package process source documents in the `TLDP document
+repository <https://github.com/tLDP/LDP>`_ and generate the following set of
+outputs from each source document.
+
+- .pdf, PDF
+- .txt, text
+- -single.html, a one-page HTML document
+- .html, a multipage HTML document
+
+(We may add other output formats.)
+
+Supported input formats are:
+
+- Linuxdoc
+- Docbook SGML 3.x (though deprecated, please no new submissions)
+- Docbook SGML 4.x
+- Docbook XML 4.x
+- Docbook XML 5.x
+
+
+Behaviour
+---------
+There's a source repository which has many source directories containing
+documents.  Each directory containing (sourcedir).
+
+A source document can be a file in a sourcedir or a directory in the
+sourcedir.  Note that the file Assembly-HOWTO.xml is self-contained.  The
+directory BRIDGE-STP-HOWTO a file BRIDGE-STP-HOWTO.sgml.::
+
+  Assembly-HOWTO.xml
+  BRIDGE-STP-HOWTO/
+  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.sgml
+  BRIDGE-STP-HOWTO/images
+  BRIDGE-STP-HOWTO/images/hardware-setup.eps
+  BRIDGE-STP-HOWTO/images/hardware-setup.png
+  BRIDGE-STP-HOWTO/images/old-hardware-setup.eps
+  BRIDGE-STP-HOWTO/images/old-hardware-setup.png
+
+Each document can be identified by its stem name.  In the above, the stems are
+`Assembly-HOWTO` and `BRIDGE-STP-HOWTO`.
+
+There is a directory containing the output collection.  Each directory is named
+by the stem name of the source document and contains the output formats for
+each source document.  Here are the corresponding output directories for the
+above two documents:::
+
+  Assembly-HOWTO/
+  Assembly-HOWTO/Assembly-HOWTO.html
+  Assembly-HOWTO/Assembly-HOWTO.pdf
+  Assembly-HOWTO/Assembly-HOWTO-single.html
+  Assembly-HOWTO/Assembly-HOWTO.txt
+  Assembly-HOWTO/index.html
+  Assembly-HOWTO/mips.html
+  Assembly-HOWTO/nasm.html
+    ... and more ...
+  
+  BRIDGE-STP-HOWTO/
+  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.html
+  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.pdf
+  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO-single.html
+  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.txt
+  BRIDGE-STP-HOWTO/images
+  BRIDGE-STP-HOWTO/images/hardware-setup.eps
+  BRIDGE-STP-HOWTO/images/hardware-setup.png
+  BRIDGE-STP-HOWTO/images/old-hardware-setup.eps
+  BRIDGE-STP-HOWTO/images/old-hardware-setup.png
+  BRIDGE-STP-HOWTO/index.html
+    ... and more ...
 
 
 Example usages:
@@ -164,7 +233,7 @@ try that, please let me know any problems you encounter.
 Links
 -----
 
+* `Source tree on GitHub <https://github.com/tLDP/LDP>`_
 * `Output documentation tree (sample) <http://www.tldp.org/>`_
 
-* `Source tree on GitHub <https://github.com/tLDP/LDP>`_
 
