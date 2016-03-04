@@ -25,6 +25,7 @@ def rngfile_finder():
 
 def xslchunk_finder():
     l = ['/usr/share/xml/docbook/stylesheet/nwalsh5/current/html/chunk.xsl',
+         '/usr/share/xml/docbook/stylesheet/docbook-xsl-ns/html/chunk.xsl',
          'http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl',
          ]
     return firstfoundfile(l)
@@ -32,6 +33,7 @@ def xslchunk_finder():
 
 def xslsingle_finder():
     l = ['/usr/share/xml/docbook/stylesheet/nwalsh5/current/html/docbook.xsl',
+         '/usr/share/xml/docbook/stylesheet/docbook-xsl-ns/html/docbook.xsl',
          'http://docbook.sourceforge.net/release/xsl/current/html/docbook.xsl',
          ]
     return firstfoundfile(l)
@@ -39,6 +41,7 @@ def xslsingle_finder():
 
 def xslprint_finder():
     l = ['/usr/share/xml/docbook/stylesheet/nwalsh5/current/fo/docbook.xsl',
+         '/usr/share/xml/docbook/stylesheet/docbook-xsl-ns/fo/docbook.xsl',
          'http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl',
          ]
     return firstfoundfile(l)
