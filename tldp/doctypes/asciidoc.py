@@ -79,7 +79,7 @@ class Asciidoc(BaseDoctype):
 
     @depends(graph, make_chunked_html)
     def move_chunked_html(self):
-        s = 'mv --no-clobber -v -- {output.stem}.chunked html'
+        s = 'mv --no-clobber -v -- "{output.stem}.chunked" html'
         return self.shellscript(s)
 
     @depends(graph, move_chunked_html)
