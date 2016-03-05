@@ -75,6 +75,21 @@ def stem_and_ext(name):
     return os.path.splitext(os.path.basename(os.path.normpath(name)))
 
 
+def conditionallogging(result, prefix, fname):
+    if logger.isEnabledFor(logging.DEBUG):
+        logfilecontents(logger.info, prefix, fname)  # -- always
+    elif logger.isEnabledFor(logging.INFO):
+        if result != 0:
+            logfilecontents(logger.info, prefix, fname)  # -- error
+
+
+def logfilecontents(logmethod, prefix, fname):
+    '''log all lines of a file with a prefix '''
+    with open(fname) as f:
+        for line in f:
+            logmethod("%s: %s", prefix, line.rstrip())
+
+
 def execute(cmd, stdin=None, stdout=None, stderr=None,
             logdir=None, env=os.environ):
     '''(yet another) wrapper around subprocess.Popen()
@@ -154,16 +169,10 @@ def execute(cmd, stdin=None, stdout=None, stderr=None,
         logger.error("Find STDOUT/STDERR in %s/%s*", logdir, prefix)
     if isinstance(stdout, int) and stdoutname:
         os.close(stdout)
-        if result != 0:
-            with open(stdoutname) as f:
-                for line in f:
-                    logger.info("STDOUT: %s", line.rstrip())
+        conditionallogging(result, 'STDOUT', stdoutname)
     if isinstance(stderr, int) and stderrname:
         os.close(stderr)
-        if result != 0:
-            with open(stderrname) as f:
-                for line in f:
-                    logger.info("STDERR: %s", line.rstrip())
+        conditionallogging(result, 'STDERR', stderrname)
     return result
 
 
