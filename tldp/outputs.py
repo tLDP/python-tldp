@@ -70,7 +70,7 @@ class OutputNamingConvention(object):
         for prop in self.expected:
             name = getattr(self, prop, None)
             assert name is not None
-            present.append(os.path.isfile(name))
+            present.append(os.path.exists(name))
         return all(present)
 
     @property
