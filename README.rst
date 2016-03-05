@@ -179,6 +179,7 @@ Ubuntu / Debian
 - docbook5-xml
 - docbook-xsl-ns
 - jing
+- a2x
 
 OpenSUSE
 ++++++++
@@ -192,6 +193,7 @@ OpenSUSE
 - docbook-dsssl-stylesheets
 - docbook-utils-minimal
 - jing
+- a2x
 
 There are a few additional data files that are needed, specifically, the TLDP
 XSL and DSSSL files that are used by the respective DocBook SGML (openjade) and
