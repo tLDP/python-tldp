@@ -19,9 +19,10 @@ class Asciidoc(BaseDoctype):
     extensions = ['.txt']
     signatures = []
 
-    required = {'linuxdoc_sgml2html': isexecutable,
-                'linuxdoc_html2text': isexecutable,
-                'linuxdoc_htmldoc': isexecutable,
+    required = {'asciidoc_sgml2html': isexecutable,
+                'asciidoc_html2text': isexecutable,
+                'asciidoc_htmldoc': isexecutable,
+                'asciidoc_a2x': isexecutable,
                 }
 
     graph = nx.DiGraph()
