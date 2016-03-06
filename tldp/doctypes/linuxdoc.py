@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import logging
-import networkx as nx
 
 from tldp.utils import which
 from tldp.utils import arg_isexecutable, isexecutable
@@ -24,13 +23,11 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
                 'linuxdoc_htmldoc': isexecutable,
                 }
 
-    graph = nx.DiGraph()
-
     def chdir_output(self):
         os.chdir(self.output.dirname)
         return True
 
-    @depends(graph, chdir_output)
+    @depends(chdir_output)
     def copy_static_resources(self):
         source = list()
         for d in ('images', 'resources'):
@@ -45,19 +42,19 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
             s = 'rsync --archive --verbose %s ./' % (' '.join(source))
         return self.shellscript(s)
 
-    @depends(graph, copy_static_resources)
+    @depends(copy_static_resources)
     def make_htmls(self):
         '''create a single page HTML output (with incorrect name)'''
         s = '"{config.linuxdoc_sgml2html}" --split=0 "{source.filename}"'
         return self.shellscript(s)
 
-    @depends(graph, make_htmls)
+    @depends(make_htmls)
     def make_name_htmls(self):
         '''correct the single page HTML output name'''
         s = 'mv -v --no-clobber -- "{output.name_html}" "{output.name_htmls}"'
         return self.shellscript(s)
 
-    @depends(graph, make_name_htmls)
+    @depends(make_name_htmls)
     def make_name_txt(self):
         '''create text output (from single-page HTML)'''
         s = '''"{config.linuxdoc_html2text}" > "{output.name_txt}" \\
@@ -66,7 +63,7 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
                   "{output.name_htmls}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_name_htmls)
+    @depends(make_name_htmls)
     def make_name_pdf(self):
         s = '''"{config.linuxdoc_htmldoc}" \\
                  --size universal \\
@@ -76,13 +73,13 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
                  "{output.name_htmls}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_name_htmls)
+    @depends(make_name_htmls)
     def make_name_html(self):
         '''create final index.html symlink'''
         s = '"{config.linuxdoc_sgml2html}" "{source.filename}"'
         return self.shellscript(s)
 
-    @depends(graph, make_name_html)
+    @depends(make_name_html)
     def make_name_indexhtml(self):
         '''create final index.html symlink'''
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'

@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import logging
-import networkx as nx
 
 from tldp.utils import which, firstfoundfile
 from tldp.utils import arg_isexecutable, isexecutable
@@ -48,13 +47,11 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                 'docbooksgml_docbookdsl': isreadablefile,
                 }
 
-    graph = nx.DiGraph()
-
     def chdir_output(self):
         os.chdir(self.output.dirname)
         return True
 
-    @depends(graph, chdir_output)
+    @depends(chdir_output)
     def copy_static_resources(self):
         source = list()
         for d in ('images', 'resources'):
@@ -69,7 +66,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
             s = 'rsync --archive --verbose %s ./' % (' '.join(source))
         return self.shellscript(s)
 
-    @depends(graph, copy_static_resources)
+    @depends(copy_static_resources)
     def make_blank_indexsgml(self):
         indexsgml = os.path.join(self.source.dirname, 'index.sgml')
         self.indexsgml = os.path.isfile(indexsgml)
@@ -82,7 +79,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                   "index.sgml"'''
         return self.shellscript(s)
 
-    @depends(graph, make_blank_indexsgml)
+    @depends(make_blank_indexsgml)
     def move_blank_indexsgml_into_source(self):
         '''move a blank index.sgml file into the source tree'''
         if self.indexsgml:
@@ -93,7 +90,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                  -- "index.sgml" "{source.dirname}/index.sgml"'''
         return self.shellscript(s)
 
-    @depends(graph, move_blank_indexsgml_into_source)
+    @depends(move_blank_indexsgml_into_source)
     def make_data_indexsgml(self):
         '''collect document's index entries into a data file (HTML.index)'''
         if self.indexsgml:
@@ -105,7 +102,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                   "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_data_indexsgml)
+    @depends(make_data_indexsgml)
     def make_indexsgml(self):
         '''generate the final document index file (index.sgml)'''
         if self.indexsgml:
@@ -119,7 +116,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                      "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_indexsgml)
+    @depends(make_indexsgml)
     def move_indexsgml_into_source(self):
         '''move the generated index.sgml file into the source tree'''
         if self.indexsgml:
@@ -136,7 +133,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
             return True
         return False
 
-    @depends(graph, move_indexsgml_into_source)
+    @depends(move_indexsgml_into_source)
     def cleaned_indexsgml(self):
         '''clean the junk from the output dir after building the index.sgml'''
         # -- be super cautious before removing a bunch of files
@@ -148,7 +145,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
         s = '''find . -mindepth 1 -maxdepth 1 -not -type d -delete -print'''
         return self.shellscript(s)
 
-    @depends(graph, cleaned_indexsgml)
+    @depends(cleaned_indexsgml)
     def make_htmls(self):
         '''create a single page HTML output (with incorrect name)'''
         s = '''"{config.docbooksgml_jw}" \\
@@ -162,13 +159,13 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                   "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_htmls)
+    @depends(make_htmls)
     def make_name_htmls(self):
         '''correct the single page HTML output name'''
         s = 'mv -v --no-clobber -- "{output.name_html}" "{output.name_htmls}"'
         return self.shellscript(s)
 
-    @depends(graph, make_name_htmls)
+    @depends(make_name_htmls)
     def make_name_txt(self):
         '''create text output (from single-page HTML)'''
         s = '''"{config.docbooksgml_html2text}" > "{output.name_txt}" \\
@@ -195,7 +192,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                      "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(graph, cleaned_indexsgml)
+    @depends(cleaned_indexsgml)
     def make_name_pdf(self):
         stem = self.source.stem
         classname = self.__class__.__name__
@@ -209,7 +206,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                     stem, classname, 'make_pdf_with_dblatex')
         return self.make_pdf_with_dblatex()
 
-    @depends(graph, make_name_htmls)
+    @depends(make_name_htmls)
     def make_html(self):
         '''create chunked HTML outputs'''
         s = '''"{config.docbooksgml_jw}" \\
@@ -222,13 +219,13 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                  "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_html)
+    @depends(make_html)
     def make_name_html(self):
         '''rename openjade's index.html to LDP standard name STEM.html'''
         s = 'mv -v --no-clobber -- "{output.name_indexhtml}" "{output.name_html}"'
         return self.shellscript(s)
 
-    @depends(graph, make_name_html)
+    @depends(make_name_html)
     def make_name_indexhtml(self):
         '''create final index.html symlink'''
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'

@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import logging
-import networkx as nx
 
 from tldp.utils import which
 from tldp.utils import arg_isexecutable, isexecutable
@@ -25,13 +24,11 @@ class Asciidoc(BaseDoctype):
                 'asciidoc_a2x': isexecutable,
                 }
 
-    graph = nx.DiGraph()
-
     def chdir_output(self):
         os.chdir(self.output.dirname)
         return True
 
-    @depends(graph, chdir_output)
+    @depends(chdir_output)
     def copy_static_resources(self):
         source = list()
         for d in ('images', 'resources'):
@@ -46,7 +43,7 @@ class Asciidoc(BaseDoctype):
             s = 'rsync --archive --verbose %s ./' % (' '.join(source))
         return self.shellscript(s)
 
-    @depends(graph, chdir_output)
+    @depends(chdir_output)
     def make_name_pdf(self):
         s = '''"{config.asciidoc_a2x}" \\
                  --verbose \\
@@ -55,12 +52,12 @@ class Asciidoc(BaseDoctype):
                  "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(graph, chdir_output)
+    @depends(chdir_output)
     def make_name_txt(self):
         s = 'cp --verbose --target-directory . -- "{source.filename}"'
         return self.shellscript(s)
 
-    @depends(graph, chdir_output)
+    @depends(chdir_output)
     def make_name_htmls(self):
         s = '''"{config.asciidoc_a2x}" \\
                  --verbose \\
@@ -69,7 +66,7 @@ class Asciidoc(BaseDoctype):
                  "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(graph, chdir_output)
+    @depends(chdir_output)
     def make_chunked_html(self):
         s = '''"{config.asciidoc_a2x}" \\
                  --verbose \\
@@ -78,12 +75,12 @@ class Asciidoc(BaseDoctype):
                  "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_chunked_html)
+    @depends(make_chunked_html)
     def move_chunked_html(self):
         s = 'mv --no-clobber -v -- "{output.stem}.chunked" html'
         return self.shellscript(s)
 
-    @depends(graph, move_chunked_html)
+    @depends(move_chunked_html)
     def make_name_html(self):
         s = 'ln -sv --relative -- html/index.html {output.name_indexhtml}'
         return self.shellscript(s)

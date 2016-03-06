@@ -6,8 +6,6 @@ from __future__ import absolute_import, division, print_function
 import os
 import logging
 
-import networkx as nx
-
 from tldp.utils import which, firstfoundfile
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.utils import arg_isreadablefile, isreadablefile
@@ -65,13 +63,11 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                 'docbook5xml_xslsingle': isreadablefile,
                 }
 
-    graph = nx.DiGraph()
-
     def chdir_output(self):
         os.chdir(self.output.dirname)
         return True
 
-    @depends(graph, chdir_output)
+    @depends(chdir_output)
     def make_xincluded_source(self):
         s = '''"{config.docbook5xml_xmllint}" > "{output.validsource}" \\
                   --nonet \\
@@ -80,7 +76,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_xincluded_source)
+    @depends(make_xincluded_source)
     def validate_source(self):
         '''consider lxml.etree and other validators'''
         s = '''"{config.docbook5xml_jing}" \\
@@ -88,7 +84,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   "{output.validsource}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_xincluded_source)
+    @depends(make_xincluded_source)
     def copy_static_resources(self):
         source = list()
         for d in ('images', 'resources'):
@@ -103,7 +99,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
             s = 'rsync --archive --verbose %s ./' % (' '.join(source))
         return self.shellscript(s)
 
-    @depends(graph, copy_static_resources)
+    @depends(copy_static_resources)
     def make_name_htmls(self):
         '''create a single page HTML output'''
         s = '''"{config.docbook5xml_xsltproc}" > "{output.name_htmls}" \\
@@ -114,7 +110,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   "{output.validsource}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_name_htmls)
+    @depends(make_name_htmls)
     def make_name_txt(self):
         '''create text output'''
         s = '''"{config.docbook5xml_html2text}" > "{output.name_txt}" \\
@@ -123,7 +119,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   "{output.name_htmls}"'''
         return self.shellscript(s)
 
-    @depends(graph, copy_static_resources)
+    @depends(copy_static_resources)
     def make_fo(self):
         '''generate the Formatting Objects intermediate output'''
         s = '''"{config.docbook5xml_xsltproc}" > "{output.name_fo}" \\
@@ -133,7 +129,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
         return self.shellscript(s)
 
     # -- this is conditionally built--see logic in make_name_pdf() below
-    # @depends(graph, make_fo)
+    # @depends(make_fo)
     def make_pdf_with_fop(self):
         '''use FOP to create a PDF'''
         s = '''"{config.docbook5xml_fop}" \\
@@ -142,7 +138,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
         return self.shellscript(s)
 
     # -- this is conditionally built--see logic in make_name_pdf() below
-    # @depends(graph, chdir_output)
+    # @depends(chdir_output)
     def make_pdf_with_dblatex(self):
         '''use dblatex (fallback) to create a PDF'''
         s = '''"{config.docbook5xml_dblatex}" \\
@@ -152,7 +148,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   "{output.validsource}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_fo)
+    @depends(make_fo)
     def make_name_pdf(self):
         stem = self.source.stem
         classname = self.__class__.__name__
@@ -166,7 +162,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                     stem, classname, 'make_pdf_with_dblatex')
         return self.make_pdf_with_dblatex()
 
-    @depends(graph, make_name_htmls)
+    @depends(make_name_htmls)
     def make_html(self):
         '''create chunked HTML output'''
         s = '''"{config.docbook5xml_xsltproc}" \\
@@ -177,19 +173,19 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   "{output.validsource}"'''
         return self.shellscript(s)
 
-    @depends(graph, make_html)
+    @depends(make_html)
     def make_name_html(self):
         '''rename DocBook XSL's index.html to LDP standard STEM.html'''
         s = 'mv -v --no-clobber -- "{output.name_indexhtml}" "{output.name_html}"'
         return self.shellscript(s)
 
-    @depends(graph, make_name_html)
+    @depends(make_name_html)
     def make_name_indexhtml(self):
         '''create final index.html symlink'''
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
         return self.shellscript(s)
 
-    @depends(graph, make_name_indexhtml, make_name_pdf)
+    @depends(make_name_indexhtml, make_name_pdf)
     def remove_xincluded_source(self):
         '''remove the xincluded source file'''
         s = 'rm --verbose -- "{output.validsource}"'
