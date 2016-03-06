@@ -8,6 +8,7 @@ import sys
 import stat
 import errno
 import logging
+import inspect
 from tempfile import NamedTemporaryFile as ntf
 from functools import wraps
 import networkx as nx
@@ -27,15 +28,13 @@ postamble = '''
 '''
 
 
-def depends(graph, *predecessors):
+def depends(*predecessors):
     '''decorator to be used for constructing build order graph'''
     def anon(f):
-        for dep in predecessors:
-            graph.add_edge(dep.__name__, f.__name__)
-
         @wraps(f)
         def method(self, *args, **kwargs):
             return f(self, *args, **kwargs)
+        method.depends = [x.__name__ for x in predecessors]
         return method
     return anon
 
@@ -155,19 +154,31 @@ class BaseDoctype(object):
             return False
         return True
 
+    def determinebuildorder(self):
+        graph = nx.DiGraph()
+        d = dict(inspect.getmembers(self, inspect.ismethod))
+        for name, member in d.items():
+            predecessors = getattr(member, 'depends', None)
+            if predecessors:
+               for pred in predecessors:
+                   method = d.get(pred, None)
+                   assert method is not None
+                   graph.add_edge(method, member)
+        order = nx.dag.topological_sort(graph)
+        return order
+
     @logtimings(logger.debug)
     def buildall(self):
         stem = self.source.stem
-        order = nx.dag.topological_sort(self.graph)
+        order = self.determinebuildorder()
         logger.debug("%s build order %r", self.source.stem, order)
-        for dep in order:
-            method = getattr(self, dep, None)
-            assert method is not None
+        for method in order:
             classname = self.__class__.__name__
-            logger.info("%s calling method %s.%s", stem, classname, dep)
+            logger.info("%s calling method %s.%s", 
+                        stem, classname, method.__name__)
             if not method():
-                logger.error("%s reported method %s failure, skipping...",
-                             stem, dep)
+                logger.error("%s called method  %s.%s failed, skipping...",
+                             stem, classname, method.__name__)
                 return False
         return True
 
