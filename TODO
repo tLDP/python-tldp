@@ -8,14 +8,22 @@ user-visible needs
 
   * add support for .epub3 (or just .epub?)
 
-  * add support for asciidoc
+  * add option --builddir (default to ${pubdir}/../ldp-builddir/
+
+  * adjust the OutputDirectory to have output.builddir
+
+  * separate the logic of --publish and --build in the generate()
+    function
+
+  * add option --publish (synonym to --build, but also rename into
+    live output dir)
+
+  * add support for asciidoc; instantiate a new instance of Docbook4XML 
+    with a SourceDocument of the generated result of asciidoc --backend
+    docbook
   
   * consider adding support for metadata extraction from documents
 
-  * figure out how/if to build the outputs in a separate place
-    rather than in the real output directory [prevent the problem that
-    a bad document update kills the real output directory and leaves
-    an empty result]
 
   * create TLDP DocBook 5.0 XSL files (if we care)
 
