@@ -6,12 +6,13 @@ from __future__ import absolute_import, division, print_function
 import os
 import sys
 import logging
+import inspect
 from argparse import Namespace
 
 from tldp.typeguesser import knowndoctypes
 from tldp.sources import SourceDocument, arg_issourcedoc
 from tldp.outputs import OutputDirectory
-from tldp.inventory import Inventory, status_classes, status_types
+from tldp.inventory import Inventory, status_classes, status_types, stypes
 from tldp.config import collectconfiguration
 from tldp.utils import arg_isloglevel
 from tldp.doctypes.common import preamble, postamble
@@ -20,6 +21,44 @@ logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s %(funcName)s %(mes
 logging.basicConfig(stream=sys.stderr, format=logformat, level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
+
+def show_doctypes(config, **kwargs):
+    file = kwargs.get('file', sys.stdout)
+    print("Supported source document types:", file=file)
+    print(file=file)
+    for doctype in knowndoctypes:
+        classname = doctype.__name__
+        fname = os.path.abspath(inspect.getmodule(doctype).__file__)
+        extensions = ', '.join(doctype.extensions)
+        print('{}'.format(classname), file=file)
+        print('      format name: {}'.format(doctype.formatname), file=file)
+        print('    code location: {}'.format(fname), file=file)
+        print('  file extensions: {}'.format(extensions), file=file)
+        for signature in doctype.signatures:
+            print('        signature: {}'.format(signature), file=file)
+        print(file=file)
+    print(file=file)
+    return 0
+
+def show_statustypes(config, **kwargs):
+    file = kwargs.get('file', sys.stdout)
+    width = 2 +  max([len(x) for x in status_types])
+    print("Basic status types:", file=file)
+    print(file=file)
+    for status, descrip in stypes.items():
+        fmt = '{status:>{width}}:  {descrip}'
+        text = fmt.format(status=status, descrip=descrip, width=width)
+        print(text, file=file)
+    print(file=file)
+    print("Synonyms and groups:", file=file)
+    print(file=file)
+    for status, descrip in status_classes.items():
+        fmt = '{status:>{width}}:  {descrip}'
+        descrip = ', '.join(descrip)
+        text = fmt.format(status=status, descrip=descrip, width=width)
+        print(text, file=file)
+    print(file=file)
+    return 0
 
 def summary(config, inv=None, **kwargs):
     if inv is None:
@@ -213,17 +252,29 @@ def run(argv):
         logger.debug("  %s = %r", param, value)
     logger.debug("  args: %r", args)
 
-    # -- summary does not require any args
-    if config.summary:
+    need_repos_p = "Option --pubdir (and --sourcedir) required "
+    need_repos_s = "Option --sourcedir (and --pubdir) required "
+
+    # -- --summary, --doctypes, --statustypes do not require any args
+    #
+    if any((config.summary, config.doctypes, config.statustypes)):
 
         if args:
-            return "Unknown args received for --summary: " + ' '.join(args)
-        if not config.pubdir:
-            return "Option --pubdir (and --sourcedir) required for --summary."
-        if not config.sourcedir:
-            return "Option --sourcedir (and --pubdir) required for --summary."
+            return "Unknown args received: " + ' '.join(args)
 
-        return summary(config)
+        if config.doctypes:
+            return show_doctypes(config)
+
+        if config.statustypes:
+            return show_statustypes(config)
+
+        if config.summary:
+            if not config.pubdir:
+                return need_repos_p + "for --summary"
+            if not config.sourcedir:
+                return need_repos_s + "for --summary"
+
+            return summary(config)
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # -- argument handling logic; try to avoid creating an inventory unless it
@@ -252,9 +303,9 @@ def run(argv):
     #
     if need_inventory:
         if not config.pubdir:
-            return " --pubdir (and --sourcedir) required for inventory."
+            return need_repos_p + "for inventory"
         if not config.sourcedir:
-            return " --sourcedir (and --pubdir) required for inventory."
+            return need_repos_s + "for inventory"
         inv = Inventory(config.pubdir, config.sourcedir)
         logger.info("Collected inventory containing %s documents.",
                     len(inv.all.keys()))
@@ -312,7 +363,7 @@ def run(argv):
         config.build = True
 
     if not config.pubdir:
-        return " --pubdir required to --build."
+        return need_repos_p + "to --build"
     return build(config, docs)
 
 

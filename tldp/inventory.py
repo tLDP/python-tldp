@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function
 
 import copy
 import logging
+from collections import OrderedDict
 
 from tldp.utils import max_mtime, mtime_gt
 
@@ -16,28 +17,29 @@ logger = logging.getLogger(__name__)
 # -- any individual document (source or output) will have a status
 #    from the following list of status_types
 #
-status_types = [
-                'source',
-                'output',
-                'published',
-                'new',
-                'orphan',
-                'broken',
-                'stale',
-                ]
+stypes = OrderedDict()
+stypes['source'] = 'found in source repository'
+stypes['output'] = 'found in output repository'
+stypes['published'] = 'matching stem in source/output; doc is up to date'
+stypes['stale'] = 'matching stem in source/output; but source is newer'
+stypes['orphan'] = 'stem located in output, but no source found (i.e. old?)'
+stypes['broken'] = 'output is missing an expected output format (e.g. PDF)'
+stypes['new'] = 'stem located in source, but missing in output; unpublished'
+
+status_types = stypes.keys()
 
 # -- the user probably doesn't usually care (too much) about listing
 #    every single published document and source document, but is probably
 #    mostly interested in specific documents grouped by status; so the
 #    status_classes are just sets of status_types
 #
-status_classes = dict(zip(status_types, [[x] for x in status_types]))
+status_classes = OrderedDict(zip(status_types, [[x] for x in status_types]))
 status_classes['outputs'] = ['output']
 status_classes['sources'] = ['source']
-status_classes['problems'] = ['orphan', 'broken', 'stale']
-status_classes['work'] = ['new', 'orphan', 'broken', 'stale']
 status_classes['orphans'] = ['orphan']
 status_classes['orphaned'] = ['orphan']
+status_classes['problems'] = ['orphan', 'broken', 'stale']
+status_classes['work'] = ['new', 'orphan', 'broken', 'stale']
 status_classes['all'] = ['published', 'new', 'orphan', 'broken', 'stale']
 
 

@@ -166,7 +166,7 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
         return self.shellscript(s)
 
-    @depends(make_name_html)
+    @depends(make_html, make_name_pdf, make_name_htmls)
     def remove_validated_source(self):
         '''create final index.html symlink'''
         s = 'rm --verbose -- "{output.validsource}"'

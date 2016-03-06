@@ -33,6 +33,14 @@ def collectconfiguration(tag, argv):
                    '-t',
                    action='store_true', default=False,
                    help='dump inventory summary report [%(default)s]')
+    g.add_argument('--doctypes', '--formats', '--format', 
+                   '--list-doctypes', '--list-formats',
+                   '-T',
+                   action='store_true', default=False,
+                   help='show supported doctypes [%(default)s]')
+    g.add_argument('--statustypes', '--list-statustypes',
+                   action='store_true', default=False,
+                   help='show status types and classes [%(default)s]')
 
     ap.add_argument('--verbose',
                     action='store_true', default=False,
