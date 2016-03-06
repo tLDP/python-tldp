@@ -185,7 +185,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
         return self.shellscript(s)
 
-    @depends(make_name_indexhtml, make_name_pdf)
+    @depends(make_name_htmls, make_html, make_fo, make_name_pdf)
     def remove_xincluded_source(self):
         '''remove the xincluded source file'''
         s = 'rm --verbose -- "{output.validsource}"'
