@@ -11,9 +11,14 @@ import operator
 import subprocess
 import functools
 from functools import wraps
-from tempfile import mkstemp
+from tempfile import mkstemp, mkdtemp
 import logging
 logger = logging.getLogger(__name__)
+
+opa = os.path.abspath
+opb = os.path.basename
+opd = os.path.dirname
+opj = os.path.join
 
 logdir = 'tldp-document-build-logs'
 
@@ -73,6 +78,26 @@ def arg_isexecutable(f):
 def stem_and_ext(name):
     '''return (stem, ext) for any relative or absolute filename'''
     return os.path.splitext(os.path.basename(os.path.normpath(name)))
+
+
+def swapdirs(a, b):
+    '''use os.rename() to make "a" become "b"'''
+    if not os.path.isdir(a):
+        raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+    tname = None
+    if os.path.isdir(b):
+        tdir = mkdtemp(prefix='swapdirs-', dir=opd(opa(a)))
+        logger.debug("Created tempdir %s.", tdir)
+        tname = opj(tdir, opb(b))
+        logger.debug("About to rename %s to %s.", b, tname)
+        os.rename(b, tname)
+    logger.debug("About to rename %s to %s.", a, b)
+    os.rename(a, b)
+    if tname:
+        logger.debug("About to rename %s to %s.", tname, a)
+        os.rename(tname, a)
+        logger.debug("About to remove %s.", tdir)
+        os.rmdir(tdir)
 
 
 def conditionallogging(result, prefix, fname):
