@@ -184,6 +184,7 @@ class SourceDocument(object):
         self.doctype = guess(self.filename)
         self.status = 'source'
         self.output = None
+        self.build = None
         self.newer = set()
         self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = stem_and_ext(self.basename)
