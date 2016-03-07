@@ -208,37 +208,41 @@ class BaseDoctype(object):
         stem = self.source.stem
         classname = self.__class__.__name__
 
+        # -- ensure all the tools and data files are present before build
         #
         if not self.build_precheck():
             logger.warning("%s %s failed (%s), skipping to next build",
                            stem, 'build_precheck', classname)
             return False
 
-        # -- we are go for build!  output directory and processor
-        #    both get to perform any build preparation steps they
-        #    would like
+        # -- perform build preparation steps:  mkdir
         #
-        # -- the processor gets to prepare; must return True
         if not self.output.hook_build_prepare():
             logger.warning("%s %s failed (output %s), skipping",
                            stem, 'hook_build_prepare', classname)
             return False
 
+        # -- perform build preparation steps:  chdir
+        #
         opwd = os.getcwd()
         if not self.build_chdir_output(self.config):
             logger.warning("%s %s failed (%s), skipping to next build",
                            stem, 'build_chdir_output', classname)
             return False
 
+        # -- perform build preparation steps:  copy images/resources
+        #
         if not self.hook_build_prepare():
             logger.warning("%s %s failed (processor %s), skipping",
                            stem, 'hook_build_prepare', classname)
             return False
 
-        # -- now, we can try to build everything; this is the BIG WORK!
+        # -- build
         #
         result = self.buildall()
 
+        # -- report on result and/or cleanup
+        #
         if result:
             self.hook_build_success()  # -- processor
             self.output.hook_build_success()  # -- output document
