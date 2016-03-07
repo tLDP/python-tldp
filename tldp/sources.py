@@ -200,6 +200,8 @@ class SourceDocument(object):
         outstr = template.format(s=self, w=widths)
         print(outstr, file=file)
         if verbose:
+            print('         doctype {}'.format(self.doctype), file=file)
+            print('        filename {}'.format(self.filename), file=file)
             for f in sorted(self.newer):
                 fname = os.path.join(self.dirname, f)
                 print('    newer source {}'.format(fname), file=file)
