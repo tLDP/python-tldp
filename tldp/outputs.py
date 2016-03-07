@@ -135,7 +135,9 @@ class OutputDirectory(OutputNamingConvention):
             logger.debug("%s removing dir   %s.", self.stem, self.dirname)
             shutil.rmtree(self.dirname)
 
-    def hook_build_prepare(self):
+    def hook_build_prepare(self, config):
+        if config.script:
+            return True
         self.clean()
         for d in (self.dirname, self.logdir):
             if not os.path.isdir(d):
