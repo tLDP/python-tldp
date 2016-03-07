@@ -21,6 +21,10 @@ def collectconfiguration(tag, argv):
                    '-b',
                    action='store_true', default=False,
                    help='build LDP documentation [%(default)s]')
+    g.add_argument('--publish',
+                   '-p',
+                   action='store_true', default=False,
+                   help='build and publish LDP documentation [%(default)s]')
     g.add_argument('--script',
                    '-S',
                    action='store_true', default=False,
