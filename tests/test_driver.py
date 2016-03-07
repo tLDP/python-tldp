@@ -54,7 +54,7 @@ class TestDriverSummary(TestInventoryBase):
         c = self.config
         self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
         stdout = StringIO()
-        tldp.driver.summary(c, None, file=stdout)
+        tldp.driver.summary(c, file=stdout)
         stdout.seek(0)
         parts = stdout.read().split()
         idx = parts.index('new')
