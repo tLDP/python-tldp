@@ -230,6 +230,10 @@ def extractExplicitDocumentArgs(config, args):
     return docs, remainder
 
 
+def sameFilesystem(d0, d1):
+    return os.stat(d0).st_dev == os.stat(d1).st_dev
+    
+
 def run(argv):
     # -- may want to see option parsing, so set --loglevel as
     #    soon as possible
@@ -376,6 +380,10 @@ def run(argv):
 
     if not config.pubdir:
         return need_repos_p + "to --build"
+
+    if not sameFilesystem(config.pubdir, config.builddir):
+        return "--pubdir and --builddir must be on the same filesystem"
+
     return build(config, docs)
 
 
