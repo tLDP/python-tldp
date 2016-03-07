@@ -217,7 +217,7 @@ class BaseDoctype(object):
 
         # -- perform build preparation steps:  mkdir
         #
-        if not self.output.hook_build_prepare():
+        if not self.output.hook_build_prepare(self.config):
             logger.warning("%s %s failed (output %s), skipping",
                            stem, 'hook_build_prepare', classname)
             return False
