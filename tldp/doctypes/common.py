@@ -99,6 +99,27 @@ class BaseDoctype(object):
             assert validator(thing)
         return True
 
+    def build_chdir_output(self, config):
+        '''chdir to the output directory (or write the script that would)'''
+        if config.script:
+            s = 'cd -- "{output.dirname}"'
+            return self.shellscript(s)
+        os.chdir(self.output.dirname)
+        return True
+
+    def hook_build_prepare(self):
+        source = list()
+        for d in self.config.resources:
+            fullpath = os.path.join(self.source.dirname, d)
+            fullpath = os.path.abspath(fullpath)
+            if os.path.isdir(fullpath):
+                source.append('"' + fullpath + '"')
+        if not source:
+            logger.debug("%s no images or resources to copy", self.source.stem)
+            return True
+        s = 'rsync --archive --verbose %s ./' % (' '.join(source))
+        return self.shellscript(s)
+
     def hook_build_success(self):
         self.cleanup()
 
@@ -187,22 +208,32 @@ class BaseDoctype(object):
         stem = self.source.stem
         classname = self.__class__.__name__
 
-        # -- the output directory gets to prepare; must return True
-        #
-        # -- the processor gets to prepare; must return True
         #
         if not self.build_precheck():
             logger.warning("%s %s failed (%s), skipping to next build",
                            stem, 'build_precheck', classname)
             return False
 
-        if not self.output.hook_prebuild():
-            logger.warning("%s %s failed (%s), skipping to next build",
-                           stem, 'hook_prebuild', classname)
+        # -- we are go for build!  output directory and processor
+        #    both get to perform any build preparation steps they
+        #    would like
+        #
+        # -- the processor gets to prepare; must return True
+        if not self.output.hook_build_prepare():
+            logger.warning("%s %s failed (output %s), skipping",
+                           stem, 'hook_build_prepare', classname)
             return False
 
         opwd = os.getcwd()
-        os.chdir(self.output.dirname)
+        if not self.build_chdir_output(self.config):
+            logger.warning("%s %s failed (%s), skipping to next build",
+                           stem, 'build_chdir_output', classname)
+            return False
+
+        if not self.hook_build_prepare():
+            logger.warning("%s %s failed (processor %s), skipping",
+                           stem, 'hook_build_prepare', classname)
+            return False
 
         # -- now, we can try to build everything; this is the BIG WORK!
         #
