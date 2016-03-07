@@ -38,7 +38,7 @@ def show_doctypes(config, **kwargs):
             print('        signature: {}'.format(signature), file=file)
         print(file=file)
     print(file=file)
-    return 0
+    return os.EX_OK
 
 def show_statustypes(config, **kwargs):
     file = kwargs.get('file', sys.stdout)
@@ -58,7 +58,7 @@ def show_statustypes(config, **kwargs):
         text = fmt.format(status=status, descrip=descrip, width=width)
         print(text, file=file)
     print(file=file)
-    return 0
+    return os.EX_OK
 
 def summary(config, inv=None, **kwargs):
     if inv is None:
@@ -87,7 +87,7 @@ def summary(config, inv=None, **kwargs):
                 if abbrev:
                     s = s + ', and %d more ...' % (len(abbrev))
             print(s, file=file)
-    return 0
+    return os.EX_OK
 
 
 def detail(config, docs, **kwargs):
@@ -101,7 +101,7 @@ def detail(config, docs, **kwargs):
     for doc in docs:
         stdout = kwargs.get('file', sys.stdout)
         doc.detail(width, config.verbose, file=stdout)
-    return 0
+    return os.EX_OK
 
 
 def build(config, docs, **kwargs):
@@ -115,20 +115,18 @@ def build(config, docs, **kwargs):
             logger.warning("%s (%d of %d) skipping unknown doctype",
                            source.stem, x, len(docs))
             continue
-        if not source.output:
-            dirname = os.path.join(config.pubdir, source.stem)
-            source.output = OutputDirectory.fromsource(config.pubdir, source)
+        source.output = OutputDirectory.fromsource(config.pubdir, source)
         output = source.output
         runner = source.doctype(source=source, output=output, config=config)
         logger.info("%s (%d of %d) initiating build",
                     source.stem, x, len(docs))
         result.append(runner.generate())
     if all(result):
-        return 0
+        return os.EX_OK
     for errcode, source in zip(result, docs):
         if not errcode:
             logger.error("%s build failed", source.stem)
-    return 1
+    return "Build failed, see errors logged."
 
 
 def script(config, docs, **kwargs):
@@ -350,7 +348,7 @@ def run(argv):
 
     if not workset:
         logger.info("No work to do.")
-        return 0
+        return os.EX_OK
 
     # -- listify the set and sort it
     #
