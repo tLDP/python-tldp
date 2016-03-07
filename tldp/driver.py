@@ -31,7 +31,9 @@ ERR_EXTRAARGS = "Extra arguments received: "
 
 
 
-def show_doctypes(config, **kwargs):
+def show_doctypes(config, *args, **kwargs):
+    if args:
+        return ERR_EXTRAARGS + ' '.join(args)
     file = kwargs.get('file', sys.stdout)
     print("Supported source document types:", file=file)
     print(file=file)
@@ -50,7 +52,9 @@ def show_doctypes(config, **kwargs):
     return os.EX_OK
 
 
-def show_statustypes(config, **kwargs):
+def show_statustypes(config, *args, **kwargs):
+    if args:
+        return ERR_EXTRAARGS + ' '.join(args)
     file = kwargs.get('file', sys.stdout)
     width = 2 + max([len(x) for x in status_types])
     print("Basic status types:", file=file)
@@ -71,10 +75,17 @@ def show_statustypes(config, **kwargs):
     return os.EX_OK
 
 
-def summary(config, inv=None, **kwargs):
+def summary(config, *args, **kwargs):
+    if args:
+        return ERR_EXTRAARGS + ' '.join(args)
+    if not config.pubdir:
+        return ERR_NEEDPUBDIR + "for --summary"
+    if not config.sourcedir:
+        return ERR_NEEDSOURCEDIR + "for --summary"
+    file = kwargs.get('file', sys.stdout)
+    inv = kwargs.get('inv', None)
     if inv is None:
         inv = Inventory(config.pubdir, config.sourcedir)
-    file = kwargs.get('file', sys.stdout)
     width = Namespace()
     width.status = max([len(x) for x in status_types])
     width.count = len(str(len(inv.source.keys())))
@@ -102,6 +113,7 @@ def summary(config, inv=None, **kwargs):
 
 
 def detail(config, docs, **kwargs):
+    file = kwargs.get('file', sys.stdout)
     width = Namespace()
     width.status = max([len(x) for x in status_types])
     width.stem = max([len(x.stem) for x in docs])
@@ -110,12 +122,33 @@ def detail(config, docs, **kwargs):
     #    "all" seems to be less surprising
     #
     for doc in docs:
-        stdout = kwargs.get('file', sys.stdout)
-        doc.detail(width, config.verbose, file=stdout)
+        doc.detail(width, config.verbose, file=file)
     return os.EX_OK
 
 
+def builddir_setup(config):
+    if not config.builddir:
+        builddir = os.path.dirname(os.path.abspath(config.pubdir))
+        builddir = os.path.join(builddir, 'ldp-builddir')
+        if not arg_isdirectory(builddir):
+            logger.debug("Creating build directory %s.", builddir)
+            try:
+                os.mkdir(builddir)
+            except OSError as e:
+                logger.critical("Could not make --builddir %s.", builddir)
+                return False, e.errno
+        config.builddir = builddir
+    if not sameFilesystem(config.pubdir, config.builddir):
+        return False, "--pubdir and --builddir must be on the same filesystem"
+    return True, None
+
+
 def build(config, docs, **kwargs):
+    if not config.pubdir:
+        return ERR_NEEDPUBDIR + "to --build"
+    ready, error = builddir_setup(config)
+    if not ready:
+        return error
     result = list()
     for x, source in enumerate(docs, 1):
         if not isinstance(source, SourceDocument):
@@ -141,12 +174,19 @@ def build(config, docs, **kwargs):
 
 
 def script(config, docs, **kwargs):
-    if preamble:
-        print(preamble, file=sys.stdout)
+    file = kwargs.get('file', sys.stdout)
+    print(preamble, file=file)
     result = build(config, docs, **kwargs)
-    if postamble:
-        print(postamble, file=sys.stdout)
+    print(postamble, file=file)
     return result
+
+
+def publish(config, docs, **kwargs):
+    config.build = True
+    result = build(config, docs, **kwargs)
+    if result != os.EX_OK:
+        return result
+    return os.EX_OK
 
 
 def getDocumentNames(args):
@@ -259,7 +299,7 @@ def collectWorkset(config, args):
     if not workset:
         need_inventory = True
 
-    # -- by default, we only --list, --script or --build on work-to-be-done
+    # -- We only --list, --script, --build, or --publish on work-to-be-done
     #    so, if there have been no special arguments at this point, we will
     #    simply grab the work to be done; see below the line that says:
     #
@@ -317,26 +357,14 @@ def collectWorkset(config, args):
 
 def handleArgs(config, args):
 
-    # -- --summary, --doctypes, --statustypes do not require any args
-    #
-    if any((config.summary, config.doctypes, config.statustypes)):
+    if config.doctypes:
+        return show_doctypes(config, *args)
 
-        if args:
-            return ERR_EXTRAARGS + ' '.join(args)
+    if config.statustypes:
+        return show_statustypes(config, *args)
 
-        if config.doctypes:
-            return show_doctypes(config)
-
-        if config.statustypes:
-            return show_statustypes(config)
-
-        if config.summary:
-            if not config.pubdir:
-                return ERR_NEEDPUBDIR + "for --summary"
-            if not config.sourcedir:
-                return ERR_NEEDSOURCEDIR + "for --summary"
-
-            return summary(config)
+    if config.summary:
+        return summary(config, *args)
 
     docs, error = collectWorkset(config, args)
 
@@ -351,36 +379,19 @@ def handleArgs(config, args):
         return detail(config, docs)
 
     if config.script:
-        return script(config, docs, preamble=preamble, postamble=postamble)
+        return script(config, docs)
 
-    # -- either --build or --publish below here ...
-    #
     if config.publish:
-        config.build = True
+        return publish(config, docs)
 
     if not config.build:
         logger.info("Assuming --build, since no other action was specified...")
         config.build = True
 
-    if not config.builddir:
-        builddir = os.path.dirname(os.path.abspath(config.pubdir))
-        builddir = os.path.join(builddir, 'ldp-builddir')
-        if not arg_isdirectory(builddir):
-            logger.debug("Creating build directory %s.", builddir)
-            try:
-                os.mkdir(builddir)
-            except OSError:
-                logger.critical("Could not make --builddir %s.", builddir)
-                raise
-        config.builddir = builddir
+    if config.build:
+        return build(config, docs)
 
-    if not config.pubdir:
-        return need_repos_p + "to --build"
-
-    if not sameFilesystem(config.pubdir, config.builddir):
-        return "--pubdir and --builddir must be on the same filesystem"
-
-    return build(config, docs)
+    return "Fell through handleArgs(); programming error."
 
 def run(argv):
     # -- may want to see option parsing, so set --loglevel as
