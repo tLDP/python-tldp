@@ -159,6 +159,8 @@ class BaseDoctype(object):
         return self.shellscript(s)
 
     def hook_build_prepare(self):
+        stem = self.source.stem
+        classname = self.__class__.__name__
         order = ['build_precheck',
                  'clear_output',
                  'mkdir_output',
@@ -269,9 +271,6 @@ class BaseDoctype(object):
 
     @logtimings(logger.info)
     def generate(self):
-        stem = self.source.stem
-        classname = self.__class__.__name__
-
         # -- perform build preparation steps;
         #     - check for all executables and data files
         #     - clear output dir
