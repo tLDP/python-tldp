@@ -37,7 +37,7 @@ def collectconfiguration(tag, argv):
                    '-t',
                    action='store_true', default=False,
                    help='dump inventory summary report [%(default)s]')
-    g.add_argument('--doctypes', '--formats', '--format', 
+    g.add_argument('--doctypes', '--formats', '--format',
                    '--list-doctypes', '--list-formats',
                    '-T',
                    action='store_true', default=False,

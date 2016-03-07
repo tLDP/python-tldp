@@ -17,7 +17,8 @@ from tldp.config import collectconfiguration
 from tldp.utils import arg_isloglevel, arg_isdirectory
 from tldp.doctypes.common import preamble, postamble
 
-logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s %(funcName)s %(message)s'
+logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s ' \
+     + '%(funcName)s %(message)s'
 logging.basicConfig(stream=sys.stderr, format=logformat, level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
@@ -40,9 +41,10 @@ def show_doctypes(config, **kwargs):
     print(file=file)
     return os.EX_OK
 
+
 def show_statustypes(config, **kwargs):
     file = kwargs.get('file', sys.stdout)
-    width = 2 +  max([len(x) for x in status_types])
+    width = 2 + max([len(x) for x in status_types])
     print("Basic status types:", file=file)
     print(file=file)
     for status, descrip in stypes.items():
@@ -59,6 +61,7 @@ def show_statustypes(config, **kwargs):
         print(text, file=file)
     print(file=file)
     return os.EX_OK
+
 
 def summary(config, inv=None, **kwargs):
     if inv is None:
@@ -230,7 +233,7 @@ def extractExplicitDocumentArgs(config, args):
 
 def sameFilesystem(d0, d1):
     return os.stat(d0).st_dev == os.stat(d1).st_dev
-    
+
 
 def run(argv):
     # -- may want to see option parsing, so set --loglevel as

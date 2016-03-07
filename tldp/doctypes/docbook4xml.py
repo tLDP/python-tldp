@@ -156,30 +156,31 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
     def argparse(cls, p):
         descrip = 'executables and data files for %s' % (cls.formatname,)
         g = p.add_argument_group(title=cls.__name__, description=descrip)
-        g.add_argument('--docbook4xml-xslchunk', type=arg_isreadablefile,
-                       default=xslchunk_finder(),
-                       help='full path to LDP HTML chunker XSL [%(default)s]')
-        g.add_argument('--docbook4xml-xslsingle', type=arg_isreadablefile,
-                       default=xslsingle_finder(),
-                       help='full path to LDP HTML single-page XSL [%(default)s]')
-        g.add_argument('--docbook4xml-xslprint', type=arg_isreadablefile,
-                       default=xslprint_finder(),
-                       help='full path to LDP FO print XSL [%(default)s]')
-        g.add_argument('--docbook4xml-xmllint', type=arg_isexecutable,
-                       default=which('xmllint'),
-                       help='full path to xmllint [%(default)s]')
-        g.add_argument('--docbook4xml-xsltproc', type=arg_isexecutable,
-                       default=which('xsltproc'),
-                       help='full path to xsltproc [%(default)s]')
-        g.add_argument('--docbook4xml-html2text', type=arg_isexecutable,
-                       default=which('html2text'),
-                       help='full path to html2text [%(default)s]')
-        g.add_argument('--docbook4xml-fop', type=arg_isexecutable,
-                       default=which('fop'),
-                       help='full path to fop [%(default)s]')
-        g.add_argument('--docbook4xml-dblatex', type=arg_isexecutable,
-                       default=which('dblatex'),
-                       help='full path to dblatex [%(default)s]')
+        gadd = g.add_argument
+        gadd('--docbook4xml-xslchunk', type=arg_isreadablefile,
+             default=xslchunk_finder(),
+             help='full path to LDP HTML chunker XSL [%(default)s]')
+        gadd('--docbook4xml-xslsingle', type=arg_isreadablefile,
+             default=xslsingle_finder(),
+             help='full path to LDP HTML single-page XSL [%(default)s]')
+        gadd('--docbook4xml-xslprint', type=arg_isreadablefile,
+             default=xslprint_finder(),
+             help='full path to LDP FO print XSL [%(default)s]')
+        gadd('--docbook4xml-xmllint', type=arg_isexecutable,
+             default=which('xmllint'),
+             help='full path to xmllint [%(default)s]')
+        gadd('--docbook4xml-xsltproc', type=arg_isexecutable,
+             default=which('xsltproc'),
+             help='full path to xsltproc [%(default)s]')
+        gadd('--docbook4xml-html2text', type=arg_isexecutable,
+             default=which('html2text'),
+             help='full path to html2text [%(default)s]')
+        gadd('--docbook4xml-fop', type=arg_isexecutable,
+             default=which('fop'),
+             help='full path to fop [%(default)s]')
+        gadd('--docbook4xml-dblatex', type=arg_isexecutable,
+             default=which('dblatex'),
+             help='full path to dblatex [%(default)s]')
 
 #
 # -- end of file

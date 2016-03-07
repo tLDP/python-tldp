@@ -107,7 +107,7 @@ class BaseDoctype(object):
         generates scripts into the directory that would be removed.  Thus, the
         behaviour is different depending on --script mode or --build mode.
         '''
-        logger.debug("%s removing dir   %s.", 
+        logger.debug("%s removing dir   %s.",
                      self.output.stem, self.output.dirname)
         if self.config.script:
             s = 'test -d "{output.dirname}" && rm -rf -- "{output.dirname}"'
@@ -123,7 +123,7 @@ class BaseDoctype(object):
         generates scripts into the directory that would be removed.  Thus, the
         behaviour is different depending on --script mode or --build mode.
         '''
-        logger.debug("%s creating dir   %s.", 
+        logger.debug("%s creating dir   %s.",
                      self.output.stem, self.output.dirname)
         if self.config.script:
             s = 'mkdir -p -- "{output.logdir}"'
@@ -135,7 +135,7 @@ class BaseDoctype(object):
 
     def chdir_output(self):
         '''chdir to the output directory (or write the script that would)'''
-        logger.debug("%s chdir to dir   %s.", 
+        logger.debug("%s chdir to dir   %s.",
                      self.output.stem, self.output.dirname)
         if self.config.script:
             s = 'cd -- "{output.dirname}"'
@@ -144,7 +144,7 @@ class BaseDoctype(object):
         return True
 
     def copy_static_resources(self):
-        logger.debug("%s copy resources %s.", 
+        logger.debug("%s copy resources %s.",
                      self.output.stem, self.output.dirname)
         source = list()
         for d in self.config.resources:
@@ -172,7 +172,7 @@ class BaseDoctype(object):
             assert method is not None
             if not method():
                 logger.warning("%s %s failed (%s), skipping",
-                           stem, methname, classname)
+                               stem, methname, classname)
                 return False
         return True
 
@@ -209,7 +209,8 @@ class BaseDoctype(object):
         return True
 
     @logtimings(logger.debug)
-    def execute_shellscript(self, script, preamble=preamble, postamble=postamble):
+    def execute_shellscript(self, script, preamble=preamble, 
+                            postamble=postamble):
         source = self.source
         output = self.output
         config = self.config
@@ -244,10 +245,10 @@ class BaseDoctype(object):
         for name, member in d.items():
             predecessors = getattr(member, 'depends', None)
             if predecessors:
-               for pred in predecessors:
-                   method = d.get(pred, None)
-                   assert method is not None
-                   graph.add_edge(method, member)
+                for pred in predecessors:
+                    method = d.get(pred, None)
+                    assert method is not None
+                    graph.add_edge(method, member)
         order = nx.dag.topological_sort(graph)
         return order
 
@@ -258,7 +259,7 @@ class BaseDoctype(object):
         logger.debug("%s build order %r", self.source.stem, order)
         for method in order:
             classname = self.__class__.__name__
-            logger.info("%s calling method %s.%s", 
+            logger.info("%s calling method %s.%s",
                         stem, classname, method.__name__)
             if not method():
                 logger.error("%s called method  %s.%s failed, skipping...",
