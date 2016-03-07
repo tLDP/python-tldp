@@ -55,6 +55,9 @@ def collectconfiguration(tag, argv):
     ap.add_argument('--skip',
                     default=[], action='append', type=str,
                     help='skip this stem during processing')
+    ap.add_argument('--resources',
+                    default=['images', 'resources'], action='append', type=str,
+                    help='subdirs to copy during build [%(default)s]')
     ap.add_argument('--sourcedir', '--source-dir', '--source-directory',
                     '-s',
                     action='append', default='', type=arg_isdirectory,
