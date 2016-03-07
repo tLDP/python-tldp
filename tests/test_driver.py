@@ -217,7 +217,7 @@ class TestDriverBuild(TestInventoryBase):
         self.assertEquals(2, len(inv.all.keys()))
         docs = inv.all.values()
         result = tldp.driver.build(c, docs)
-        self.assertEquals(1, result)
+        self.assertTrue('Build failed' in result)
 
     def test_build_only_requested_stem(self):
         c = self.config
