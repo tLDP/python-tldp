@@ -362,6 +362,11 @@ def run(argv):
     if config.script:
         return script(config, docs, preamble=preamble, postamble=postamble)
 
+    # -- either --build or --publish below here ...
+    #
+    if config.publish:
+        config.build = True
+
     if not config.build:
         logger.info("Assuming --build, since no other action was specified...")
         config.build = True
