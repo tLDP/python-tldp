@@ -7,6 +7,7 @@ import os
 import sys
 import stat
 import errno
+import shutil
 import logging
 import inspect
 from tempfile import NamedTemporaryFile as ntf
@@ -99,15 +100,52 @@ class BaseDoctype(object):
             assert validator(thing)
         return True
 
-    def build_chdir_output(self, config):
+    def clear_output(self):
+        '''remove the entire output directory
+
+        This method must be --script aware.  The method execute_shellscript()
+        generates scripts into the directory that would be removed.  Thus, the
+        behaviour is different depending on --script mode or --build mode.
+        '''
+        logger.debug("%s removing dir   %s.", 
+                     self.output.stem, self.output.dirname)
+        if self.config.script:
+            s = 'test -d "{output.dirname}" && rm -rf -- "{output.dirname}"'
+            return self.shellscript(s)
+        if os.path.exists(self.output.dirname):
+            shutil.rmtree(self.output.dirname)
+        return True
+
+    def mkdir_output(self):
+        '''create a new output directory
+
+        This method must be --script aware.  The method execute_shellscript()
+        generates scripts into the directory that would be removed.  Thus, the
+        behaviour is different depending on --script mode or --build mode.
+        '''
+        logger.debug("%s creating dir   %s.", 
+                     self.output.stem, self.output.dirname)
+        if self.config.script:
+            s = 'mkdir -p -- "{output.logdir}"'
+            return self.shellscript(s)
+        for d in (self.output.dirname, self.output.logdir):
+            if not os.path.isdir(d):
+                os.mkdir(d)
+        return True
+
+    def chdir_output(self):
         '''chdir to the output directory (or write the script that would)'''
-        if config.script:
+        logger.debug("%s chdir to dir   %s.", 
+                     self.output.stem, self.output.dirname)
+        if self.config.script:
             s = 'cd -- "{output.dirname}"'
             return self.shellscript(s)
         os.chdir(self.output.dirname)
         return True
 
-    def hook_build_prepare(self):
+    def copy_static_resources(self):
+        logger.debug("%s copy resources %s.", 
+                     self.output.stem, self.output.dirname)
         source = list()
         for d in self.config.resources:
             fullpath = os.path.join(self.source.dirname, d)
@@ -120,11 +158,36 @@ class BaseDoctype(object):
         s = 'rsync --archive --verbose %s ./' % (' '.join(source))
         return self.shellscript(s)
 
+    def hook_build_prepare(self):
+        order = ['build_precheck',
+                 'clear_output',
+                 'mkdir_output',
+                 'chdir_output',
+                 'copy_static_resources',
+                 ]
+        # -- perform build preparation steps:  clear
+        #
+        for methname in order:
+            method = getattr(self, methname, None)
+            assert method is not None
+            if not method():
+                logger.warning("%s %s failed (%s), skipping",
+                           stem, methname, classname)
+                return False
+        return True
+
     def hook_build_success(self):
-        self.cleanup()
+        stem = self.output.stem
+        logdir = self.output.logdir
+        dirname = self.output.dirname
+        logger.info("%s build SUCCESS  %s.", stem, dirname)
+        logger.debug("%s removing logs  %s)", stem, logdir)
+        if os.path.isdir(logdir):
+            shutil.rmtree(logdir)
+        return True
 
     def hook_build_failure(self):
-        self.cleanup()
+        pass
 
     def shellscript(self, script, **kwargs):
         if self.config.build:
@@ -208,33 +271,15 @@ class BaseDoctype(object):
         stem = self.source.stem
         classname = self.__class__.__name__
 
-        # -- ensure all the tools and data files are present before build
-        #
-        if not self.build_precheck():
-            logger.warning("%s %s failed (%s), skipping to next build",
-                           stem, 'build_precheck', classname)
-            return False
-
-        # -- perform build preparation steps:  mkdir
-        #
-        if not self.output.hook_build_prepare(self.config):
-            logger.warning("%s %s failed (output %s), skipping",
-                           stem, 'hook_build_prepare', classname)
-            return False
-
-        # -- perform build preparation steps:  chdir
+        # -- perform build preparation steps;
+        #     - check for all executables and data files
+        #     - clear output dir
+        #     - make output dir
+        #     - chdir to output dir
+        #     - copy source images/resources to output dir
         #
         opwd = os.getcwd()
-        if not self.build_chdir_output(self.config):
-            logger.warning("%s %s failed (%s), skipping to next build",
-                           stem, 'build_chdir_output', classname)
-            return False
-
-        # -- perform build preparation steps:  copy images/resources
-        #
         if not self.hook_build_prepare():
-            logger.warning("%s %s failed (processor %s), skipping",
-                           stem, 'hook_build_prepare', classname)
             return False
 
         # -- build
@@ -244,11 +289,9 @@ class BaseDoctype(object):
         # -- report on result and/or cleanup
         #
         if result:
-            self.hook_build_success()  # -- processor
-            self.output.hook_build_success()  # -- output document
+            self.hook_build_success()
         else:
-            self.hook_build_failure()  # -- processor
-            self.output.hook_build_failure()  # -- output document
+            self.hook_build_failure()
 
         os.chdir(opwd)
 

@@ -125,38 +125,6 @@ class OutputDirectory(OutputNamingConvention):
         self.source = source
         self.logdir = os.path.join(self.dirname, logdir)
 
-    def clean(self):
-        '''remove the output directory for this document
-
-        This is done as a matter of course when the output documents must be
-        regenerated.  Better to start fresh.
-        '''
-        if os.path.isdir(self.dirname):
-            logger.debug("%s removing dir   %s.", self.stem, self.dirname)
-            shutil.rmtree(self.dirname)
-
-    def hook_build_prepare(self, config):
-        if config.script:
-            return True
-        self.clean()
-        for d in (self.dirname, self.logdir):
-            if not os.path.isdir(d):
-                logger.debug("%s creating dir   %s.", self.stem, d)
-                os.mkdir(d)
-        logger.info("%s ready to build %s.", self.stem, self.dirname)
-        return True
-
-    def hook_build_failure(self):
-        logger.error("%s FAILURE, see logs in %s", self.stem, self.logdir)
-        return True
-
-    def hook_build_success(self):
-        logger.info("%s build SUCCESS  %s.", self.stem, self.dirname)
-        logger.debug("%s removing logs  %s)", self.stem, self.logdir)
-        if os.path.isdir(self.logdir):
-            shutil.rmtree(logdir)
-        return True
-
     def detail(self, widths, verbose, file=sys.stdout):
         template = '{s.status:{w.status}} {s.stem:{w.stem}}'
         outstr = template.format(s=self, w=widths)
