@@ -44,10 +44,10 @@ class SignatureChecker(object):
     @classmethod
     def signatureLocation(cls, f):
         f.seek(0)
-        buf = f.read(1024).lower()
+        buf = f.read(1024)
         for sig in cls.signatures:
             try:
-                sindex = buf.index(sig.lower())
+                sindex = buf.index(sig)
                 logger.debug("YES FOUND signature %r in %s at %s; doctype %s.",
                              sig, f.name, sindex, cls)
                 return sindex
