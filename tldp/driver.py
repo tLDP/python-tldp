@@ -367,7 +367,11 @@ def run(argv):
         builddir = os.path.join(builddir, 'ldp-builddir')
         if not arg_isdirectory(builddir):
             logger.debug("Creating build directory %s.", builddir)
-            os.mkdir(builddir)
+            try:
+                os.mkdir(builddir)
+            except OSError:
+                logger.critical("Could not make --builddir %s.", builddir)
+                raise
         config.builddir = builddir
 
     if not config.pubdir:
