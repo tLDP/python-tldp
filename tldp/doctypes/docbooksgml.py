@@ -47,26 +47,6 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                 'docbooksgml_docbookdsl': isreadablefile,
                 }
 
-    def chdir_output(self):
-        os.chdir(self.output.dirname)
-        return True
-
-    @depends(chdir_output)
-    def copy_static_resources(self):
-        source = list()
-        for d in ('images', 'resources'):
-            fullpath = os.path.join(self.source.dirname, d)
-            fullpath = os.path.abspath(fullpath)
-            if os.path.isdir(fullpath):
-                source.append('"' + fullpath + '"')
-            if not source:
-                logger.debug("%s no images or resources to copy",
-                             self.source.stem)
-                return True
-            s = 'rsync --archive --verbose %s ./' % (' '.join(source))
-        return self.shellscript(s)
-
-    @depends(copy_static_resources)
     def make_blank_indexsgml(self):
         indexsgml = os.path.join(self.source.dirname, 'index.sgml')
         self.indexsgml = os.path.isfile(indexsgml)

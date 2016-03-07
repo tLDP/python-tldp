@@ -63,11 +63,6 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                 'docbook5xml_xslsingle': isreadablefile,
                 }
 
-    def chdir_output(self):
-        os.chdir(self.output.dirname)
-        return True
-
-    @depends(chdir_output)
     def make_xincluded_source(self):
         s = '''"{config.docbook5xml_xmllint}" > "{output.validsource}" \\
                   --nonet \\
@@ -84,22 +79,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   "{output.validsource}"'''
         return self.shellscript(s)
 
-    @depends(make_xincluded_source)
-    def copy_static_resources(self):
-        source = list()
-        for d in ('images', 'resources'):
-            fullpath = os.path.join(self.source.dirname, d)
-            fullpath = os.path.abspath(fullpath)
-            if os.path.isdir(fullpath):
-                source.append('"' + fullpath + '"')
-            if not source:
-                logger.debug("%s no images or resources to copy",
-                             self.source.stem)
-                return True
-            s = 'rsync --archive --verbose %s ./' % (' '.join(source))
-        return self.shellscript(s)
-
-    @depends(copy_static_resources)
+    @depends(validate_source)
     def make_name_htmls(self):
         '''create a single page HTML output'''
         s = '''"{config.docbook5xml_xsltproc}" > "{output.name_htmls}" \\
@@ -119,7 +99,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   "{output.name_htmls}"'''
         return self.shellscript(s)
 
-    @depends(copy_static_resources)
+    @depends(validate_source)
     def make_fo(self):
         '''generate the Formatting Objects intermediate output'''
         s = '''"{config.docbook5xml_xsltproc}" > "{output.name_fo}" \\
@@ -138,7 +118,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
         return self.shellscript(s)
 
     # -- this is conditionally built--see logic in make_name_pdf() below
-    # @depends(chdir_output)
+    # @depends(validate_source)
     def make_pdf_with_dblatex(self):
         '''use dblatex (fallback) to create a PDF'''
         s = '''"{config.docbook5xml_dblatex}" \\
@@ -148,7 +128,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   "{output.validsource}"'''
         return self.shellscript(s)
 
-    @depends(make_fo)
+    @depends(make_fo, validate_source)
     def make_name_pdf(self):
         stem = self.source.stem
         classname = self.__class__.__name__
@@ -162,8 +142,8 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                     stem, classname, 'make_pdf_with_dblatex')
         return self.make_pdf_with_dblatex()
 
-    @depends(make_name_htmls)
-    def make_html(self):
+    @depends(make_name_htmls, validate_source)
+    def make_chunked_html(self):
         '''create chunked HTML output'''
         s = '''"{config.docbook5xml_xsltproc}" \\
                   --nonet \\
@@ -173,7 +153,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   "{output.validsource}"'''
         return self.shellscript(s)
 
-    @depends(make_html)
+    @depends(make_chunked_html)
     def make_name_html(self):
         '''rename DocBook XSL's index.html to LDP standard STEM.html'''
         s = 'mv -v --no-clobber -- "{output.name_indexhtml}" "{output.name_html}"'
@@ -185,7 +165,7 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
         return self.shellscript(s)
 
-    @depends(make_name_htmls, make_html, make_fo, make_name_pdf)
+    @depends(make_name_htmls, make_name_html, make_name_pdf, make_name_txt)
     def remove_xincluded_source(self):
         '''remove the xincluded source file'''
         s = 'rm --verbose -- "{output.validsource}"'

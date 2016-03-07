@@ -24,26 +24,6 @@ class Asciidoc(BaseDoctype):
                 'asciidoc_a2x': isexecutable,
                 }
 
-    def chdir_output(self):
-        os.chdir(self.output.dirname)
-        return True
-
-    @depends(chdir_output)
-    def copy_static_resources(self):
-        source = list()
-        for d in ('images', 'resources'):
-            fullpath = os.path.join(self.source.dirname, d)
-            fullpath = os.path.abspath(fullpath)
-            if os.path.isdir(fullpath):
-                source.append('"' + fullpath + '"')
-            if not source:
-                logger.debug("%s no images or resources to copy",
-                             self.source.stem)
-                return True
-            s = 'rsync --archive --verbose %s ./' % (' '.join(source))
-        return self.shellscript(s)
-
-    @depends(chdir_output)
     def make_name_pdf(self):
         s = '''"{config.asciidoc_a2x}" \\
                  --verbose \\
@@ -52,12 +32,10 @@ class Asciidoc(BaseDoctype):
                  "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(chdir_output)
     def make_name_txt(self):
         s = 'cp --verbose --target-directory . -- "{source.filename}"'
         return self.shellscript(s)
 
-    @depends(chdir_output)
     def make_name_htmls(self):
         s = '''"{config.asciidoc_a2x}" \\
                  --verbose \\
@@ -66,7 +44,6 @@ class Asciidoc(BaseDoctype):
                  "{source.filename}"'''
         return self.shellscript(s)
 
-    @depends(chdir_output)
     def make_chunked_html(self):
         s = '''"{config.asciidoc_a2x}" \\
                  --verbose \\
