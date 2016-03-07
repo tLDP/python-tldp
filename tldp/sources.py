@@ -201,7 +201,10 @@ class SourceDocument(object):
         print(outstr, file=file)
         if verbose:
             print('         doctype {}'.format(self.doctype), file=file)
-            print('        filename {}'.format(self.filename), file=file)
+            print('     source file {}'.format(self.filename), file=file)
+            if self.output:
+                print('      output dir {}'.format(self.output.dirname), 
+                      file=file)
             for f in sorted(self.newer):
                 fname = os.path.join(self.dirname, f)
                 print('    newer source {}'.format(fname), file=file)
