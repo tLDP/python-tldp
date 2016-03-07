@@ -59,6 +59,10 @@ def collectconfiguration(tag, argv):
                     '-o',
                     default=None, type=arg_isdirectory,
                     help='a directory containing LDP output documents')
+    ap.add_argument('--builddir', '--build-dir', '--build-directory',
+                    '-d',
+                    default=None, type=arg_isdirectory,
+                    help='a scratch directory used for building')
     ap.add_argument('--configfile', '--config-file', '--cfg',
                     '-c',
                     default='/etc/ldptool/ldptool.ini',

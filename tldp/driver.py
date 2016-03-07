@@ -14,7 +14,7 @@ from tldp.sources import SourceDocument, arg_issourcedoc
 from tldp.outputs import OutputDirectory
 from tldp.inventory import Inventory, status_classes, status_types, stypes
 from tldp.config import collectconfiguration
-from tldp.utils import arg_isloglevel
+from tldp.utils import arg_isloglevel, arg_isdirectory
 from tldp.doctypes.common import preamble, postamble
 
 logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s %(funcName)s %(message)s'
@@ -361,6 +361,14 @@ def run(argv):
     if not config.build:
         logger.info("Assuming --build, since no other action was specified...")
         config.build = True
+
+    if not config.builddir:
+        builddir = os.path.dirname(os.path.abspath(config.pubdir))
+        builddir = os.path.join(builddir, 'ldp-builddir')
+        if not arg_isdirectory(builddir):
+            logger.debug("Creating build directory %s.", builddir)
+            os.mkdir(builddir)
+        config.builddir = builddir
 
     if not config.pubdir:
         return need_repos_p + "to --build"
