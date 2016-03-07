@@ -22,6 +22,14 @@ logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s ' \
 logging.basicConfig(stream=sys.stderr, format=logformat, level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
+# -- error message prefixes
+#
+ERR_NEEDPUBDIR = "Option --pubdir (and --sourcedir) required "
+ERR_NEEDSOURCEDIR = "Option --sourcedir (and --pubdir) required "
+ERR_UNKNOWNARGS = "Unknown arguments received: "
+ERR_EXTRAARGS = "Extra arguments received: "
+
+
 
 def show_doctypes(config, **kwargs):
     file = kwargs.get('file', sys.stdout)
@@ -235,52 +243,7 @@ def sameFilesystem(d0, d1):
     return os.stat(d0).st_dev == os.stat(d1).st_dev
 
 
-def run(argv):
-    # -- may want to see option parsing, so set --loglevel as
-    #    soon as possible
-    if '--loglevel' in argv:
-        levelarg = 1 + argv.index('--loglevel')
-        level = arg_isloglevel(argv[levelarg])
-        # -- set the root logger's level
-        logging.getLogger().setLevel(level)
-
-    # -- produce a configuration from CLI, ENV and CFG
-    #
-    tag = 'ldptool'
-    config, args = collectconfiguration(tag, argv)
-
-    # -- and reset the loglevel (after reading envar, and config)
-    logging.getLogger().setLevel(config.loglevel)
-
-    logger.debug("Received the following configuration:")
-    for param, value in sorted(vars(config).items()):
-        logger.debug("  %s = %r", param, value)
-    logger.debug("  args: %r", args)
-
-    need_repos_p = "Option --pubdir (and --sourcedir) required "
-    need_repos_s = "Option --sourcedir (and --pubdir) required "
-
-    # -- --summary, --doctypes, --statustypes do not require any args
-    #
-    if any((config.summary, config.doctypes, config.statustypes)):
-
-        if args:
-            return "Unknown args received: " + ' '.join(args)
-
-        if config.doctypes:
-            return show_doctypes(config)
-
-        if config.statustypes:
-            return show_statustypes(config)
-
-        if config.summary:
-            if not config.pubdir:
-                return need_repos_p + "for --summary"
-            if not config.sourcedir:
-                return need_repos_s + "for --summary"
-
-            return summary(config)
-
+def collectWorkset(config, args):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # -- argument handling logic; try to avoid creating an inventory unless it
     #    is necessary
@@ -308,9 +271,9 @@ def run(argv):
     #
     if need_inventory:
         if not config.pubdir:
-            return need_repos_p + "for inventory"
+            return None, ERR_NEEDPUBDIR + "for inventory"
         if not config.sourcedir:
-            return need_repos_s + "for inventory"
+            return None, ERR_NEEDSOURCEDIR + "for inventory"
         inv = Inventory(config.pubdir, config.sourcedir)
         logger.info("Collected inventory containing %s documents.",
                     len(inv.all.keys()))
@@ -333,8 +296,7 @@ def run(argv):
         logger.info("Added %d docs, found by stem name.", len(docs))
 
     if unknownargs:
-        return "Unknown arguments (neither stem, file, nor status_class): " \
-               + ' '.join(remainder)
+        return None, ERR_UNKNOWNARGS + ' '.join(unknownargs)
 
     # -- without any arguments (no files, no stems, no status_classes), the
     #    default behaviour is to either --build, --list or --script any
@@ -347,15 +309,43 @@ def run(argv):
 
     # -- and, of course, apply the skipping logic
     #
-    workset, excluded = processSkips(config, workset)
+    workset, _ = processSkips(config, workset)
 
-    if not workset:
+    docs = sorted(workset, key=lambda x: x.stem.lower())
+    return docs, None
+
+
+def handleArgs(config, args):
+
+    # -- --summary, --doctypes, --statustypes do not require any args
+    #
+    if any((config.summary, config.doctypes, config.statustypes)):
+
+        if args:
+            return ERR_EXTRAARGS + ' '.join(args)
+
+        if config.doctypes:
+            return show_doctypes(config)
+
+        if config.statustypes:
+            return show_statustypes(config)
+
+        if config.summary:
+            if not config.pubdir:
+                return ERR_NEEDPUBDIR + "for --summary"
+            if not config.sourcedir:
+                return ERR_NEEDSOURCEDIR + "for --summary"
+
+            return summary(config)
+
+    docs, error = collectWorkset(config, args)
+
+    if error:
+        return error
+
+    if not docs:
         logger.info("No work to do.")
         return os.EX_OK
-
-    # -- listify the set and sort it
-    #
-    docs = sorted(workset, key=lambda x: x.stem.lower())
 
     if config.detail:
         return detail(config, docs)
@@ -391,6 +381,31 @@ def run(argv):
         return "--pubdir and --builddir must be on the same filesystem"
 
     return build(config, docs)
+
+def run(argv):
+    # -- may want to see option parsing, so set --loglevel as
+    #    soon as possible
+    if '--loglevel' in argv:
+        levelarg = 1 + argv.index('--loglevel')
+        level = arg_isloglevel(argv[levelarg])
+        # -- set the root logger's level
+        logging.getLogger().setLevel(level)
+
+    # -- produce a configuration from CLI, ENV and CFG
+    #
+    tag = 'ldptool'
+    config, args = collectconfiguration(tag, argv)
+
+    # -- and reset the loglevel (after reading envar, and config)
+    #
+    logging.getLogger().setLevel(config.loglevel)
+
+    logger.debug("Received the following configuration:")
+    for param, value in sorted(vars(config).items()):
+        logger.debug("  %s = %r", param, value)
+    logger.debug("  args: %r", args)
+
+    return handleArgs(config, args)
 
 
 def main():
