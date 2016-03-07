@@ -143,22 +143,31 @@ def builddir_setup(config):
     return True, None
 
 
-def build(config, docs, **kwargs):
-    if not config.pubdir:
-        return ERR_NEEDPUBDIR + "to --build"
-    ready, error = builddir_setup(config)
-    if not ready:
-        return error
+def removeOrphans(docs):
+    sources = list()
+    for x, doc in enumerate(docs, 1):
+        if not isinstance(doc, SourceDocument):
+            logger.info("%s (%d of %d) removing:  no source for orphan",
+                        doc.stem, x, len(docs))
+            continue
+        sources.append(doc)
+    return sources
+
+
+def removeUnknownDoctypes(docs):
+    sources = list()
+    for x, doc in enumerate(docs, 1):
+        if not doc.doctype:
+            logger.info("%s (%d of %d) removing:  unknown doctype",
+                        doc.stem, x, len(docs))
+            continue
+        sources.append(doc)
+    return sources
+
+
+def runbuild(config, docs, **kwargs):
     result = list()
     for x, source in enumerate(docs, 1):
-        if not isinstance(source, SourceDocument):
-            logger.info("%s (%d of %d) skipping, no source for orphan",
-                        source.stem, x, len(docs))
-            continue
-        if not source.doctype:
-            logger.warning("%s (%d of %d) skipping unknown doctype",
-                           source.stem, x, len(docs))
-            continue
         source.output = OutputDirectory.fromsource(config.pubdir, source)
         output = source.output
         runner = source.doctype(source=source, output=output, config=config)
@@ -173,17 +182,26 @@ def build(config, docs, **kwargs):
     return "Build failed, see errors logged."
 
 
+def build(config, docs, **kwargs):
+    if not config.pubdir:
+        return ERR_NEEDPUBDIR + "to --build"
+    ready, error = builddir_setup(config)
+    if not ready:
+        return error
+    return runbuild(config, docs, **kwargs)
+
+
 def script(config, docs, **kwargs):
     file = kwargs.get('file', sys.stdout)
     print(preamble, file=file)
-    result = build(config, docs, **kwargs)
+    result = runbuild(config, docs, **kwargs)
     print(postamble, file=file)
     return result
 
 
 def publish(config, docs, **kwargs):
     config.build = True
-    result = build(config, docs, **kwargs)
+    result = runbuild(config, docs, **kwargs)
     if result != os.EX_OK:
         return result
     return os.EX_OK
@@ -377,6 +395,11 @@ def handleArgs(config, args):
 
     if config.detail:
         return detail(config, docs)
+
+    # -- build(), script() and publish() will not be able to deal
+    #    with orphans or with unknown source document types
+    #
+    docs = removeUnknownDoctypes(removeOrphans(docs))
 
     if config.script:
         return script(config, docs)
