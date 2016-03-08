@@ -65,6 +65,11 @@ ex_docbook4xml_dir = Namespace(
                             'DocBook-4.2-WHYNOT.xml'),
               )
 
+unknown_doctype =  Namespace(
+               doctype=None,
+               filename=opj(sampledocs, 'Unknown-Doctype.xqf'),
+              )
+
 # -- a bit ugly, but grab each dict
 sources = [y for x, y in locals().items() if x.startswith('ex_')]
 

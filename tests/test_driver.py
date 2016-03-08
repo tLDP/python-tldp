@@ -2,11 +2,18 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import uuid
+import errno
+import random
 import unittest
+from tempfile import NamedTemporaryFile as ntf
 from cStringIO import StringIO
 from argparse import Namespace
 
-from tldptesttools import TestInventoryBase
+from tldptesttools import TestInventoryBase, TestToolsFilesystem
+from tldp.typeguesser import knowndoctypes
+from tldp.inventory import stypes, status_types
+from tldp.sources import SourceDocument
 
 # -- Test Data
 import example
@@ -15,10 +22,13 @@ import example
 import tldp.config
 import tldp.driver
 
+# -- variables
 opj = os.path.join
 opd = os.path.dirname
 opa = os.path.abspath
 extras = opa(opj(opd(opd(__file__)), 'extras'))
+
+sampledocs = opj(opd(__file__), 'sample-documents')
 
 widths = Namespace(status=20, stem=50)
 
@@ -59,17 +69,141 @@ class TestDriverDetail(TestInventoryBase):
         self.assertTrue('missing source' in stdout.read())
 
 
+class TestDriverShowDoctypes(TestToolsFilesystem):
+
+    def test_show_doctypes(self):
+        f = ntf(dir=self.tempdir, prefix='doctypes-', delete=False)
+        result = tldp.driver.show_doctypes(Namespace(), file=f)
+        self.assertEquals(result, os.EX_OK)
+        f.close()
+        with open(f.name) as x:
+            stdout = x.read()
+        for doctype in knowndoctypes:
+            self.assertTrue(doctype.formatname in stdout)
+
+    def test_show_doctypes_extraargs(self):
+        result = tldp.driver.show_doctypes(Namespace(), 'bogus')
+        self.assertTrue('Extra arguments' in result)
+
+
+class TestDriverShowStatustypes(TestToolsFilesystem):
+
+    def test_show_statustypes(self):
+        stdout = StringIO()
+        result = tldp.driver.show_statustypes(Namespace(), file=stdout)
+        self.assertEquals(result, os.EX_OK)
+        stdout.seek(0)
+        data = stdout.read()
+        for status in status_types:
+            self.assertTrue(stypes[status] in data)
+
+    def test_show_statustypes_extraargs(self):
+        result = tldp.driver.show_statustypes(Namespace(), 'bogus')
+        self.assertTrue('Extra arguments' in result)
+
+
 class TestDriverSummary(TestInventoryBase):
 
-    def test_summary(self):
+    def test_summary_extraargs(self):
+        result = tldp.driver.summary(Namespace(), 'bogus')
+        self.assertTrue('Extra arguments' in result)
+
+    def test_summary_pubdir(self):
+        self.config.pubdir = None
+        result = tldp.driver.summary(self.config)
+        self.assertTrue('Option --pubdir' in result)
+
+    def test_summary_sourcedir(self):
+        self.config.sourcedir = None
+        result = tldp.driver.summary(self.config)
+        self.assertTrue('Option --sourcedir' in result)
+
+    def publishDocumentsWithLongNames(self, count):
+        names = list()
+        for _ in range(count):
+            x = str(uuid.uuid4())
+            names.append(x)
+            self.add_published(x, random.choice(example.sources))
+        return names
+
+    def test_summary_longnames(self):
         c = self.config
-        self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
+        names = self.publishDocumentsWithLongNames(5)
         stdout = StringIO()
-        tldp.driver.summary(c, file=stdout)
+        result = tldp.driver.summary(c, file=stdout)
+        self.assertEquals(result, os.EX_OK)
         stdout.seek(0)
-        parts = stdout.read().split()
-        idx = parts.index('new')
-        self.assertEqual(['new', '1'], parts[idx:idx+2])
+        data = stdout.read()
+        self.assertTrue('and 4 more' in data)
+        c.verbose = True
+        stdout = StringIO()
+        result = tldp.driver.summary(c, file=stdout)
+        self.assertEquals(result, os.EX_OK)
+        stdout.seek(0)
+        data = stdout.read()
+        for name in names:
+            self.assertTrue(name in data)
+
+    def publishDocumentsWithShortNames(self, count):
+        names = list()
+        for _ in range(count):
+            x = hex(random.randint(0, 2**32))
+            names.append(x)
+            self.add_published(x, random.choice(example.sources))
+        return names
+
+    def test_summary_short(self):
+        c = self.config
+        names = self.publishDocumentsWithShortNames(20)
+        stdout = StringIO()
+        result = tldp.driver.summary(c, file=stdout)
+        self.assertEquals(result, os.EX_OK)
+        stdout.seek(0)
+        data = stdout.read()
+        self.assertTrue('and 16 more' in data)
+        c.verbose = True
+        stdout = StringIO()
+        result = tldp.driver.summary(c, file=stdout)
+        self.assertEquals(result, os.EX_OK)
+        stdout.seek(0)
+        data = stdout.read()
+        for name in names:
+            self.assertTrue(name in data)
+
+
+class TestcreateBuildDirectory(TestToolsFilesystem):
+
+    def test_createBuildDirectory(self):
+        d = os.path.join(self.tempdir, 'child', 'grandchild')
+        ready, error = tldp.driver.createBuildDirectory(d)
+        self.assertFalse(ready)
+        self.assertEquals(error, errno.ENOENT)
+
+
+class Testbuilddir_setup(TestToolsFilesystem):
+
+    def test_builddir_setup_default(self):
+        config = Namespace()
+        _, config.pubdir = self.adddir('pubdir')
+        config.builddir = None
+        ready, error = tldp.driver.builddir_setup(config)
+        self.assertTrue(ready)
+
+    def test_builddir_setup_specified(self):
+        config = Namespace()
+        _, config.pubdir = self.adddir('pubdir')
+        _, config.builddir = self.adddir('builddir')
+        ready, error = tldp.driver.builddir_setup(config)
+        self.assertTrue(ready)
+
+class TestremoveUnknownDoctypes(TestToolsFilesystem):
+
+    def test_removeUnknownDoctypes(self):
+        docs = list()
+        docs.append(SourceDocument(opj(sampledocs, 'Unknown-Doctype.xqf')))
+        docs.append(SourceDocument(opj(sampledocs, 'linuxdoc-simple.sgml')))
+        result = tldp.driver.removeUnknownDoctypes(docs)
+        self.assertEqual(1, len(result))
 
 
 class TestDriverRun(TestInventoryBase):

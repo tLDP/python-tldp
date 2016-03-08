@@ -178,6 +178,14 @@ class TestInventoryBase(unittest.TestCase):
         else:
             mysource.addsourcefile(stem + ex.ext, ex.filename)
 
+    def add_unknown(self, stem, ext, content=None):
+        c = self.config
+        mysource = TestSourceDocSkeleton(c.sourcedir)
+        if content:
+            mysource.addsourcefile(stem + ext, content)
+        else:
+            mysource.addsourcefile(stem + ext, '')
+
     def add_orphan(self, stem, ex):
         c = self.config
         myoutput = TestOutputDirSkeleton(os.path.join(c.pubdir, stem), stem)
