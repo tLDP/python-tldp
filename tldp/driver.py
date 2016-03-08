@@ -16,7 +16,8 @@ from tldp.sources import SourceDocument, arg_issourcedoc
 from tldp.outputs import OutputDirectory
 from tldp.inventory import Inventory, status_classes, status_types, stypes
 from tldp.config import collectconfiguration
-from tldp.utils import arg_isloglevel, arg_isdirectory, swapdirs
+from tldp.utils import arg_isloglevel, arg_isdirectory
+from tldp.utils import swapdirs, sameFilesystem
 from tldp.doctypes.common import preamble, postamble
 
 logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s ' \
@@ -37,7 +38,6 @@ ERR_NEEDPUBDIR = "Option --pubdir (and --sourcedir) required "
 ERR_NEEDSOURCEDIR = "Option --sourcedir (and --pubdir) required "
 ERR_UNKNOWNARGS = "Unknown arguments received: "
 ERR_EXTRAARGS = "Extra arguments received: "
-
 
 
 def show_doctypes(config, *args, **kwargs):
@@ -366,10 +366,6 @@ def extractExplicitDocumentArgs(config, args):
     for doc in rawdocs:
         docs.add(SourceDocument(doc))
     return docs, remainder
-
-
-def sameFilesystem(d0, d1):
-    return os.stat(d0).st_dev == os.stat(d1).st_dev
 
 
 def collectWorkset(config, args):

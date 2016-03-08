@@ -75,6 +75,10 @@ def arg_isexecutable(f):
     return None
 
 
+def sameFilesystem(d0, d1):
+    return os.stat(d0).st_dev == os.stat(d1).st_dev
+
+
 def stem_and_ext(name):
     '''return (stem, ext) for any relative or absolute filename'''
     return os.path.splitext(os.path.basename(os.path.normpath(name)))
