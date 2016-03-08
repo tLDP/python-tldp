@@ -100,19 +100,19 @@ def swapdirs(a, b):
         os.rmdir(tdir)
 
 
-def conditionallogging(result, prefix, fname):
-    if logger.isEnabledFor(logging.DEBUG):
-        logfilecontents(logger.info, prefix, fname)  # -- always
-    elif logger.isEnabledFor(logging.INFO):
-        if result != 0:
-            logfilecontents(logger.info, prefix, fname)  # -- error
-
-
 def logfilecontents(logmethod, prefix, fname):
     '''log all lines of a file with a prefix '''
     with open(fname) as f:
         for line in f:
             logmethod("%s: %s", prefix, line.rstrip())
+
+
+def conditionallogging(result, prefix, fname):
+    if logger.isEnabledFor(logging.DEBUG):
+        logfilecontents(logger.debug, prefix, fname)  # -- always
+    elif logger.isEnabledFor(logging.INFO):
+        if result != 0:
+            logfilecontents(logger.info, prefix, fname)  # -- error
 
 
 def execute(cmd, stdin=None, stdout=None, stderr=None,
