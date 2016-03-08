@@ -2,11 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-
-try:
-    from types import SimpleNamespace
-except ImportError:
-    from utils import SimpleNamespace
+from argparse import Namespace
 
 import tldp.doctypes
 
@@ -17,49 +13,49 @@ opd = os.path.dirname
 opa = os.path.abspath
 sampledocs = opa(opj(opd(__file__), 'sample-documents'))
 
-ex_linuxdoc = SimpleNamespace(
-               type=tldp.doctypes.linuxdoc.Linuxdoc,
+ex_linuxdoc = Namespace(
+               doctype=tldp.doctypes.linuxdoc.Linuxdoc,
                filename=opj(sampledocs, 'linuxdoc-simple.sgml'),
               )
 
-ex_docbooksgml = SimpleNamespace(
-                  type=tldp.doctypes.docbooksgml.DocbookSGML,
+ex_docbooksgml = Namespace(
+                  doctype=tldp.doctypes.docbooksgml.DocbookSGML,
                   filename=opj(sampledocs, 'docbooksgml-simple.sgml'),
                  )
 
-ex_docbook4xml = SimpleNamespace(
-                 type=tldp.doctypes.docbook4xml.Docbook4XML,
+ex_docbook4xml = Namespace(
+                 doctype=tldp.doctypes.docbook4xml.Docbook4XML,
                  filename=opj(sampledocs, 'docbook4xml-simple.xml'),
                 )
 
-ex_docbook5xml = SimpleNamespace(
-                 type=tldp.doctypes.docbook5xml.Docbook5XML,
+ex_docbook5xml = Namespace(
+                 doctype=tldp.doctypes.docbook5xml.Docbook5XML,
                  filename=opj(sampledocs, 'docbook5xml-simple.xml'),
                 )
 
-# ex_rst = SimpleNamespace(
-#           type=tldp.doctypes.rst.RestructuredText,
+# ex_rst = Namespace(
+#           doctype=tldp.doctypes.rst.RestructuredText,
 #           filename=opj(sampledocs, 'restructuredtext-simple.rst'),
 #          )
 #
-# ex_text = SimpleNamespace(
-#            type=tldp.doctypes.text.Text,
+# ex_text = Namespace(
+#            doctype=tldp.doctypes.text.Text,
 #            filename=opj(sampledocs, 'text-simple.txt'),
 #           )
 #
-# ex_markdown = SimpleNamespace(
-#                type=tldp.doctypes.markdown.Markdown,
+# ex_markdown = Namespace(
+#                doctype=tldp.doctypes.markdown.Markdown,
 #                filename=opj(sampledocs, 'markdown-simple.md'),
 #               )
 
-ex_linuxdoc_dir = SimpleNamespace(
-               type=tldp.doctypes.linuxdoc.Linuxdoc,
+ex_linuxdoc_dir = Namespace(
+               doctype=tldp.doctypes.linuxdoc.Linuxdoc,
                filename=opj(sampledocs, 'Linuxdoc-Larger',
                             'Linuxdoc-Larger.sgml'),
               )
 
-ex_docbook4xml_dir = SimpleNamespace(
-               type=tldp.doctypes.docbook4xml.Docbook4XML,
+ex_docbook4xml_dir = Namespace(
+               doctype=tldp.doctypes.docbook4xml.Docbook4XML,
                filename=opj(sampledocs, 'DocBook-4.2-WHYNOT',
                             'DocBook-4.2-WHYNOT.xml'),
               )

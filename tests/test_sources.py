@@ -5,13 +5,9 @@ import os
 import errno
 import random
 import unittest
+from argparse import Namespace
 
 from cStringIO import StringIO
-
-try:
-    from types import SimpleNamespace
-except ImportError:
-    from utils import SimpleNamespace
 
 from tldptesttools import TestToolsFilesystem
 
@@ -24,15 +20,15 @@ from tldp.sources import scansourcedirs, sourcedoc_fromdir
 
 sampledocs = os.path.join(os.path.dirname(__file__), 'sample-documents')
 
-widths = SimpleNamespace(status=20, stem=50)
+widths = Namespace(status=20, stem=50)
 
 
 class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
 
     def test_multidir_finding_singlefiles(self):
         ex = random.choice(example.sources)
-        doc0 = SimpleNamespace(reldir='LDP/howto', stem="A-Unique-Stem")
-        doc1 = SimpleNamespace(reldir='LDP/guide', stem="A-Different-Stem")
+        doc0 = Namespace(reldir='LDP/howto', stem="A-Unique-Stem")
+        doc1 = Namespace(reldir='LDP/guide', stem="A-Different-Stem")
         documents = (doc0, doc1)
         for d in documents:
             d.reldir, d.absdir = self.adddir(d.reldir)
@@ -45,8 +41,8 @@ class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
 
     def test_multidir_finding_namecollision(self):
         ex = random.choice(example.sources)
-        doc0 = SimpleNamespace(reldir='LDP/howto', stem="A-Non-Unique-Stem")
-        doc1 = SimpleNamespace(reldir='LDP/guide', stem="A-Non-Unique-Stem")
+        doc0 = Namespace(reldir='LDP/howto', stem="A-Non-Unique-Stem")
+        doc1 = Namespace(reldir='LDP/guide', stem="A-Non-Unique-Stem")
         documents = (doc0, doc1)
         for d in documents:
             d.reldir, d.absdir = self.adddir(d.reldir)
