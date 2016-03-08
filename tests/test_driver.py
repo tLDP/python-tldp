@@ -27,7 +27,7 @@ class TestDriverDetail(TestInventoryBase):
 
     def test_stale_detail_verbosity(self):
         c = self.config
-        self.add_stale('Frobnitz-HOWTO', example.ex_docbook4xml)
+        self.add_stale('Stale-HOWTO', example.ex_docbook4xml)
         c.verbose = True,
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         docs = inv.all.values()
@@ -38,7 +38,7 @@ class TestDriverDetail(TestInventoryBase):
 
     def test_broken_detail_verbosity(self):
         c = self.config
-        self.add_broken('Frobnitz-HOWTO', example.ex_docbook4xml)
+        self.add_broken('Broken-HOWTO', example.ex_docbook4xml)
         c.verbose = True,
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         docs = inv.all.values()
@@ -46,6 +46,17 @@ class TestDriverDetail(TestInventoryBase):
         tldp.driver.detail(c, docs, file=stdout)
         stdout.seek(0)
         self.assertTrue('missing output' in stdout.read())
+
+    def test_orphan_verbosity(self):
+        c = self.config
+        self.add_orphan('Orphan-HOWTO', example.ex_docbook4xml)
+        c.verbose = True,
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        docs = inv.all.values()
+        stdout = StringIO()
+        tldp.driver.detail(c, docs, file=stdout)
+        stdout.seek(0)
+        self.assertTrue('missing source' in stdout.read())
 
 
 class TestDriverSummary(TestInventoryBase):
@@ -161,7 +172,7 @@ class TestDriverProcessSkips(TestInventoryBase):
         self.assertEquals(len(inc) + 1, len(inv.all.keys()))
 
 
-#@unittest.skip("Except when you want to spend time....")
+@unittest.skip("Except when you want to spend time....")
 class TestDriverBuild(TestInventoryBase):
 
     def test_build_linuxdoc(self):
