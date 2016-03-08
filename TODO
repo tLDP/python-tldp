@@ -8,8 +8,6 @@ user-visible needs
 
   * add support for .epub3 (or just .epub?)
 
-  * improve abstraction and functions for --script vs. --publish and --build
-
   * add support for asciidoc; instantiate a new instance of Docbook4XML 
     with a SourceDocument of the generated result of asciidoc --backend
     docbook
