@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import sys
+import shutil
 import logging
 import inspect
 from argparse import Namespace
@@ -14,13 +15,20 @@ from tldp.sources import SourceDocument, arg_issourcedoc
 from tldp.outputs import OutputDirectory
 from tldp.inventory import Inventory, status_classes, status_types, stypes
 from tldp.config import collectconfiguration
-from tldp.utils import arg_isloglevel, arg_isdirectory
+from tldp.utils import arg_isloglevel, arg_isdirectory, swapdirs
 from tldp.doctypes.common import preamble, postamble
 
 logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s ' \
      + '%(funcName)s %(message)s'
 logging.basicConfig(stream=sys.stderr, format=logformat, level=logging.ERROR)
 logger = logging.getLogger(__name__)
+
+# -- short names
+#
+opa = os.path.abspath
+opb = os.path.basename
+opd = os.path.dirname
+opj = os.path.join
 
 # -- error message prefixes
 #
@@ -126,20 +134,29 @@ def detail(config, docs, **kwargs):
     return os.EX_OK
 
 
+def createBuildDirectory(d):
+    if not arg_isdirectory(d):
+        logger.debug("Creating build directory %s.", d)
+        try:
+            os.mkdir(d)
+        except OSError as e:
+            logger.critical("Could not make --builddir %s.", d)
+            return False, e.errno
+    return True, d
+
+
 def builddir_setup(config):
+    '''create --builddir; ensure it shares a filesystem with --pubdir'''
     if not config.builddir:
-        builddir = os.path.dirname(os.path.abspath(config.pubdir))
-        builddir = os.path.join(builddir, 'ldp-builddir')
-        if not arg_isdirectory(builddir):
-            logger.debug("Creating build directory %s.", builddir)
-            try:
-                os.mkdir(builddir)
-            except OSError as e:
-                logger.critical("Could not make --builddir %s.", builddir)
-                return False, e.errno
+        builddir = opj(opd(opa(config.pubdir)), 'ldptool-build')
+        ready, error = createBuildDirectory(builddir)
+        if not ready:
+            return ready, error
         config.builddir = builddir
+
     if not sameFilesystem(config.pubdir, config.builddir):
         return False, "--pubdir and --builddir must be on the same filesystem"
+
     return True, None
 
 
@@ -165,12 +182,21 @@ def removeUnknownDoctypes(docs):
     return sources
 
 
-def runbuild(config, docs, **kwargs):
+def docbuild(config, docs, **kwargs):
     result = list()
     for x, source in enumerate(docs, 1):
-        source.output = OutputDirectory.fromsource(config.pubdir, source)
-        output = source.output
-        runner = source.doctype(source=source, output=output, config=config)
+        classname = source.doctype.__name__
+        docbuilddir = opj(config.builddir, classname)
+        ready, error = createBuildDirectory(docbuilddir)
+        if not ready:
+            text = "%s (%d of %d) failed creating builddir; bailing." % (
+                    source.stem, x, len(docs))
+            return text
+        source.working = OutputDirectory.fromsource(docbuilddir, source)
+        working = source.working
+        if not source.output:
+            source.output = OutputDirectory.fromsource(config.pubdir, source)
+        runner = source.doctype(source=source, output=working, config=config)
         logger.info("%s (%d of %d) initiating build",
                     source.stem, x, len(docs))
         result.append(runner.generate())
@@ -188,22 +214,32 @@ def build(config, docs, **kwargs):
     ready, error = builddir_setup(config)
     if not ready:
         return error
-    return runbuild(config, docs, **kwargs)
+    return docbuild(config, docs, **kwargs)
 
 
 def script(config, docs, **kwargs):
     file = kwargs.get('file', sys.stdout)
     print(preamble, file=file)
-    result = runbuild(config, docs, **kwargs)
+    result = docbuild(config, docs, **kwargs)
     print(postamble, file=file)
     return result
 
 
 def publish(config, docs, **kwargs):
     config.build = True
-    result = runbuild(config, docs, **kwargs)
+    result = build(config, docs, **kwargs)
     if result != os.EX_OK:
-        return result
+        return "Aborting all publication: " + result
+    for x, source in enumerate(docs, 1):
+        logger.info("%s (%d of %d) publishing outputs",
+                    source.stem, x, len(docs))
+        # -- swapdirs must raise an error if there are problems
+        #
+        swapdirs(source.working.dirname, source.output.dirname)
+        if os.path.isdir(source.working.dirname):
+            logger.info("%s removing old directory", 
+                        source.stem, source.working.dirname)
+            shutil.rmtree(source.working.dirname)
     return os.EX_OK
 
 
