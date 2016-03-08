@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import sys
+import errno
 import shutil
 import logging
 import inspect
@@ -132,6 +133,28 @@ def detail(config, docs, **kwargs):
     return os.EX_OK
 
 
+def removeOrphans(docs):
+    sources = list()
+    for x, doc in enumerate(docs, 1):
+        if not isinstance(doc, SourceDocument):
+            logger.info("%s (%d of %d) removing:  no source for orphan",
+                        doc.stem, x, len(docs))
+            continue
+        sources.append(doc)
+    return sources
+
+
+def removeUnknownDoctypes(docs):
+    sources = list()
+    for x, doc in enumerate(docs, 1):
+        if not doc.doctype:
+            logger.info("%s (%d of %d) removing:  unknown doctype",
+                        doc.stem, x, len(docs))
+            continue
+        sources.append(doc)
+    return sources
+
+
 def createBuildDirectory(d):
     if not arg_isdirectory(d):
         logger.debug("Creating build directory %s.", d)
@@ -158,42 +181,50 @@ def builddir_setup(config):
     return True, None
 
 
-def removeOrphans(docs):
-    sources = list()
-    for x, doc in enumerate(docs, 1):
-        if not isinstance(doc, SourceDocument):
-            logger.info("%s (%d of %d) removing:  no source for orphan",
-                        doc.stem, x, len(docs))
-            continue
-        sources.append(doc)
-    return sources
+def create_dtworkingdir(config, docs):
+    for source in docs:
+        classname = source.doctype.__name__
+        source.dtworkingdir = opj(config.builddir, classname)
+        ready, error = createBuildDirectory(source.dtworkingdir)
+        if not ready:
+            return ready, error
+    return True, None
 
 
-def removeUnknownDoctypes(docs):
-    sources = list()
-    for x, doc in enumerate(docs, 1):
-        if not doc.doctype:
-            logger.info("%s (%d of %d) removing:  unknown doctype",
-                        doc.stem, x, len(docs))
-            continue
-        sources.append(doc)
-    return sources
+def post_publish_cleanup(docs):
+    '''clean up any doctype directories left in --builddir'''
+    dtworkingdirs = set([x.dtworkingdir for x in docs])
+    for d in dtworkingdirs:
+        if os.path.isdir(d):
+            try:
+                logger.info("removing docbuild dir %s", d)
+                os.rmdir(d)
+            except OSError as e:
+                if e.errno != errno.ENOTEMPTY:
+                    raise
+                logger.debug("Could not remove %s; files still present", d)
+
+
+def prepare_docs_script_mode(config, docs):
+    for source in docs:
+        if not source.output:
+            source.working = OutputDirectory.fromsource(config.pubdir, source)
+        else:
+            source.working = source.output
+
+
+def prepare_docs_build_mode(config, docs):
+    for source in docs:
+        d = source.dtworkingdir
+        source.working = OutputDirectory.fromsource(d, source)
+        if not source.output:
+            source.output = OutputDirectory.fromsource(config.pubdir, source)
 
 
 def docbuild(config, docs, **kwargs):
     result = list()
     for x, source in enumerate(docs, 1):
-        classname = source.doctype.__name__
-        docbuilddir = opj(config.builddir, classname)
-        ready, error = createBuildDirectory(docbuilddir)
-        if not ready:
-            text = "%s (%d of %d) failed creating builddir; bailing." % (
-                    source.stem, x, len(docs))
-            return text
-        source.working = OutputDirectory.fromsource(docbuilddir, source)
         working = source.working
-        if not source.output:
-            source.output = OutputDirectory.fromsource(config.pubdir, source)
         runner = source.doctype(source=source, output=working, config=config)
         logger.info("%s (%d of %d) initiating build",
                     source.stem, x, len(docs))
@@ -206,21 +237,26 @@ def docbuild(config, docs, **kwargs):
     return "Build failed, see errors logged."
 
 
+def script(config, docs, **kwargs):
+    prepare_docs_script_mode(config, docs)
+    file = kwargs.get('file', sys.stdout)
+    print(preamble, file=file)
+    result = docbuild(config, docs, **kwargs)
+    print(postamble, file=file)
+    return result
+
+
 def build(config, docs, **kwargs):
     if not config.pubdir:
         return ERR_NEEDPUBDIR + "to --build"
     ready, error = builddir_setup(config)
     if not ready:
         return error
+    ready, error = create_dtworkingdir(config, docs)
+    if not ready:
+        return error
+    prepare_docs_build_mode(config, docs)
     return docbuild(config, docs, **kwargs)
-
-
-def script(config, docs, **kwargs):
-    file = kwargs.get('file', sys.stdout)
-    print(preamble, file=file)
-    result = docbuild(config, docs, **kwargs)
-    print(postamble, file=file)
-    return result
 
 
 def publish(config, docs, **kwargs):
@@ -235,9 +271,10 @@ def publish(config, docs, **kwargs):
         #
         swapdirs(source.working.dirname, source.output.dirname)
         if os.path.isdir(source.working.dirname):
-            logger.info("%s removing old directory", 
+            logger.info("%s removing old directory %s", 
                         source.stem, source.working.dirname)
             shutil.rmtree(source.working.dirname)
+    post_publish_cleanup(docs)
     return os.EX_OK
 
 
