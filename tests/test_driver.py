@@ -73,7 +73,7 @@ class TestDriverRun(TestInventoryBase):
         self.add_broken('Broken-HOWTO', ex)
         argv = ['--pubdir', c.pubdir, '--sourcedir', c.sourcedir[0]]
         fullpath = opj(self.tempdir, 'sources', 'New-HOWTO.sgml')
-        argv.extend(['--build', 'stale', 'Orphan-HOWTO', fullpath])
+        argv.extend(['--publish', 'stale', 'Orphan-HOWTO', fullpath])
         tldp.driver.run(argv)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(4, len(inv.published.keys()))
@@ -92,9 +92,12 @@ class TestDriverRun(TestInventoryBase):
         c = self.config
         ex = example.ex_linuxdoc
         self.add_new('New-HOWTO', ex)
-        argv = ['--pubdir', c.pubdir, '--sourcedir', c.sourcedir[0]]
+        argv = ['--builddir', c.builddir, ]
+        argv.extend(['--pubdir', c.pubdir, ])
+        argv.extend(['--sourcedir', c.sourcedir[0]])
         tldp.driver.run(argv)
-        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        docbuilddir = opj(c.builddir, ex.doctype.__name__)
+        inv = tldp.inventory.Inventory(docbuilddir, c.sourcedir)
         self.assertEquals(1, len(inv.published.keys()))
 
     def test_run_oops_no_sourcedir(self):
@@ -158,7 +161,7 @@ class TestDriverProcessSkips(TestInventoryBase):
         self.assertEquals(len(inc) + 1, len(inv.all.keys()))
 
 
-@unittest.skip("Except when you want to spend time....")
+#@unittest.skip("Except when you want to spend time....")
 class TestDriverBuild(TestInventoryBase):
 
     def test_build_linuxdoc(self):
@@ -169,7 +172,7 @@ class TestDriverBuild(TestInventoryBase):
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
         c.skip = []
-        tldp.driver.build(c, docs)
+        tldp.driver.publish(c, docs)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -182,7 +185,7 @@ class TestDriverBuild(TestInventoryBase):
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
-        tldp.driver.build(c, docs)
+        tldp.driver.publish(c, docs)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -200,7 +203,7 @@ class TestDriverBuild(TestInventoryBase):
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
-        tldp.driver.build(c, docs)
+        tldp.driver.publish(c, docs)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
