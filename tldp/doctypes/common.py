@@ -25,8 +25,7 @@ set -o pipefail
 '''
 
 postamble = '''
-# -- end of file
-'''
+# -- end of file'''
 
 
 def depends(*predecessors):
@@ -138,7 +137,10 @@ class BaseDoctype(object):
         logger.debug("%s chdir to dir   %s.",
                      self.output.stem, self.output.dirname)
         if self.config.script:
-            s = 'cd -- "{output.dirname}"'
+            s = '''
+# - - - - - {source.stem} - - - - - -
+
+            cd -- "{output.dirname}"'''
             return self.shellscript(s)
         os.chdir(self.output.dirname)
         return True
