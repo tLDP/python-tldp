@@ -98,8 +98,6 @@ def summary(config, *args, **kwargs):
     width.status = max([len(x) for x in status_types])
     width.count = len(str(len(inv.source.keys())))
     for status in status_types:
-        if status == 'all':
-            continue
         count = len(getattr(inv, status, 0))
         s = '{0:{w.status}}  {1:{w.count}}  '.format(status, count, w=width)
         print(s, end="", file=file)
