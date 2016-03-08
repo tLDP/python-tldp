@@ -20,6 +20,7 @@ class TestOutputNamingConvention(unittest.TestCase):
         onc = OutputNamingConvention("/path/to/output/", "Stem")
         self.assertTrue(onc.name_txt.endswith(".txt"))
         self.assertTrue(onc.name_pdf.endswith(".pdf"))
+        self.assertTrue(onc.name_epub.endswith(".epub"))
         self.assertTrue(onc.name_html.endswith(".html"))
         self.assertTrue(onc.name_htmls.endswith("-single.html"))
         self.assertTrue(onc.name_indexhtml.endswith("index.html"))
@@ -68,6 +69,7 @@ class TestOutputDirectory(TestToolsFilesystem):
             with open(fname, 'w'):
                 pass
         self.assertTrue(o.iscomplete)
+        self.assertTrue('Frobnitz' in str(o))
 
 #
 # -- end of file
