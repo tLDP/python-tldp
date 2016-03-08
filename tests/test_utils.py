@@ -4,7 +4,10 @@ from __future__ import absolute_import, division, print_function
 import os
 import stat
 import uuid
+import errno
+import posix
 import unittest
+from tempfile import mkdtemp
 from tempfile import NamedTemporaryFile as ntf
 
 from tldptesttools import TestToolsFilesystem
@@ -15,6 +18,7 @@ from tldp.utils import statfile, statfiles, stem_and_ext
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.utils import arg_isreadablefile, isreadablefile
 from tldp.utils import arg_isdirectory, arg_isloglevel
+from tldp.utils import swapdirs
 
 
 class Test_isexecutable_and_friends(unittest.TestCase):
@@ -71,6 +75,20 @@ class Test_execute(TestToolsFilesystem):
     def test_execute_returns_zero(self):
         exe = which('true')
         result = execute([exe], logdir=self.tempdir)
+        self.assertEqual(0, result)
+
+    def test_execute_stdout_to_devnull(self):
+        exe = which('cat')
+        cmd = [exe, '/etc/hosts']
+        devnull = open('/dev/null', 'w')
+        result = execute(cmd, stdout=devnull, logdir=self.tempdir)
+        self.assertEqual(0, result)
+
+    def test_execute_stderr_to_devnull(self):
+        exe = which('cat')
+        cmd = [exe, '/etc/hosts']
+        devnull = open('/dev/null', 'w')
+        result = execute(cmd, stderr=devnull, logdir=self.tempdir)
         self.assertEqual(0, result)
 
     def test_execute_returns_nonzero(self):
@@ -168,6 +186,16 @@ class Test_statfile(TestToolsFilesystem):
         f = ntf(dir=self.tempdir)
         self.assertIsNone(statfile(f.name + '-ENOENT_TEST'))
 
+    def test_statfile_exception(self):
+        f = ntf(dir=self.tempdir)
+        omode = os.stat(self.tempdir).st_mode
+        os.chmod(self.tempdir, 0)
+        with self.assertRaises(OSError):
+            statfile(f.name)
+        os.chmod(self.tempdir, omode)
+        stbuf = statfile(f.name)
+        self.assertIsInstance(stbuf, posix.stat_result)
+
 
 class Test_stem_and_ext(unittest.TestCase):
 
@@ -181,6 +209,38 @@ class Test_stem_and_ext(unittest.TestCase):
         r1 = stem_and_ext('Frobnitz-HOWTO/')
         self.assertEqual(r0, r1)
 
+
+class Test_swapdirs(TestToolsFilesystem):
+
+    def test_swapdirs_bogusarg(self):
+        with self.assertRaises(OSError) as ecm:
+            swapdirs('/path/to/frickin/impossible/dir', None)
+        e = ecm.exception
+        self.assertTrue(errno.ENOENT is e.errno)
+
+    def test_swapdirs_b_missing(self):
+        a = mkdtemp(dir=self.tempdir)
+        b = a + '-B'
+        self.assertFalse(os.path.exists(b))
+        swapdirs(a, b)
+        self.assertTrue(os.path.exists(b))
+
+    def test_swapdirs_b_missing(self):
+        a = mkdtemp(dir=self.tempdir)
+        afile = os.path.join(a, 'silly')
+        b = mkdtemp(dir=self.tempdir)
+        bfile = os.path.join(b, 'silly')
+        with open(afile, 'w'):
+            pass
+        self.assertTrue(os.path.exists(a))
+        self.assertTrue(os.path.exists(afile))
+        self.assertTrue(os.path.exists(b))
+        self.assertFalse(os.path.exists(bfile))
+        swapdirs(a, b)
+        self.assertTrue(os.path.exists(a))
+        self.assertFalse(os.path.exists(afile))
+        self.assertTrue(os.path.exists(b))
+        self.assertTrue(os.path.exists(bfile))
 
 class Test_att_statinfo(unittest.TestCase):
 
