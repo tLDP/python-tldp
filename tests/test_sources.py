@@ -17,6 +17,7 @@ import example
 # -- SUT
 from tldp.sources import SourceCollection, SourceDocument
 from tldp.sources import scansourcedirs, sourcedoc_fromdir
+from tldp.sources import arg_issourcedoc
 
 sampledocs = os.path.join(os.path.dirname(__file__), 'sample-documents')
 
@@ -120,7 +121,27 @@ class TestInvalidSourceCollection(TestToolsFilesystem):
         self.assertEquals(0, len(s))
 
 
-class TestSourceDocument(unittest.TestCase):
+class Test_sourcedoc_fromdir(unittest.TestCase):
+
+    def test_sourcedoc_fromdir_missingdir(self):
+        dirname = os.path.dirname('/frobnitz/path/to/extremely/unlikely/file')
+        self.assertIsNone(sourcedoc_fromdir(dirname))
+
+    def test_sourcedoc_fromdir_withdots(self):
+        dirname = os.path.dirname(example.ex_docbook4xml_dir.filename)
+        doc = sourcedoc_fromdir(dirname)
+        self.assertIsNotNone(doc)
+
+
+class Test_arg_issourcedoc(unittest.TestCase):
+
+    def test_arg_issourcedoc_fromdir(self):
+        fname = example.ex_linuxdoc_dir.filename
+        dirname = os.path.dirname(fname)
+        self.assertTrue(fname, arg_issourcedoc(dirname))
+
+
+class TestSourceDocument(TestToolsFilesystem):
 
     def test_init(self):
         for ex in example.sources:
@@ -131,15 +152,18 @@ class TestSourceDocument(unittest.TestCase):
             self.assertTrue(fn in str(doc))
             self.assertTrue(fn in doc.statinfo)
 
-    def test_sourcedoc_fromdir(self):
+    def test_fromfifo_should_fail(self):
+        fifo = os.path.join(self.tempdir, 'fifofile')
+        os.mkfifo(fifo)
+        with self.assertRaises(ValueError) as ecm:
+            SourceDocument(fifo)
+        e = ecm.exception
+        self.assertTrue('not identifiable' in e.message)
+
+    def test_fromdir(self):
         dirname = os.path.dirname(example.ex_linuxdoc_dir.filename)
         doc = SourceDocument(dirname)
         self.assertIsInstance(doc, SourceDocument)
-
-    def test_sourcedoc_fromdir_withdots(self):
-        dirname = os.path.dirname(example.ex_docbook4xml_dir.filename)
-        doc = sourcedoc_fromdir(dirname)
-        self.assertIsNotNone(doc)
 
     def test_detail(self):
         ex = example.ex_linuxdoc_dir
