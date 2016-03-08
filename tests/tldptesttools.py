@@ -133,8 +133,9 @@ class TestInventoryBase(unittest.TestCase):
         self.config, _ = collectconfiguration('ldptool', [])
         c = self.config
         c.pubdir = os.path.join(self.tempdir, 'outputs')
+        c.builddir = os.path.join(self.tempdir, 'builddir')
         c.sourcedir = os.path.join(self.tempdir, 'sources')
-        for d in (c.sourcedir, c.pubdir):
+        for d in (c.sourcedir, c.pubdir, c.builddir):
             if not os.path.isdir(d):
                 os.mkdir(d)
         c.sourcedir = [c.sourcedir]
