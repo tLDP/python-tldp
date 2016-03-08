@@ -85,7 +85,7 @@ def swapdirs(a, b):
     if not os.path.isdir(a):
         raise OSError(errno.ENOENT, os.strerror(errno.ENOENT), a)
     tname = None
-    if os.path.exists(b):
+    if b and os.path.exists(b):
         tdir = mkdtemp(prefix='swapdirs-', dir=opd(opa(a)))
         logger.debug("Created tempdir %s.", tdir)
         tname = opj(tdir, opb(b))
