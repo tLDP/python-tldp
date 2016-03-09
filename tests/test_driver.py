@@ -14,6 +14,7 @@ from tldptesttools import TestInventoryBase, TestToolsFilesystem
 from tldp.typeguesser import knowndoctypes
 from tldp.inventory import stypes, status_types
 from tldp.sources import SourceDocument
+from tldp.outputs import OutputDirectory
 
 # -- Test Data
 import example
@@ -206,6 +207,26 @@ class TestremoveUnknownDoctypes(TestToolsFilesystem):
         self.assertEqual(1, len(result))
 
 
+class Test_prepare_docs_script_mode(TestToolsFilesystem):
+
+    def test_prepare_docs_script_mode(self):
+        config = Namespace(pubdir=self.tempdir)
+        doc = SourceDocument(opj(sampledocs, 'linuxdoc-simple.sgml'))
+        self.assertIsNone(doc.working)
+        tldp.driver.prepare_docs_script_mode(config, [doc])
+        self.assertIsInstance(doc.working, OutputDirectory)
+
+
+class Test_prepare_docs_build_mode(TestInventoryBase):
+
+    def test_prepare_docs_build_mode(self):
+        c = self.config
+        doc = SourceDocument(opj(sampledocs, 'linuxdoc-simple.sgml'))
+        self.assertIsNone(doc.working)
+        tldp.driver.prepare_docs_build_mode(c, [doc])
+        self.assertIsInstance(doc.working, OutputDirectory)
+
+
 class TestDriverRun(TestInventoryBase):
 
     def test_run(self):
@@ -306,7 +327,7 @@ class TestDriverProcessSkips(TestInventoryBase):
         self.assertEquals(len(inc) + 1, len(inv.all.keys()))
 
 
-# @unittest.skip("Except when you want to spend time....")
+@unittest.skip("Except when you want to spend time....")
 class TestDriverBuild(TestInventoryBase):
 
     def test_build_asciidoc(self):
