@@ -1,4 +1,3 @@
-# from .text import Text
 # from .rst import RestructuredText
 # from .markdown import Markdown
 from .asciidoc import Asciidoc
