@@ -211,14 +211,19 @@ def prepare_docs_script_mode(config, docs):
             source.working = OutputDirectory.fromsource(config.pubdir, source)
         else:
             source.working = source.output
+    return True, None
 
 
 def prepare_docs_build_mode(config, docs):
+    ready, error = create_dtworkingdir(config, docs)
+    if not ready:
+        return ready, error
     for source in docs:
         d = source.dtworkingdir
         source.working = OutputDirectory.fromsource(d, source)
         if not source.output:
             source.output = OutputDirectory.fromsource(config.pubdir, source)
+    return True, None
 
 
 def docbuild(config, docs, **kwargs):
@@ -238,7 +243,9 @@ def docbuild(config, docs, **kwargs):
 
 
 def script(config, docs, **kwargs):
-    prepare_docs_script_mode(config, docs)
+    ready, error = prepare_docs_script_mode(config, docs)
+    if not ready:
+        return error
     file = kwargs.get('file', sys.stdout)
     print(preamble, file=file)
     result = docbuild(config, docs, **kwargs)
@@ -252,10 +259,9 @@ def build(config, docs, **kwargs):
     ready, error = builddir_setup(config)
     if not ready:
         return error
-    ready, error = create_dtworkingdir(config, docs)
+    ready, error = prepare_docs_build_mode(config, docs)
     if not ready:
         return error
-    prepare_docs_build_mode(config, docs)
     return docbuild(config, docs, **kwargs)
 
 
