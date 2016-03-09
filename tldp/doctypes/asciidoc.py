@@ -21,6 +21,7 @@ class Asciidoc(Docbook4XML):
     required = {'asciidoc_asciidoc': isexecutable,
                 'asciidoc_xmllint': isexecutable,
                 }
+    required.update(Docbook4XML.required)
 
     def make_docbook45(self):
         s = '''"{config.asciidoc_asciidoc}" \\

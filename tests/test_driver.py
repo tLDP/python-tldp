@@ -306,8 +306,21 @@ class TestDriverProcessSkips(TestInventoryBase):
         self.assertEquals(len(inc) + 1, len(inv.all.keys()))
 
 
-@unittest.skip("Except when you want to spend time....")
+# @unittest.skip("Except when you want to spend time....")
 class TestDriverBuild(TestInventoryBase):
+
+    def test_build_asciidoc(self):
+        self.add_docbook4xml_xsl_to_config()
+        c = self.config
+        c.build = True
+        self.add_new('Frobnitz-Asciidoc-HOWTO', example.ex_asciidoc)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEquals(1, len(inv.all.keys()))
+        docs = inv.all.values()
+        c.skip = []
+        tldp.driver.publish(c, docs)
+        doc = docs.pop(0)
+        self.assertTrue(doc.output.iscomplete)
 
     def test_build_linuxdoc(self):
         c = self.config

@@ -8,10 +8,6 @@ user-visible needs
 
   * add support for .epub3 (or just .epub?)
 
-  * add support for asciidoc; instantiate a new instance of Docbook4XML 
-    with a SourceDocument of the generated result of asciidoc --backend
-    docbook
-  
   * consider adding support for metadata extraction from documents
 
   * create TLDP DocBook 5.0 XSL files (if we care)

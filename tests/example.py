@@ -35,18 +35,13 @@ ex_docbook5xml = Namespace(
 
 ex_asciidoc = Namespace(
            doctype=tldp.doctypes.asciidoc.Asciidoc,
-           filename=opj(sampledocs, 'text-simple.txt'),
+           filename=opj(sampledocs, 'asciidoc-complete.txt'),
           )
 #
 # ex_rst = Namespace(
 #           doctype=tldp.doctypes.rst.RestructuredText,
 #           filename=opj(sampledocs, 'restructuredtext-simple.rst'),
 #          )
-#
-# ex_text = Namespace(
-#            doctype=tldp.doctypes.text.Text,
-#            filename=opj(sampledocs, 'text-simple.txt'),
-#           )
 #
 # ex_markdown = Namespace(
 #                doctype=tldp.doctypes.markdown.Markdown,
