@@ -8,16 +8,18 @@ import logging
 from tldp.utils import which
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.doctypes.common import BaseDoctype, depends
+from tldp.doctypes.docbook4xml import Docbook4XML
 
 logger = logging.getLogger(__name__)
 
 
-class Asciidoc(BaseDoctype):
+class Asciidoc(Docbook4XML):
     formatname = 'AsciiDoc'
     extensions = ['.txt']
     signatures = []
 
-    required = {'asciidoc_a2x': isexecutable,
+    required = {'asciidoc_asciidoc': isexecutable,
+                'asciidoc_xmllint': isexecutable,
                 }
 
     def make_docbook45(self):
@@ -28,11 +30,9 @@ class Asciidoc(BaseDoctype):
         return self.shellscript(s)
 
     @depends(make_docbook45)
-    def docbook_subbuild(self):
-        config = self.config
-        source = self.output.validsource
-        return True
-
+    def make_validated_source(self):
+        s = '"{config.asciidoc_xmllint}" --noout --valid "{output.validsource}"'
+        return self.shellscript(s)
 
     @classmethod
     def argparse(cls, p):
@@ -41,6 +41,9 @@ class Asciidoc(BaseDoctype):
         g.add_argument('--asciidoc-asciidoc', type=arg_isexecutable,
                        default=which('asciidoc'),
                        help='full path to asciidoc [%(default)s]')
+        g.add_argument('--asciidoc-xmllint', type=arg_isexecutable,
+                       default=which('xmllint'),
+                       help='full path to xmllint [%(default)s]')
 
 #
 # -- end of file
