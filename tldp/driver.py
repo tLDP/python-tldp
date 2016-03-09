@@ -197,7 +197,7 @@ def post_publish_cleanup(docs):
     for d in dtworkingdirs:
         if os.path.isdir(d):
             try:
-                logger.info("removing docbuild dir %s", d)
+                logger.info("removing doctype build dir %s", d)
                 os.rmdir(d)
             except OSError as e:
                 if e.errno != errno.ENOTEMPTY:
@@ -227,6 +227,7 @@ def prepare_docs_build_mode(config, docs):
 
 
 def docbuild(config, docs, **kwargs):
+    buildsuccess = False
     result = list()
     for x, source in enumerate(docs, 1):
         working = source.working
@@ -235,11 +236,8 @@ def docbuild(config, docs, **kwargs):
                     source.stem, x, len(docs))
         result.append(runner.generate())
     if all(result):
-        return os.EX_OK
-    for errcode, source in zip(result, docs):
-        if not errcode:
-            logger.error("%s build failed", source.stem)
-    return "Build failed, see errors logged."
+        buildsuccess = True
+    return buildsuccess, zip(result, docs)
 
 
 def script(config, docs, **kwargs):
@@ -248,9 +246,15 @@ def script(config, docs, **kwargs):
         return error
     file = kwargs.get('file', sys.stdout)
     print(preamble, file=file)
-    result = docbuild(config, docs, **kwargs)
+    buildsuccess, results = docbuild(config, docs, **kwargs)
     print(postamble, file=file)
-    return result
+    for errcode, source in results:
+        if not errcode:
+            logger.error("Could not generate script for %s", source.stem)
+    if buildsuccess:
+        return os.EX_OK
+    else:
+        return "Script generation failed."
 
 
 def build(config, docs, **kwargs):
@@ -262,25 +266,35 @@ def build(config, docs, **kwargs):
     ready, error = prepare_docs_build_mode(config, docs)
     if not ready:
         return error
-    return docbuild(config, docs, **kwargs)
+    buildsuccess, results = docbuild(config, docs, **kwargs)
+    for x, (buildcode, source) in enumerate(results, 1):
+        if buildcode:
+            logger.info("success (%d of %d) available in %s",
+                        x, len(results), source.working.dirname)
+        else:
+            logger.info("FAILURE (%d of %d) available in %s",
+                        x, len(results), source.working.dirname)
+    if buildsuccess:
+        return os.EX_OK
+    else:
+        return "Build failed, see logging output in %s." % (config.builddir,)
 
 
 def publish(config, docs, **kwargs):
     config.build = True
     result = build(config, docs, **kwargs)
-    if result != os.EX_OK:
-        return "Aborting all publication: " + result
-    for x, source in enumerate(docs, 1):
-        logger.info("%s (%d of %d) publishing outputs",
-                    source.stem, x, len(docs))
-        # -- swapdirs must raise an error if there are problems
-        #
-        swapdirs(source.working.dirname, source.output.dirname)
-        if os.path.isdir(source.working.dirname):
-            logger.info("%s removing old directory %s", 
-                        source.stem, source.working.dirname)
-            shutil.rmtree(source.working.dirname)
-    post_publish_cleanup(docs)
+    if result == os.EX_OK:
+        for x, source in enumerate(docs, 1):
+            logger.info("%s (%d of %d) publishing outputs",
+                        source.stem, x, len(docs))
+            # -- swapdirs must raise an error if there are problems
+            #
+            swapdirs(source.working.dirname, source.output.dirname)
+            if os.path.isdir(source.working.dirname):
+                logger.info("%s removing old directory %s", 
+                            source.stem, source.working.dirname)
+                shutil.rmtree(source.working.dirname)
+        post_publish_cleanup(docs)
     return os.EX_OK
 
 
