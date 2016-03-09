@@ -1,6 +1,0 @@
-Title of an Asciidoc Document
-=============================
-Franklin P. Gundersnip <devnull@example.com>
-v0.3, 2016-03
-
-Here is simply text.
