@@ -197,7 +197,7 @@ def post_publish_cleanup(docs):
     for d in dtworkingdirs:
         if os.path.isdir(d):
             try:
-                logger.info("removing doctype build dir %s", d)
+                logger.debug("removing doctype build dir %s", d)
                 os.rmdir(d)
             except OSError as e:
                 if e.errno != errno.ENOTEMPTY:
@@ -285,14 +285,14 @@ def publish(config, docs, **kwargs):
     result = build(config, docs, **kwargs)
     if result == os.EX_OK:
         for x, source in enumerate(docs, 1):
-            logger.info("%s (%d of %d) publishing outputs",
-                        source.stem, x, len(docs))
+            logger.info("Publishing (%d of %d) to %s.",
+                        x, len(docs), source.output.dirname)
             # -- swapdirs must raise an error if there are problems
             #
             swapdirs(source.working.dirname, source.output.dirname)
             if os.path.isdir(source.working.dirname):
-                logger.info("%s removing old directory %s", 
-                            source.stem, source.working.dirname)
+                logger.debug("%s removing old directory %s", 
+                             source.stem, source.working.dirname)
                 shutil.rmtree(source.working.dirname)
         post_publish_cleanup(docs)
     return os.EX_OK
