@@ -22,6 +22,7 @@ Requires: jing
 Requires: htmldoc
 Requires: sgmltool
 Requires: openjade
+Requires: docbook-utils
 Requires: docbook-utils-minimal
 Requires: docbook-dsssl-stylesheets
 Requires: docbook-xsl-stylesheets
