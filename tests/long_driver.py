@@ -1,7 +1,11 @@
 
 from __future__ import absolute_import, division, print_function
 
+import os
+
 from tldptesttools import TestInventoryBase
+
+from tldp.sources import SourceDocument
 
 # -- Test Data
 import example
@@ -41,6 +45,18 @@ class TestDriverBuild(TestInventoryBase):
 
 
 class TestDriverPublish(TestInventoryBase):
+
+    def test_publish_docbook5xml(self):
+        c = self.config
+        c.publish = True
+        self.add_new('Frobnitz-DocBook-XML-5-HOWTO', example.ex_docbook5xml)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEquals(1, len(inv.all.keys()))
+        docs = inv.all.values()
+        exitcode = tldp.driver.publish(c, docs)
+        self.assertEquals(exitcode, 0)
+        doc = docs.pop(0)
+        self.assertTrue(doc.output.iscomplete)
 
     def test_publish_docbook4xml(self):
         self.add_docbook4xml_xsl_to_config()
@@ -94,6 +110,17 @@ class TestDriverPublish(TestInventoryBase):
         self.assertEquals(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
+
+    def test_publish_docbooksgml_larger(self):
+        self.add_docbooksgml_support_to_config()
+        c = self.config
+        c.publish = True
+        doc = SourceDocument(example.ex_docbooksgml_dir.filename)
+        exitcode = tldp.driver.publish(c, [doc])
+        self.assertEquals(exitcode, 0)
+        self.assertTrue(doc.output.iscomplete)
+        outputimages = os.path.join(doc.output.dirname, 'images')
+        self.assertTrue(os.path.exists(outputimages))
 
 #
 # -- end of file
