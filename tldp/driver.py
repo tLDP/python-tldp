@@ -9,6 +9,7 @@ import errno
 import shutil
 import logging
 import inspect
+import collections
 from argparse import Namespace
 
 from tldp.typeguesser import knowndoctypes
@@ -96,8 +97,10 @@ def summary(config, *args, **kwargs):
     if inv is None:
         inv = Inventory(config.pubdir, config.sourcedir)
     width = Namespace()
+    width.doctype = max([len(x.formatname) for x in knowndoctypes])
     width.status = max([len(x) for x in status_types])
     width.count = len(str(len(inv.source.keys())))
+    print('By Status Type', '--------------', sep='\n', file=file)
     for status in status_types:
         count = len(getattr(inv, status, 0))
         s = '{0:{w.status}}  {1:{w.count}}  '.format(status, count, w=width)
@@ -116,6 +119,30 @@ def summary(config, *args, **kwargs):
                 if abbrev:
                     s = s + ', and %d more ...' % (len(abbrev))
             print(s, file=file)
+    print('', 'By Document Type', '----------------', sep='\n', file=file)
+    summarybytype = collections.defaultdict(list)
+    for doc in inv.source.values():
+        name = doc.doctype.__name__
+        summarybytype[name].append(doc.stem)
+    for doctype, docs in summarybytype.items():
+        count = len(docs)
+        s = '{0:{w.doctype}}  {1:{w.count}}  '.format(doctype, count, w=width)
+        print(s, end="", file=file)
+        if config.verbose:
+            print(', '.join(docs), file=file)
+        else:
+            abbrev = docs
+            s = ''
+            if abbrev:
+                s = s + abbrev.pop(0)
+                while abbrev:
+                    if (len(s) + len(abbrev[0])) > 36:
+                        break
+                    s = s + ', ' + abbrev.pop(0)
+                if abbrev:
+                    s = s + ', and %d more ...' % (len(abbrev))
+            print(s, file=file)
+    print(file=file)
     return os.EX_OK
 
 
