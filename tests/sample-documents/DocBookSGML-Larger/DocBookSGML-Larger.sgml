@@ -26,6 +26,7 @@
 
   <sect1 id="intro"><title>Introduction</title>
     <para>Text</para>
+    <indexterm><primary>Text</primary></indexterm>
     <sect2 id="copyright"><title>More stuff</title>
       <para>Text</para>
     </sect2>
