@@ -22,47 +22,47 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
                 'linuxdoc_htmldoc': isexecutable,
                 }
 
-    def make_htmls(self):
+    def make_htmls(self, **kwargs):
         '''create a single page HTML output (with incorrect name)'''
         s = '"{config.linuxdoc_sgml2html}" --split=0 "{source.filename}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_htmls)
-    def make_name_htmls(self):
+    def make_name_htmls(self, **kwargs):
         '''correct the single page HTML output name'''
         s = 'mv -v --no-clobber -- "{output.name_html}" "{output.name_htmls}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_name_htmls)
-    def make_name_txt(self):
+    def make_name_txt(self, **kwargs):
         '''create text output (from single-page HTML)'''
         s = '''"{config.linuxdoc_html2text}" > "{output.name_txt}" \\
                   -style pretty \\
                   -nobs \\
                   "{output.name_htmls}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_name_htmls)
-    def make_name_pdf(self):
+    def make_name_pdf(self, **kwargs):
         s = '''"{config.linuxdoc_htmldoc}" \\
                  --size universal \\
                  --firstpage p1 \\
                  --format pdf \\
                  --outfile "{output.name_pdf}" \\
                  "{output.name_htmls}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_name_htmls)
-    def make_name_html(self):
+    def make_name_html(self, **kwargs):
         '''create final index.html symlink'''
         s = '"{config.linuxdoc_sgml2html}" "{source.filename}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_name_html)
-    def make_name_indexhtml(self):
+    def make_name_indexhtml(self, **kwargs):
         '''create final index.html symlink'''
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @classmethod
     def argparse(cls, p):

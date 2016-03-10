@@ -23,17 +23,17 @@ class Asciidoc(Docbook4XML):
                 }
     required.update(Docbook4XML.required)
 
-    def make_docbook45(self):
+    def make_docbook45(self, **kwargs):
         s = '''"{config.asciidoc_asciidoc}" \\
                  --backend docbook45 \\
                  --out-file {output.validsource} \\
                  "{source.filename}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_docbook45)
-    def make_validated_source(self):
+    def make_validated_source(self, **kwargs):
         s = '"{config.asciidoc_xmllint}" --noout --valid "{output.validsource}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @classmethod
     def argparse(cls, p):

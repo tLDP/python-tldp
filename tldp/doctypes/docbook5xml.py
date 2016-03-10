@@ -62,24 +62,24 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                 'docbook5xml_xslsingle': isreadablefile,
                 }
 
-    def make_xincluded_source(self):
+    def make_xincluded_source(self, **kwargs):
         s = '''"{config.docbook5xml_xmllint}" > "{output.validsource}" \\
                   --nonet \\
                   --noent \\
                   --xinclude \\
                   "{source.filename}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_xincluded_source)
-    def validate_source(self):
+    def validate_source(self, **kwargs):
         '''consider lxml.etree and other validators'''
         s = '''"{config.docbook5xml_jing}" \\
                   "{config.docbook5xml_rngfile}" \\
                   "{output.validsource}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(validate_source)
-    def make_name_htmls(self):
+    def make_name_htmls(self, **kwargs):
         '''create a single page HTML output'''
         s = '''"{config.docbook5xml_xsltproc}" > "{output.name_htmls}" \\
                   --nonet \\
@@ -87,62 +87,62 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   --stringparam base.dir . \\
                   "{config.docbook5xml_xslsingle}" \\
                   "{output.validsource}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_name_htmls)
-    def make_name_txt(self):
+    def make_name_txt(self, **kwargs):
         '''create text output'''
         s = '''"{config.docbook5xml_html2text}" > "{output.name_txt}" \\
                   -style pretty \\
                   -nobs \\
                   "{output.name_htmls}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(validate_source)
-    def make_fo(self):
+    def make_fo(self, **kwargs):
         '''generate the Formatting Objects intermediate output'''
         s = '''"{config.docbook5xml_xsltproc}" > "{output.name_fo}" \\
                   "{config.docbook5xml_xslprint}" \\
                   "{output.validsource}"'''
         self.removals.append(self.output.name_fo)
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     # -- this is conditionally built--see logic in make_name_pdf() below
     # @depends(make_fo)
-    def make_pdf_with_fop(self):
+    def make_pdf_with_fop(self, **kwargs):
         '''use FOP to create a PDF'''
         s = '''"{config.docbook5xml_fop}" \\
                   -fo "{output.name_fo}" \\
                   -pdf "{output.name_pdf}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     # -- this is conditionally built--see logic in make_name_pdf() below
     # @depends(validate_source)
-    def make_pdf_with_dblatex(self):
+    def make_pdf_with_dblatex(self, **kwargs):
         '''use dblatex (fallback) to create a PDF'''
         s = '''"{config.docbook5xml_dblatex}" \\
                   -F xml \\
                   -t pdf \\
                   -o "{output.name_pdf}" \\
                   "{output.validsource}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_fo, validate_source)
-    def make_name_pdf(self):
+    def make_name_pdf(self, **kwargs):
         stem = self.source.stem
         classname = self.__class__.__name__
         logger.info("%s calling method %s.%s",
                     stem, classname, 'make_pdf_with_fop')
-        if self.make_pdf_with_fop():
+        if self.make_pdf_with_fop(**kwargs):
             return True
         logger.error("%s %s failed creating PDF, falling back to dblatex...",
                      stem, self.config.docbook5xml_fop)
         logger.info("%s calling method %s.%s",
                     stem, classname, 'make_pdf_with_dblatex')
-        return self.make_pdf_with_dblatex()
+        return self.make_pdf_with_dblatex(**kwargs)
 
     @depends(make_name_htmls, validate_source)
-    def make_chunked_html(self):
+    def make_chunked_html(self, **kwargs):
         '''create chunked HTML output'''
         s = '''"{config.docbook5xml_xsltproc}" \\
                   --nonet \\
@@ -150,25 +150,25 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
                   --stringparam base.dir . \\
                   "{config.docbook5xml_xslchunk}" \\
                   "{output.validsource}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_chunked_html)
-    def make_name_html(self):
+    def make_name_html(self, **kwargs):
         '''rename DocBook XSL's index.html to LDP standard STEM.html'''
         s = 'mv -v --no-clobber -- "{output.name_indexhtml}" "{output.name_html}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_name_html)
-    def make_name_indexhtml(self):
+    def make_name_indexhtml(self, **kwargs):
         '''create final index.html symlink'''
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_name_htmls, make_name_html, make_name_pdf, make_name_txt)
-    def remove_xincluded_source(self):
+    def remove_xincluded_source(self, **kwargs):
         '''remove the xincluded source file'''
         s = 'rm --verbose -- "{output.validsource}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @classmethod
     def argparse(cls, p):

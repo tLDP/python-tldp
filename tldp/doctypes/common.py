@@ -99,7 +99,7 @@ class BaseDoctype(object):
             assert validator(thing)
         return True
 
-    def clear_output(self):
+    def clear_output(self, **kwargs):
         '''remove the entire output directory
 
         This method must be --script aware.  The method execute_shellscript()
@@ -110,12 +110,12 @@ class BaseDoctype(object):
                      self.output.stem, self.output.dirname)
         if self.config.script:
             s = 'test -d "{output.dirname}" && rm -rf -- "{output.dirname}"'
-            return self.shellscript(s)
+            return self.shellscript(s, **kwargs)
         if os.path.exists(self.output.dirname):
             shutil.rmtree(self.output.dirname)
         return True
 
-    def mkdir_output(self):
+    def mkdir_output(self, **kwargs):
         '''create a new output directory
 
         This method must be --script aware.  The method execute_shellscript()
@@ -126,13 +126,13 @@ class BaseDoctype(object):
                      self.output.stem, self.output.dirname)
         if self.config.script:
             s = 'mkdir -p -- "{output.logdir}"'
-            return self.shellscript(s)
+            return self.shellscript(s, **kwargs)
         for d in (self.output.dirname, self.output.logdir):
             if not os.path.isdir(d):
                 os.mkdir(d)
         return True
 
-    def chdir_output(self):
+    def chdir_output(self, **kwargs):
         '''chdir to the output directory (or write the script that would)'''
         logger.debug("%s chdir to dir   %s.",
                      self.output.stem, self.output.dirname)
@@ -141,7 +141,7 @@ class BaseDoctype(object):
 # - - - - - {source.stem} - - - - - -
 
             cd -- "{output.dirname}"'''
-            return self.shellscript(s)
+            return self.shellscript(s, **kwargs)
         os.chdir(self.output.dirname)
         return True
 
@@ -158,7 +158,7 @@ class BaseDoctype(object):
             logger.debug("%s no images or resources to copy", self.source.stem)
             return True
         s = 'rsync --archive --verbose %s ./' % (' '.join(source))
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     def hook_build_prepare(self):
         stem = self.source.stem
@@ -203,18 +203,20 @@ class BaseDoctype(object):
             raise Exception(etext % (self.source.stem,))
 
     @logtimings(logger.debug)
-    def dump_shellscript(self, script, preamble=preamble, postamble=postamble):
+    def dump_shellscript(self, script, preamble=preamble, 
+                         postamble=postamble, **kwargs):
         source = self.source
         output = self.output
         config = self.config
+        file = kwargs.get('file', sys.stdout)
         s = script.format(output=output, source=source, config=config)
-        print('', file=sys.stdout)
-        print(s, file=sys.stdout)
+        print('', file=file)
+        print(s, file=file)
         return True
 
     @logtimings(logger.debug)
     def execute_shellscript(self, script, preamble=preamble, 
-                            postamble=postamble):
+                            postamble=postamble, **kwargs):
         source = self.source
         output = self.output
         config = self.config
@@ -257,7 +259,7 @@ class BaseDoctype(object):
         return order
 
     @logtimings(logger.debug)
-    def buildall(self):
+    def buildall(self, **kwargs):
         stem = self.source.stem
         order = self.determinebuildorder()
         logger.debug("%s build order %r", self.source.stem, order)
@@ -265,14 +267,14 @@ class BaseDoctype(object):
             classname = self.__class__.__name__
             logger.info("%s calling method %s.%s",
                         stem, classname, method.__name__)
-            if not method():
+            if not method(**kwargs):
                 logger.error("%s called method  %s.%s failed, skipping...",
                              stem, classname, method.__name__)
                 return False
         return True
 
     @logtimings(logger.info)
-    def generate(self):
+    def generate(self, **kwargs):
         # -- perform build preparation steps;
         #     - check for all executables and data files
         #     - clear output dir
@@ -286,7 +288,7 @@ class BaseDoctype(object):
 
         # -- build
         #
-        result = self.buildall()
+        result = self.buildall(**kwargs)
 
         # -- report on result and/or cleanup
         #

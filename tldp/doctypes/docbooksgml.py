@@ -47,7 +47,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                 'docbooksgml_docbookdsl': isreadablefile,
                 }
 
-    def make_blank_indexsgml(self):
+    def make_blank_indexsgml(self, **kwargs):
         indexsgml = os.path.join(self.source.dirname, 'index.sgml')
         self.indexsgml = os.path.isfile(indexsgml)
         if self.indexsgml:
@@ -57,10 +57,10 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                   -N \\
                   -o \\
                   "index.sgml"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_blank_indexsgml)
-    def move_blank_indexsgml_into_source(self):
+    def move_blank_indexsgml_into_source(self, **kwargs):
         '''move a blank index.sgml file into the source tree'''
         if self.indexsgml:
             return True
@@ -68,10 +68,10 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                  --no-clobber \\
                  --verbose \\
                  -- "index.sgml" "{source.dirname}/index.sgml"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(move_blank_indexsgml_into_source)
-    def make_data_indexsgml(self):
+    def make_data_indexsgml(self, **kwargs):
         '''collect document's index entries into a data file (HTML.index)'''
         if self.indexsgml:
             return True
@@ -80,10 +80,10 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                   -V html-index \\
                   -d "{config.docbooksgml_docbookdsl}" \\
                   "{source.filename}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_data_indexsgml)
-    def make_indexsgml(self):
+    def make_indexsgml(self, **kwargs):
         '''generate the final document index file (index.sgml)'''
         if self.indexsgml:
             return True
@@ -94,10 +94,10 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                   -o "index.sgml" \\
                      "HTML.index" \\
                      "{source.filename}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_indexsgml)
-    def move_indexsgml_into_source(self):
+    def move_indexsgml_into_source(self, **kwargs):
         '''move the generated index.sgml file into the source tree'''
         if self.indexsgml:
             return True
@@ -106,7 +106,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                  --verbose \\
                  --force \\
                  -- "index.sgml" "{source.dirname}/index.sgml"'''
-        moved = self.shellscript(s)
+        moved = self.shellscript(s, **kwargs)
         if moved:
             logger.debug("%s created %s", self.source.stem, indexsgml)
             self.removals.append(indexsgml)
@@ -114,7 +114,7 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
         return False
 
     @depends(move_indexsgml_into_source)
-    def cleaned_indexsgml(self):
+    def cleaned_indexsgml(self, **kwargs):
         '''clean the junk from the output dir after building the index.sgml'''
         # -- be super cautious before removing a bunch of files
         if not self.config.script:
@@ -126,10 +126,10 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                              self.source.stem, self.output.dirname)
                 return False
         s = '''find . -mindepth 1 -maxdepth 1 -not -type d -delete -print'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(cleaned_indexsgml)
-    def make_htmls(self):
+    def make_htmls(self, **kwargs):
         '''create a single page HTML output (with incorrect name)'''
         s = '''"{config.docbooksgml_jw}" \\
                   -f docbook \\
@@ -140,57 +140,57 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                   -V '%stock-graphics-extension%=.png' \\
                   --output . \\
                   "{source.filename}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_htmls)
-    def make_name_htmls(self):
+    def make_name_htmls(self, **kwargs):
         '''correct the single page HTML output name'''
         s = 'mv -v --no-clobber -- "{output.name_html}" "{output.name_htmls}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_name_htmls)
-    def make_name_txt(self):
+    def make_name_txt(self, **kwargs):
         '''create text output (from single-page HTML)'''
         s = '''"{config.docbooksgml_html2text}" > "{output.name_txt}" \\
                   -style pretty \\
                   -nobs \\
                   "{output.name_htmls}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
-    def make_pdf_with_jw(self):
+    def make_pdf_with_jw(self, **kwargs):
         '''use jw (openjade) to create a PDF'''
         s = '''"{config.docbooksgml_jw}" \\
                   -f docbook \\
                   -b pdf \\
                   --output . \\
                   "{source.filename}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
-    def make_pdf_with_dblatex(self):
+    def make_pdf_with_dblatex(self, **kwargs):
         '''use dblatex (fallback) to create a PDF'''
         s = '''"{config.docbooksgml_dblatex}" \\
                   -F sgml \\
                   -t pdf \\
                   -o "{output.name_pdf}" \\
                      "{source.filename}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(cleaned_indexsgml)
-    def make_name_pdf(self):
+    def make_name_pdf(self, **kwargs):
         stem = self.source.stem
         classname = self.__class__.__name__
         logger.info("%s calling method %s.%s",
                     stem, classname, 'make_pdf_with_jw')
-        if self.make_pdf_with_jw():
+        if self.make_pdf_with_jw(**kwargs):
             return True
         logger.error("%s jw failed creating PDF, falling back to dblatex...",
                      stem)
         logger.info("%s calling method %s.%s",
                     stem, classname, 'make_pdf_with_dblatex')
-        return self.make_pdf_with_dblatex()
+        return self.make_pdf_with_dblatex(**kwargs)
 
     @depends(make_name_htmls)
-    def make_html(self):
+    def make_html(self, **kwargs):
         '''create chunked HTML outputs'''
         s = '''"{config.docbooksgml_jw}" \\
                  -f docbook \\
@@ -200,19 +200,19 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                  -V '%stock-graphics-extension%=.png' \\
                  --output . \\
                  "{source.filename}"'''
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_html)
-    def make_name_html(self):
+    def make_name_html(self, **kwargs):
         '''rename openjade's index.html to LDP standard name STEM.html'''
         s = 'mv -v --no-clobber -- "{output.name_indexhtml}" "{output.name_html}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @depends(make_name_html)
-    def make_name_indexhtml(self):
+    def make_name_indexhtml(self, **kwargs):
         '''create final index.html symlink'''
         s = 'ln -svr -- "{output.name_html}" "{output.name_indexhtml}"'
-        return self.shellscript(s)
+        return self.shellscript(s, **kwargs)
 
     @classmethod
     def argparse(cls, p):
