@@ -12,6 +12,15 @@ from tempfile import NamedTemporaryFile as ntf
 from tldp.config import collectconfiguration
 from tldp.outputs import OutputNamingConvention
 
+# -- short names
+#
+opa = os.path.abspath
+opb = os.path.basename
+opd = os.path.dirname
+opj = os.path.join
+
+extras = opa(opj(opd(opd(__file__)), 'extras'))
+
 
 def stem_and_ext(name):
     stem, ext = os.path.splitext(os.path.basename(name))
@@ -199,6 +208,17 @@ class TestInventoryBase(unittest.TestCase):
         myoutput = TestOutputDirSkeleton(os.path.join(c.pubdir, stem), stem)
         myoutput.mkdir()
         myoutput.create_expected_docs()
+
+    def add_docbooksgml_support_to_config(self):
+        c = self.config
+        c.docbooksgml_collateindex = opj(extras, 'collateindex.pl')
+        c.docbooksgml_ldpdsl = opj(extras, 'dsssl', 'ldp.dsl')
+
+    def add_docbook4xml_xsl_to_config(self):
+        c = self.config
+        c.docbook4xml_xslprint = opj(extras, 'xsl', 'tldp-print.xsl')
+        c.docbook4xml_xslsingle = opj(extras, 'xsl', 'tldp-one-page.xsl')
+        c.docbook4xml_xslchunk = opj(extras, 'xsl', 'tldp-chapters.xsl')
 
 #
 # -- end of file
