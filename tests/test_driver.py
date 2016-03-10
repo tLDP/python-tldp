@@ -27,7 +27,6 @@ import tldp.driver
 opj = os.path.join
 opd = os.path.dirname
 opa = os.path.abspath
-extras = opa(opj(opd(opd(__file__)), 'extras'))
 
 sampledocs = opj(opd(__file__), 'sample-documents')
 
@@ -209,12 +208,20 @@ class TestremoveUnknownDoctypes(TestToolsFilesystem):
 
 class Test_prepare_docs_script_mode(TestToolsFilesystem):
 
-    def test_prepare_docs_script_mode(self):
+    def test_prepare_docs_script_mode_basic(self):
         config = Namespace(pubdir=self.tempdir)
         doc = SourceDocument(opj(sampledocs, 'linuxdoc-simple.sgml'))
         self.assertIsNone(doc.working)
         tldp.driver.prepare_docs_script_mode(config, [doc])
         self.assertIsInstance(doc.working, OutputDirectory)
+
+    def test_prepare_docs_script_mode_existing_output(self):
+        config = Namespace(pubdir=self.tempdir)
+        doc = SourceDocument(opj(sampledocs, 'linuxdoc-simple.sgml'))
+        doc.output = OutputDirectory.fromsource(config.pubdir, doc)
+        self.assertIsNone(doc.working)
+        tldp.driver.prepare_docs_script_mode(config, [doc])
+        self.assertIs(doc.working, doc.output)
 
 
 class Test_prepare_docs_build_mode(TestInventoryBase):
@@ -225,6 +232,25 @@ class Test_prepare_docs_build_mode(TestInventoryBase):
         self.assertIsNone(doc.working)
         tldp.driver.prepare_docs_build_mode(c, [doc])
         self.assertIsInstance(doc.working, OutputDirectory)
+
+    def test_prepare_docs_build_mode_nobuilddir(self):
+        c = self.config
+        os.rmdir(c.builddir)
+        doc = SourceDocument(opj(sampledocs, 'linuxdoc-simple.sgml'))
+        ready, error = tldp.driver.prepare_docs_build_mode(c, [doc])
+        self.assertFalse(ready)
+
+
+class Test_post_publish_cleanup(TestInventoryBase):
+
+    def test_post_publish_cleanup_enotempty(self):
+        c = self.config
+        doc = SourceDocument(opj(sampledocs, 'linuxdoc-simple.sgml'))
+        tldp.driver.prepare_docs_build_mode(c, [doc])
+        with open(opj(doc.dtworkingdir, 'annoyance-file.txt'), 'w'):
+            pass
+        tldp.driver.post_publish_cleanup([doc])
+        self.assertTrue(os.path.isdir(doc.dtworkingdir))
 
 
 class TestDriverRun(TestInventoryBase):
@@ -327,64 +353,80 @@ class TestDriverProcessSkips(TestInventoryBase):
         self.assertEquals(len(inc) + 1, len(inv.all.keys()))
 
 
-@unittest.skip("Except when you want to spend time....")
-class TestDriverBuild(TestInventoryBase):
+class TestDriverScript(TestInventoryBase):
 
-    def test_build_asciidoc(self):
+    #@unittest.skip
+    def test_script(self):
+        c = self.config
+        c.script = True
+        stdout = StringIO()
+        self.add_published('Published-HOWTO', example.ex_linuxdoc)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        tldp.driver.script(c, inv.all.values(), file=stdout)
+        stdout.seek(0)
+        data = stdout.read()
+        self.assertTrue(c.linuxdoc_sgml2html in data)
+
+
+# @unittest.skip("Except when you want to spend time....")
+class TestDriverPublish(TestInventoryBase):
+
+    def test_publish_docbook4xml(self):
         self.add_docbook4xml_xsl_to_config()
         c = self.config
-        c.build = True
+        c.publish = True
+        self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEquals(1, len(inv.all.keys()))
+        docs = inv.all.values()
+        exitcode = tldp.driver.publish(c, docs)
+        self.assertEquals(exitcode, 0)
+        doc = docs.pop(0)
+        self.assertTrue(doc.output.iscomplete)
+
+    def test_publish_asciidoc(self):
+        self.add_docbook4xml_xsl_to_config()
+        c = self.config
+        c.publish = True
         self.add_new('Frobnitz-Asciidoc-HOWTO', example.ex_asciidoc)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
         c.skip = []
-        tldp.driver.publish(c, docs)
+        exitcode = tldp.driver.publish(c, docs)
+        self.assertEquals(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
-    def test_build_linuxdoc(self):
+    def test_publish_linuxdoc(self):
         c = self.config
-        c.build = True
+        c.publish = True
         self.add_new('Frobnitz-Linuxdoc-HOWTO', example.ex_linuxdoc)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
         c.skip = []
-        tldp.driver.publish(c, docs)
+        exitcode = tldp.driver.publish(c, docs)
+        self.assertEquals(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
-    def test_build_docbooksgml(self):
+    def test_publish_docbooksgml(self):
+        self.add_docbooksgml_support_to_config()
         c = self.config
-        c.build = True
+        c.publish = True
         self.add_new('Frobnitz-DocBook-SGML-HOWTO', example.ex_docbooksgml)
-        c.docbooksgml_collateindex = opj(extras, 'collateindex.pl')
-        c.docbooksgml_ldpdsl = opj(extras, 'dsssl', 'ldp.dsl')
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
-        tldp.driver.publish(c, docs)
+        exitcode = tldp.driver.publish(c, docs)
+        self.assertEquals(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
-    def add_docbook4xml_xsl_to_config(self):
-        c = self.config
-        c.docbook4xml_xslprint = opj(extras, 'xsl', 'tldp-print.xsl')
-        c.docbook4xml_xslsingle = opj(extras, 'xsl', 'tldp-one-page.xsl')
-        c.docbook4xml_xslchunk = opj(extras, 'xsl', 'tldp-chapters.xsl')
 
-    def test_build_docbook4xml(self):
-        self.add_docbook4xml_xsl_to_config()
-        c = self.config
-        c.build = True
-        self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
-        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(1, len(inv.all.keys()))
-        docs = inv.all.values()
-        tldp.driver.publish(c, docs)
-        doc = docs.pop(0)
-        self.assertTrue(doc.output.iscomplete)
+@unittest.skip("Except when you want to spend time....")
+class TestDriverBuild(TestInventoryBase):
 
     def test_build_one_broken(self):
         self.add_docbook4xml_xsl_to_config()
