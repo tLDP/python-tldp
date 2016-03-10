@@ -426,13 +426,10 @@ def collectWorkset(config, args):
         inv = None
 
     if stati:
-        oldsize = len(workset)
-        for status in stati:
-            collection = getattr(inv, status)
-            workset.update(collection.values())
-        growth = len(workset) - oldsize
-        if growth:
-            logger.info("Added %d docs, found by status class .", growth)
+        docs = getDocumentsByStatus(inv.all.values(), stati)
+        workset.update(docs)
+        if docs:
+            logger.info("Added %d docs, found by status class .", len(docs))
 
     unknownargs = None
     if remainder:
