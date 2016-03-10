@@ -355,7 +355,6 @@ class TestDriverProcessSkips(TestInventoryBase):
 
 class TestDriverScript(TestInventoryBase):
 
-    #@unittest.skip
     def test_script(self):
         c = self.config
         c.script = True
@@ -368,7 +367,39 @@ class TestDriverScript(TestInventoryBase):
         self.assertTrue(c.linuxdoc_sgml2html in data)
 
 
-# @unittest.skip("Except when you want to spend time....")
+@unittest.skip("Except when you want to spend time....")
+class TestDriverBuild(TestInventoryBase):
+
+    def test_build_one_broken(self):
+        self.add_docbook4xml_xsl_to_config()
+        c = self.config
+        c.build = True
+        self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
+        # -- mangle the content of a valid DocBook XML file
+        borked = example.ex_docbook4xml.content[:-12]
+        self.add_new('Frobnitz-Borked-XML-4-HOWTO',
+                     example.ex_docbook4xml, content=borked)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEquals(2, len(inv.all.keys()))
+        docs = inv.all.values()
+        result = tldp.driver.build(c, docs)
+        self.assertTrue('Build failed' in result)
+
+    def test_build_only_requested_stem(self):
+        c = self.config
+        ex = example.ex_linuxdoc
+        self.add_published('Published-HOWTO', ex)
+        self.add_new('New-HOWTO', ex)
+        argv = ['--pubdir', c.pubdir, '--sourcedir', c.sourcedir[0]]
+        argv.extend(['--build', 'Published-HOWTO'])
+        tldp.driver.run(argv)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEquals(1, len(inv.published.keys()))
+        self.assertEquals(1, len(inv.work.keys()))
+
+
+
+@unittest.skip("Except when you want to spend time....")
 class TestDriverPublish(TestInventoryBase):
 
     def test_publish_docbook4xml(self):
@@ -423,37 +454,5 @@ class TestDriverPublish(TestInventoryBase):
         self.assertEquals(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
-
-
-@unittest.skip("Except when you want to spend time....")
-class TestDriverBuild(TestInventoryBase):
-
-    def test_build_one_broken(self):
-        self.add_docbook4xml_xsl_to_config()
-        c = self.config
-        c.build = True
-        self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
-        # -- mangle the content of a valid DocBook XML file
-        borked = example.ex_docbook4xml.content[:-12]
-        self.add_new('Frobnitz-Borked-XML-4-HOWTO',
-                     example.ex_docbook4xml, content=borked)
-        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(2, len(inv.all.keys()))
-        docs = inv.all.values()
-        result = tldp.driver.build(c, docs)
-        self.assertTrue('Build failed' in result)
-
-    def test_build_only_requested_stem(self):
-        c = self.config
-        ex = example.ex_linuxdoc
-        self.add_published('Published-HOWTO', ex)
-        self.add_new('New-HOWTO', ex)
-        argv = ['--pubdir', c.pubdir, '--sourcedir', c.sourcedir[0]]
-        argv.extend(['--build', 'Published-HOWTO'])
-        tldp.driver.run(argv)
-        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(1, len(inv.published.keys()))
-        self.assertEquals(1, len(inv.work.keys()))
-
 #
 # -- end of file
