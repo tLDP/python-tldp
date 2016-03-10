@@ -12,6 +12,7 @@ import tldp.typeguesser
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_CONFIGFILE = '/etc/ldptool/ldptool.ini'
 
 def collectconfiguration(tag, argv):
     ap = DefaultFreeArgumentParser()
@@ -72,7 +73,7 @@ def collectconfiguration(tag, argv):
                     help='a scratch directory used for building')
     ap.add_argument('--configfile', '--config-file', '--cfg',
                     '-c',
-                    default='/etc/ldptool/ldptool.ini',
+                    default=DEFAULT_CONFIGFILE,
                     type=arg_isreadablefile,
                     help='a configuration file')
 
