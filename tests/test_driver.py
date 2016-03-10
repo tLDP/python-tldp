@@ -263,8 +263,8 @@ class TestDriverRun(TestInventoryBase):
         self.add_stale('Stale-HOWTO', ex)
         self.add_orphan('Orphan-HOWTO', ex)
         self.add_broken('Broken-HOWTO', ex)
-        argv = ['--pubdir', c.pubdir, '--sourcedir', c.sourcedir[0]]
         fullpath = opj(self.tempdir, 'sources', 'New-HOWTO.sgml')
+        argv = self.argv
         argv.extend(['--publish', 'stale', 'Orphan-HOWTO', fullpath])
         tldp.driver.run(argv)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
@@ -274,8 +274,8 @@ class TestDriverRun(TestInventoryBase):
     def test_run_extra_args(self):
         c = self.config
         self.add_new('New-HOWTO', example.ex_linuxdoc)
-        argv = ['--pubdir', c.pubdir, '--sourcedir', c.sourcedir[0]]
         fullpath = opj(self.tempdir, 'sources', 'New-HOWTO.sgml')
+        argv = self.argv
         argv.extend(['--build', 'stale', 'Orphan-HOWTO', fullpath, 'extra'])
         val = tldp.driver.run(argv)
         self.assertTrue('Unknown arguments' in val)
@@ -284,29 +284,40 @@ class TestDriverRun(TestInventoryBase):
         c = self.config
         ex = example.ex_linuxdoc
         self.add_new('New-HOWTO', ex)
-        argv = ['--builddir', c.builddir, ]
-        argv.extend(['--pubdir', c.pubdir, ])
-        argv.extend(['--sourcedir', c.sourcedir[0]])
-        tldp.driver.run(argv)
+        tldp.driver.run(self.argv)
         docbuilddir = opj(c.builddir, ex.doctype.__name__)
         inv = tldp.inventory.Inventory(docbuilddir, c.sourcedir)
         self.assertEquals(1, len(inv.published.keys()))
 
     def test_run_oops_no_sourcedir(self):
         c = self.config
+        argv = ['--pubdir', c.pubdir]
         ex = example.ex_linuxdoc
         self.add_new('New-HOWTO', ex)
-        argv = ['--pubdir', c.pubdir]
-        exit = tldp.driver.run(argv)
-        self.assertTrue('required for inventory' in exit)
+        exitcode = tldp.driver.run(argv)
+        self.assertTrue('required for inventory' in exitcode)
 
     def test_run_oops_no_pubdir(self):
         c = self.config
+        argv = ['--sourcedir', c.sourcedir[0]]
         ex = example.ex_linuxdoc
         self.add_new('New-HOWTO', ex)
-        argv = ['--sourcedir', c.sourcedir[0]]
-        exit = tldp.driver.run(argv)
-        self.assertTrue('required for inventory' in exit)
+        exitcode = tldp.driver.run(argv)
+        self.assertTrue('required for inventory' in exitcode)
+
+    def test_run_status_selection(self):
+        self.add_docbook4xml_xsl_to_config()
+        c = self.config
+        c.script = True
+        stdout = StringIO()
+        self.add_stale('Asciidoc-Stale-HOWTO', example.ex_asciidoc)
+        self.add_new('DocBook4XML-New-HOWTO', example.ex_docbook4xml)
+        argv = self.argv
+        argv.extend(['--publish', 'stale'])
+        exitcode = tldp.driver.run(argv)
+        self.assertEquals(exitcode, os.EX_OK)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEquals(1, len(inv.published.keys()))
 
 
 class TestDriverProcessSkips(TestInventoryBase):

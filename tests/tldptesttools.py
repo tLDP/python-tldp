@@ -108,11 +108,18 @@ class TestOutputDirSkeleton(OutputNamingConvention):
         if not os.path.isdir(self.dirname):
             os.mkdir(self.dirname)
 
-    def create_expected_docs(self):
+    def create_expected_docs(self, func=None):
         for name in self.expected:
             fname = getattr(self, name)
             with open(fname, 'w'):
                 pass
+            if func:
+                func(fname)
+
+    def create_stale_expected_docs(self):
+        def thirtysecondsago(fname):
+            os.utime(fname, (time.time() - 30, time.time() - 30))
+        self.create_expected_docs(func=thirtysecondsago)
 
 
 class TestSourceDocSkeleton(object):
@@ -144,6 +151,12 @@ class TestInventoryBase(unittest.TestCase):
         c.pubdir = os.path.join(self.tempdir, 'outputs')
         c.builddir = os.path.join(self.tempdir, 'builddir')
         c.sourcedir = os.path.join(self.tempdir, 'sources')
+        argv = list()
+        argv.extend(['--builddir', c.builddir])
+        argv.extend(['--pubdir', c.pubdir])
+        argv.extend(['--sourcedir', c.sourcedir])
+        self.argv = argv
+        # -- and make some directories
         for d in (c.sourcedir, c.pubdir, c.builddir):
             if not os.path.isdir(d):
                 os.mkdir(d)
@@ -162,8 +175,7 @@ class TestInventoryBase(unittest.TestCase):
         c = self.config
         myoutput = TestOutputDirSkeleton(os.path.join(c.pubdir, stem), stem)
         myoutput.mkdir()
-        myoutput.create_expected_docs()
-        time.sleep(0.001)
+        myoutput.create_stale_expected_docs()
         mysource = TestSourceDocSkeleton(c.sourcedir)
         mysource.addsourcefile(stem + ex.ext, ex.filename)
 
