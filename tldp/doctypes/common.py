@@ -145,7 +145,7 @@ class BaseDoctype(object):
         os.chdir(self.output.dirname)
         return True
 
-    def copy_static_resources(self):
+    def copy_static_resources(self, **kwargs):
         logger.debug("%s copy resources %s.",
                      self.output.stem, self.output.dirname)
         source = list()
@@ -160,7 +160,7 @@ class BaseDoctype(object):
         s = 'rsync --archive --verbose %s ./' % (' '.join(source))
         return self.shellscript(s, **kwargs)
 
-    def hook_build_prepare(self):
+    def hook_build_prepare(self, **kwargs):
         stem = self.source.stem
         classname = self.__class__.__name__
         order = ['build_precheck',
@@ -174,7 +174,7 @@ class BaseDoctype(object):
         for methname in order:
             method = getattr(self, methname, None)
             assert method is not None
-            if not method():
+            if not method(**kwargs):
                 logger.warning("%s %s failed (%s), skipping",
                                stem, methname, classname)
                 return False
