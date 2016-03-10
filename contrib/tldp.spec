@@ -16,6 +16,16 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
 BuildArch: noarch
 Vendor: Martin A. Brown <martin@linux-ip.net>
+BuildRequires: python-setuptools
+Requires: asciidoc
+Requires: jing
+Requires: htmldoc
+Requires: sgmltool
+Requires: openjade
+Requires: docbook-utils-minimal
+Requires: docbook-dsssl-stylesheets
+Requires: docbook-xsl-stylesheets
+Requires: docbook5-xsl-stylesheets
 
 %description
 tldp - tools for publishing from TLDP sources
