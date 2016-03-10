@@ -69,7 +69,8 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                  --verbose \\
                  -- "index.sgml" "{source.dirname}/index.sgml"'''
         indexsgml = os.path.join(self.source.dirname, 'index.sgml')
-        self.removals.add(indexsgml)
+        if not self.config.script:
+            self.removals.add(indexsgml)
         return self.shellscript(s, **kwargs)
 
     @depends(move_blank_indexsgml_into_source)
@@ -109,7 +110,8 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                  --force \\
                  -- "index.sgml" "{source.dirname}/index.sgml"'''
         logger.debug("%s creating %s", self.source.stem, indexsgml)
-        self.removals.add(indexsgml)
+        if not self.config.script:
+            self.removals.add(indexsgml)
         return self.shellscript(s, **kwargs)
 
     @depends(move_indexsgml_into_source)
