@@ -21,8 +21,6 @@ from tldp.sources import arg_issourcedoc
 
 sampledocs = os.path.join(os.path.dirname(__file__), 'sample-documents')
 
-widths = Namespace(status=20, stem=50)
-
 
 class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
 
@@ -169,6 +167,7 @@ class TestSourceDocument(TestToolsFilesystem):
         ex = example.ex_linuxdoc_dir
         s = SourceDocument(ex.filename)
         fout = StringIO()
+        widths = Namespace(status=20, doctype=20, stem=50)
         s.detail(widths, False, file=fout)
         fout.seek(0)
         result = fout.read()
