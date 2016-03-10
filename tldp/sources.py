@@ -197,7 +197,9 @@ class SourceDocument(object):
 
     def detail(self, widths, verbose, file=sys.stdout):
         '''produce a small tabular output about the document'''
-        template = '{s.status:{w.status}} {s.stem:{w.stem}}'
+        template = ' '.join(('{s.status:{w.status}}',
+                            '{s.doctype.formatname:{w.doctype}}',
+                            '{s.stem:{w.stem}}'))
         outstr = template.format(s=self, w=widths)
         print(outstr, file=file)
         if verbose:
