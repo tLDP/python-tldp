@@ -149,6 +149,7 @@ def summary(config, *args, **kwargs):
 def detail(config, docs, **kwargs):
     file = kwargs.get('file', sys.stdout)
     width = Namespace()
+    width.doctype = max([len(x.formatname) for x in knowndoctypes])
     width.status = max([len(x) for x in status_types])
     width.stem = max([len(x.stem) for x in docs])
     # -- if user just said "list" with no args, then give the user something
