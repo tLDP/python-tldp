@@ -26,6 +26,7 @@ Requires: docbook-utils-minimal
 Requires: docbook-dsssl-stylesheets
 Requires: docbook-xsl-stylesheets
 Requires: docbook5-xsl-stylesheets
+Requires: python-networkx
 
 %description
 tldp - tools for publishing from TLDP sources
