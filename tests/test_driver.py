@@ -435,5 +435,15 @@ class TestDriverScript(TestInventoryBase):
         exitcode = tldp.driver.run(argv)
         self.assertEquals(exitcode, os.EX_OK)
 
+    def test_script_bad_invocation(self):
+        c = self.config
+        c.script = False
+        self.add_published('Published-HOWTO', example.ex_linuxdoc)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        with self.assertRaises(Exception) as ecm:
+            tldp.driver.script(c, inv.all.values())
+        e = ecm.exception
+        self.assertTrue("neither --build nor --script" in e.message)
+
 #
 # -- end of file
