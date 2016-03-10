@@ -66,14 +66,12 @@ class BaseDoctype(object):
         self.source = kwargs.get('source', None)
         self.output = kwargs.get('output', None)
         self.config = kwargs.get('config', None)
-        self.removals = list()
+        self.removals = set()
         assert self.source is not None
         assert self.output is not None
         assert self.config is not None
 
     def cleanup(self):
-        if self.config.script:
-            return
         stem = self.source.stem
         removals = getattr(self, 'removals', None)
         if removals:
@@ -289,6 +287,10 @@ class BaseDoctype(object):
         # -- build
         #
         result = self.buildall(**kwargs)
+
+        # -- always clean the kitchen
+        #
+        self.cleanup()
 
         # -- report on result and/or cleanup
         #
