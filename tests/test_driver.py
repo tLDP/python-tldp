@@ -442,7 +442,7 @@ class TestDriverScript(TestInventoryBase):
         self.assertEquals(exitcode, os.EX_OK)
 
 
-# @unittest.skip("Except when you want to spend time....")
+@unittest.skip("Except when you want to spend time....")
 class TestDriverBuild(TestInventoryBase):
 
     def test_build_one_broken(self):
@@ -474,7 +474,7 @@ class TestDriverBuild(TestInventoryBase):
 
 
 
-# @unittest.skip("Except when you want to spend time....")
+@unittest.skip("Except when you want to spend time....")
 class TestDriverPublish(TestInventoryBase):
 
     def test_publish_docbook4xml(self):
