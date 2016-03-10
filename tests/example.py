@@ -60,6 +60,12 @@ ex_docbook4xml_dir = Namespace(
                             'DocBook-4.2-WHYNOT.xml'),
               )
 
+ex_docbooksgml_dir = Namespace(
+               doctype=tldp.doctypes.docbooksgml.DocbookSGML,
+               filename=opj(sampledocs, 'DocBookSGML-Larger',
+                            'DocBookSGML-Larger.sgml'),
+              )
+
 unknown_doctype =  Namespace(
                doctype=None,
                filename=opj(sampledocs, 'Unknown-Doctype.xqf'),

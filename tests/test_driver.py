@@ -68,6 +68,18 @@ class TestDriverDetail(TestInventoryBase):
         stdout.seek(0)
         self.assertTrue('missing source' in stdout.read())
 
+    def test_run_detail(self):
+        c = self.config
+        self.add_published('Published-HOWTO', example.ex_linuxdoc)
+        self.add_new('New-HOWTO', example.ex_linuxdoc)
+        self.add_stale('Stale-HOWTO', example.ex_linuxdoc)
+        self.add_orphan('Orphan-HOWTO', example.ex_linuxdoc)
+        self.add_broken('Broken-HOWTO', example.ex_linuxdoc)
+        argv = self.argv
+        argv.append('--detail')
+        exitcode = tldp.driver.run(argv)
+        self.assertEquals(exitcode, os.EX_OK)
+
 
 class TestDriverShowDoctypes(TestToolsFilesystem):
 
@@ -85,6 +97,10 @@ class TestDriverShowDoctypes(TestToolsFilesystem):
         result = tldp.driver.show_doctypes(Namespace(), 'bogus')
         self.assertTrue('Extra arguments' in result)
 
+    def test_run_doctypes(self):
+        exitcode = tldp.driver.run(['--doctypes'])
+        self.assertEquals(exitcode, os.EX_OK)
+
 
 class TestDriverShowStatustypes(TestToolsFilesystem):
 
@@ -101,8 +117,24 @@ class TestDriverShowStatustypes(TestToolsFilesystem):
         result = tldp.driver.show_statustypes(Namespace(), 'bogus')
         self.assertTrue('Extra arguments' in result)
 
+    def test_run_statustypes(self):
+        exitcode = tldp.driver.run(['--statustypes'])
+        self.assertEquals(exitcode, os.EX_OK)
+
 
 class TestDriverSummary(TestInventoryBase):
+
+    def test_run_summary(self):
+        c = self.config
+        self.add_published('Published-HOWTO', example.ex_linuxdoc)
+        self.add_new('New-HOWTO', example.ex_linuxdoc)
+        self.add_stale('Stale-HOWTO', example.ex_linuxdoc)
+        self.add_orphan('Orphan-HOWTO', example.ex_linuxdoc)
+        self.add_broken('Broken-HOWTO', example.ex_linuxdoc)
+        argv = self.argv
+        argv.append('--summary')
+        exitcode = tldp.driver.run(argv)
+        self.assertEquals(exitcode, os.EX_OK)
 
     def test_summary_extraargs(self):
         result = tldp.driver.summary(Namespace(), 'bogus')
@@ -266,10 +298,23 @@ class TestDriverRun(TestInventoryBase):
         fullpath = opj(self.tempdir, 'sources', 'New-HOWTO.sgml')
         argv = self.argv
         argv.extend(['--publish', 'stale', 'Orphan-HOWTO', fullpath])
-        tldp.driver.run(argv)
+        exitcode = tldp.driver.run(argv)
+        self.assertEquals(exitcode, os.EX_OK)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(4, len(inv.published.keys()))
         self.assertEquals(1, len(inv.broken.keys()))
+
+    def test_run_no_work(self):
+        c = self.config
+        self.add_published('Published-HOWTO', example.ex_linuxdoc)
+        exitcode = tldp.driver.run(self.argv)
+        # -- improvement: check for 'No work to do.' from logger
+        self.assertEquals(exitcode, os.EX_OK)
+
+    def test_run_loglevel_resetting(self):
+        '''just exercise the loglevel settings'''
+        argv = ['--doctypes', '--loglevel', 'debug']
+        tldp.driver.run(argv)
 
     def test_run_extra_args(self):
         c = self.config
@@ -300,10 +345,17 @@ class TestDriverRun(TestInventoryBase):
     def test_run_oops_no_pubdir(self):
         c = self.config
         argv = ['--sourcedir', c.sourcedir[0]]
-        ex = example.ex_linuxdoc
-        self.add_new('New-HOWTO', ex)
+        self.add_new('New-HOWTO', example.ex_linuxdoc)
         exitcode = tldp.driver.run(argv)
         self.assertTrue('required for inventory' in exitcode)
+
+    def test_run_build_no_pubdir(self):
+        c = self.config
+        argv = ['--sourcedir', c.sourcedir[0]]
+        fname = opj(sampledocs, 'linuxdoc-simple.sgml')
+        argv.append(fname)
+        exitcode = tldp.driver.run(argv)
+        self.assertTrue('to --build' in exitcode)
 
     def test_run_status_selection(self):
         self.add_docbook4xml_xsl_to_config()
@@ -377,8 +429,20 @@ class TestDriverScript(TestInventoryBase):
         data = stdout.read()
         self.assertTrue(c.linuxdoc_sgml2html in data)
 
+    def test_run_script(self):
+        c = self.config
+        self.add_published('Published-HOWTO', example.ex_linuxdoc)
+        self.add_new('New-HOWTO', example.ex_linuxdoc)
+        self.add_stale('Stale-HOWTO', example.ex_linuxdoc)
+        self.add_orphan('Orphan-HOWTO', example.ex_linuxdoc)
+        self.add_broken('Broken-HOWTO', example.ex_linuxdoc)
+        argv = self.argv
+        argv.append('--script')
+        exitcode = tldp.driver.run(argv)
+        self.assertEquals(exitcode, os.EX_OK)
 
-@unittest.skip("Except when you want to spend time....")
+
+# @unittest.skip("Except when you want to spend time....")
 class TestDriverBuild(TestInventoryBase):
 
     def test_build_one_broken(self):
@@ -410,7 +474,7 @@ class TestDriverBuild(TestInventoryBase):
 
 
 
-@unittest.skip("Except when you want to spend time....")
+# @unittest.skip("Except when you want to spend time....")
 class TestDriverPublish(TestInventoryBase):
 
     def test_publish_docbook4xml(self):
@@ -457,7 +521,7 @@ class TestDriverPublish(TestInventoryBase):
         self.add_docbooksgml_support_to_config()
         c = self.config
         c.publish = True
-        self.add_new('Frobnitz-DocBook-SGML-HOWTO', example.ex_docbooksgml)
+        self.add_new('Frobnitz-DocBookSGML-HOWTO', example.ex_docbooksgml)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEquals(1, len(inv.all.keys()))
         docs = inv.all.values()
@@ -465,5 +529,6 @@ class TestDriverPublish(TestInventoryBase):
         self.assertEquals(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
+
 #
 # -- end of file
