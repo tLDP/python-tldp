@@ -9,7 +9,7 @@ import unittest
 from tempfile import mkdtemp
 from tempfile import NamedTemporaryFile as ntf
 
-from tldp.config import collectconfiguration
+import tldp.config
 from tldp.outputs import OutputNamingConvention
 
 # -- short names
@@ -146,7 +146,8 @@ class TestInventoryBase(unittest.TestCase):
 
     def setUp(self):
         self.makeTempdir()
-        self.config, _ = collectconfiguration('ldptool', [])
+        tldp.config.DEFAULT_CONFIGFILE = None
+        self.config, _ = tldp.config.collectconfiguration('ldptool', [])
         c = self.config
         c.pubdir = os.path.join(self.tempdir, 'outputs')
         c.builddir = os.path.join(self.tempdir, 'builddir')
