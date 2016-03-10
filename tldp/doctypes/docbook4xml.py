@@ -85,7 +85,7 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
         s = '''"{config.docbook4xml_xsltproc}" > "{output.name_fo}" \\
                   "{config.docbook4xml_xslprint}" \\
                   "{output.validsource}"'''
-        self.removals.append(self.output.name_fo)
+        self.removals.add(self.output.name_fo)
         return self.shellscript(s, **kwargs)
 
     # -- this is conditionally built--see logic in make_name_pdf() below
