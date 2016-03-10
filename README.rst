@@ -97,20 +97,24 @@ To see what work needs to be done, `ldptool --list`::
 To see publication status of each document:::
 
   $ ldptool --list all | head -n 3
-  published 3-Button-Mouse                                 
-  published 3D-Modelling                                   
-  published 4mb-Laptops  
+  published Linuxdoc             3-Button-Mouse                                 
+  published Linuxdoc             3D-Modelling                                   
+  published Linuxdoc             4mb-Laptops                                    
 
 To get more information about the newer or missing files in a specific
 document:::
 
-  $ ldptool --list Linux-Dictionary
-  stale     Linux-Dictionary
-      newer source /vcs/LDP/LDP/guide/docbook/Linux-Dictionary/Contributors.xml
-      newer source /vcs/LDP/LDP/guide/docbook/Linux-Dictionary/D.xml
-      newer source /vcs/LDP/LDP/guide/docbook/Linux-Dictionary/J.xml
-      newer source /vcs/LDP/LDP/guide/docbook/Linux-Dictionary/O.xml
-      newer source /vcs/LDP/LDP/guide/docbook/Linux-Dictionary/S.xml
+  $ ldptool --verbose --list Linux-Dictionary
+  stale     DocBook XML 4.x      Linux-Dictionary
+           doctype <class 'tldp.doctypes.docbook4xml.Docbook4XML'>
+        output dir /home/mabrown/tmp/en/Linux-Dictionary
+       source file /home/mabrown/vcs/LDP/LDP/guide/docbook/Linux-Dictionary/Linux-Dictionary.xml
+      newer source /home/mabrown/vcs/LDP/LDP/guide/docbook/Linux-Dictionary/Contributors.xml
+      newer source /home/mabrown/vcs/LDP/LDP/guide/docbook/Linux-Dictionary/D.xml
+      newer source /home/mabrown/vcs/LDP/LDP/guide/docbook/Linux-Dictionary/J.xml
+      newer source /home/mabrown/vcs/LDP/LDP/guide/docbook/Linux-Dictionary/O.xml
+      newer source /home/mabrown/vcs/LDP/LDP/guide/docbook/Linux-Dictionary/S.xml
+
 
 To get the big picture:::
 
