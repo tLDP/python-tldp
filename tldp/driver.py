@@ -234,7 +234,7 @@ def docbuild(config, docs, **kwargs):
         runner = source.doctype(source=source, output=working, config=config)
         logger.info("%s (%d of %d) initiating build",
                     source.stem, x, len(docs))
-        result.append(runner.generate())
+        result.append(runner.generate(**kwargs))
     if all(result):
         buildsuccess = True
     return buildsuccess, zip(result, docs)
