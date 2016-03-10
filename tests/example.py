@@ -66,7 +66,7 @@ ex_docbooksgml_dir = Namespace(
                             'DocBookSGML-Larger.sgml'),
               )
 
-unknown_doctype =  Namespace(
+unknown_doctype = Namespace(
                doctype=None,
                filename=opj(sampledocs, 'Unknown-Doctype.xqf'),
               )

@@ -225,7 +225,7 @@ class Test_swapdirs(TestToolsFilesystem):
         swapdirs(a, b)
         self.assertTrue(os.path.exists(b))
 
-    def test_swapdirs_b_missing(self):
+    def test_swapdirs_with_file(self):
         a = mkdtemp(dir=self.tempdir)
         afile = os.path.join(a, 'silly')
         b = mkdtemp(dir=self.tempdir)
@@ -241,6 +241,7 @@ class Test_swapdirs(TestToolsFilesystem):
         self.assertFalse(os.path.exists(afile))
         self.assertTrue(os.path.exists(b))
         self.assertTrue(os.path.exists(bfile))
+
 
 class Test_att_statinfo(unittest.TestCase):
 
