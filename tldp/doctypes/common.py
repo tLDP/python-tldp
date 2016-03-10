@@ -158,26 +158,6 @@ class BaseDoctype(object):
         s = 'rsync --archive --verbose %s ./' % (' '.join(source))
         return self.shellscript(s, **kwargs)
 
-    def hook_build_prepare(self, **kwargs):
-        stem = self.source.stem
-        classname = self.__class__.__name__
-        order = ['build_precheck',
-                 'clear_output',
-                 'mkdir_output',
-                 'chdir_output',
-                 'copy_static_resources',
-                 ]
-        # -- perform build preparation steps:  clear
-        #
-        for methname in order:
-            method = getattr(self, methname, None)
-            assert method is not None
-            if not method(**kwargs):
-                logger.warning("%s %s failed (%s), skipping",
-                               stem, methname, classname)
-                return False
-        return True
-
     def hook_build_success(self):
         stem = self.output.stem
         logdir = self.output.logdir
@@ -243,6 +223,27 @@ class BaseDoctype(object):
             return False
         return True
 
+    def build_prepare(self, **kwargs):
+        stem = self.source.stem
+        classname = self.__class__.__name__
+        order = ['build_precheck',
+                 'clear_output',
+                 'mkdir_output',
+                 'chdir_output',
+                 'copy_static_resources',
+                 ]
+
+        for methname in order:
+            method = getattr(self, methname, None)
+            assert method is not None
+            logger.info("%s calling method %s.%s",
+                        stem, classname, method.__name__)
+            if not method(**kwargs):
+                logger.error("%s called method  %s.%s failed, skipping...",
+                             stem, classname, method.__name__)
+                return False
+        return True
+
     def determinebuildorder(self):
         graph = nx.DiGraph()
         d = dict(inspect.getmembers(self, inspect.ismethod))
@@ -257,7 +258,7 @@ class BaseDoctype(object):
         return order
 
     @logtimings(logger.debug)
-    def buildall(self, **kwargs):
+    def build_fullrun(self, **kwargs):
         stem = self.source.stem
         order = self.determinebuildorder()
         logger.debug("%s build order %r", self.source.stem, order)
@@ -281,12 +282,12 @@ class BaseDoctype(object):
         #     - copy source images/resources to output dir
         #
         opwd = os.getcwd()
-        if not self.hook_build_prepare():
+        if not self.build_prepare():
             return False
 
         # -- build
         #
-        result = self.buildall(**kwargs)
+        result = self.build_fullrun(**kwargs)
 
         # -- always clean the kitchen
         #
