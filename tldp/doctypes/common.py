@@ -181,7 +181,7 @@ class BaseDoctype(object):
             raise Exception(etext % (self.source.stem,))
 
     @logtimings(logger.debug)
-    def dump_shellscript(self, script, preamble=preamble, 
+    def dump_shellscript(self, script, preamble=preamble,
                          postamble=postamble, **kwargs):
         source = self.source
         output = self.output
@@ -193,7 +193,7 @@ class BaseDoctype(object):
         return True
 
     @logtimings(logger.debug)
-    def execute_shellscript(self, script, preamble=preamble, 
+    def execute_shellscript(self, script, preamble=preamble,
                             postamble=postamble, **kwargs):
         source = self.source
         output = self.output

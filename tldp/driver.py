@@ -319,7 +319,7 @@ def publish(config, docs, **kwargs):
             #
             swapdirs(source.working.dirname, source.output.dirname)
             if os.path.isdir(source.working.dirname):
-                logger.debug("%s removing old directory %s", 
+                logger.debug("%s removing old directory %s",
                              source.stem, source.working.dirname)
                 shutil.rmtree(source.working.dirname)
         post_publish_cleanup(docs)
@@ -527,6 +527,7 @@ def handleArgs(config, args):
         return build(config, docs)
 
     return "Fell through handleArgs(); programming error."
+
 
 def run(argv):
     # -- may want to see option parsing, so set --loglevel as

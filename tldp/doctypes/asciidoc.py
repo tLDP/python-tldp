@@ -7,7 +7,7 @@ import logging
 
 from tldp.utils import which
 from tldp.utils import arg_isexecutable, isexecutable
-from tldp.doctypes.common import BaseDoctype, depends
+from tldp.doctypes.common import depends
 from tldp.doctypes.docbook4xml import Docbook4XML
 
 logger = logging.getLogger(__name__)

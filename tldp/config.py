@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIGFILE = '/etc/ldptool/ldptool.ini'
 
+
 def collectconfiguration(tag, argv):
     ap = DefaultFreeArgumentParser()
 

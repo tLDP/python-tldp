@@ -119,9 +119,9 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
         if not self.config.script:
             cwd = os.getcwd()
             if not os.path.samefile(cwd, self.output.dirname):
-                logger.error("%s (cowardly) refusing to clean directory %s", 
+                logger.error("%s (cowardly) refusing to clean directory %s",
                              self.source.stem, cwd)
-                logger.error("%s expected to find %s", 
+                logger.error("%s expected to find %s",
                              self.source.stem, self.output.dirname)
                 return False
         s = '''find . -mindepth 1 -maxdepth 1 -not -type d -delete -print'''
