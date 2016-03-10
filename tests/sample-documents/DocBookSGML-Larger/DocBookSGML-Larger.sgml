@@ -1,0 +1,34 @@
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+  <!ENTITY index SYSTEM "index.sgml">
+]>
+
+<article>
+  <articleinfo>
+    <title>T</title>
+    <author>
+      <firstname>A</firstname> <surname>B</surname>
+      <affiliation>
+        <address><email>devnull@example.org</email></address>
+      </affiliation>
+    </author>
+    <pubdate>2016-02-11</pubdate>
+    <abstract><para>abstract</para> </abstract>
+    <revhistory>
+       <revision>
+         <revnumber>1.0</revnumber>
+         <date>2016-02-11</date>
+         <authorinitials>AB</authorinitials>
+         <revremark>Initial release.</revremark>
+       </revision>
+    </revhistory>
+
+  </articleinfo>
+
+  <sect1 id="intro"><title>Introduction</title>
+    <para>Text</para>
+    <sect2 id="copyright"><title>More stuff</title>
+      <para>Text</para>
+    </sect2>
+  </sect1>
+  &index;
+</article>
