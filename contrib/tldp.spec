@@ -26,6 +26,7 @@ Requires: docbook-utils-minimal
 Requires: docbook-dsssl-stylesheets
 Requires: docbook-xsl-stylesheets
 Requires: docbook5-xsl-stylesheets
+Requires: libxslt-tools
 Requires: python-networkx
 
 %description
