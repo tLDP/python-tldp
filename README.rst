@@ -22,11 +22,12 @@ outputs from each source document.
 
 Supported input formats are:
 
+- Asciidoc
 - Linuxdoc
 - Docbook SGML 3.x (though deprecated, please no new submissions)
 - Docbook SGML 4.x
 - Docbook XML 4.x
-- Docbook XML 5.x
+- Docbook XML 5.x (basic support, as of 2016-03-10)
 
 
 Behaviour
@@ -114,33 +115,57 @@ document:::
 To get the big picture:::
 
   $ ldptool --summary
+  By Status Type
+  --------------
   source     503  3-Button-Mouse, 3D-Modelling, 4mb-Laptops, and 500 more ...
   output     503  3-Button-Mouse, 3D-Modelling, 4mb-Laptops, and 500 more ...
   published  503  3-Button-Mouse, 3D-Modelling, 4mb-Laptops, and 500 more ...
-  new          1  DocBook-Demystification-HOWTO
-  orphan       1  Traffic-Control-tcng-HTB-HOWTO
+  stale        0  
+  orphan       0  
   broken       1  HOWTO-INDEX
-  stale        1  Linux-Dictionary
+  new          0  
 
-To generate a specific output:::
+  By Document Type
+  ----------------
+  Linuxdoc              226  3-Button-Mouse, 3D-Modelling, and 224 more ...
+  Docbook4XML           130  8021X-HOWTO, abs-guide, and 128 more ...
+  Docbook5XML             1  Assembly-HOWTO
+  DocbookSGML           146  ACP-Modem, and 145 more ...
+
+To build and publish a single document:::
+
+  $ ldptool --publish DocBook-Demystification-HOWTO
+  $ ldptool --publish ~/vcs/LDP/LDP/howto/docbook/Valgrind-HOWTO.xml
+
+To build and publish anything that is new or updated work:::
+
+  $ ldptool --publish
+  $ ldptool --publish work
+
+To (re-)build and publish everything, regardless of state:::
+
+  $ ldptool --publish all
+
+To generate a specific output (into a --builddir):::
 
   $ ldptool --build DocBook-Demystification-HOWTO
 
-To generate all outputs:::
+To generate all outputs into a --builddir (should exist):::
 
-  $ ldptool --build
+  $ ldptool --builddir ~/tmp/scratch-directory/ --build all
 
-To generate all outputs, except a trouble-maker:::
+To build new/updated work, but pass over a trouble-maker:::
 
   $ ldptool --build --skip HOWTO-INDEX
 
 To loudly generate all outputs, except a trouble-maker:::
 
-  $ ldptool --build --loglevel debug --skip HOWTO-INDEX
+  $ ldptool --build all --loglevel debug --skip HOWTO-INDEX
 
-To print out a script of what would be executed:::
+To print out a shell script for building a specific document:::
 
-  $ ldptool --script DocBook-Demystification-HOWTO
+  $ ldptool --script TransparentProxy
+  $ ldptool --script ~/vcs/LDP/LDP/howto/docbook/Assembly-HOWTO.xml
 
 
 Configuration
@@ -163,23 +188,22 @@ DocBook formats is split across many upstream packages and repositories.
 
 Ubuntu / Debian
 +++++++++++++++
-- git{,-core,-doc,-man}
 - linuxdoc-tools{,-text,-latex}
 - docbook{,-dsssl,-xsl,-utils}
 - htmldoc{,-common}
 - xsltproc
-- libxml2-utils
 - fop
 - sgml2x
-- openjade
 - opensp
+- openjade
 - ldp-docbook-xsl
 - ldp-docbook-dsssl
 - html2text
 - docbook5-xml
 - docbook-xsl-ns
 - jing
-- a2x
+- asciidoc
+- libxml2-utils
 
 OpenSUSE
 ++++++++
@@ -187,13 +211,14 @@ OpenSUSE
 - openjade
 - sgmltool
 - html2text
-- libxml2-tools
-- libxslt-tools
 - docbook{,5}-xsl-stylesheets
 - docbook-dsssl-stylesheets
 - docbook-utils-minimal
+- docbook-utils
 - jing
-- a2x
+- asciidoc
+- libxml2-tools
+- libxslt-tools
 
 There are a few additional data files that are needed, specifically, the TLDP
 XSL and DSSSL files that are used by the respective DocBook SGML (openjade) and
