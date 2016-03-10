@@ -17,8 +17,6 @@ code internals
 
   * generate contrib/tldp.spec at build time (?)
 
-  * figure out suppression of system configuration (testing borkage)
-
   * SourceDocument and OutputDirectory both have nearly-identical
     methods called detail() which define a format string; probably
     should be defined once in a parent class or something
