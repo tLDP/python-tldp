@@ -115,8 +115,7 @@ document:::
       newer source /home/mabrown/vcs/LDP/LDP/guide/docbook/Linux-Dictionary/O.xml
       newer source /home/mabrown/vcs/LDP/LDP/guide/docbook/Linux-Dictionary/S.xml
 
-
-To get the big picture:::
+To see what the entire source collection looks like, use `ldptool --summary`:::
 
   $ ldptool --summary
   By Status Type
