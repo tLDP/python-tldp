@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import sys
 import errno
+import signal
 import shutil
 import logging
 import inspect
@@ -20,6 +21,13 @@ from tldp.config import collectconfiguration
 from tldp.utils import arg_isloglevel, arg_isdirectory
 from tldp.utils import swapdirs, sameFilesystem
 from tldp.doctypes.common import preamble, postamble
+
+# -- Don't freak out with IOError when our STDOUT, handled with
+#    head, sed, awk, grep, etc; and, also deal with a user's ctrl-C
+#    the same way (i.e. no traceback, just stop)
+#
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s ' \
      + '%(funcName)s %(message)s'
@@ -122,7 +130,7 @@ def summary(config, *args, **kwargs):
     print('', 'By Document Type', '----------------', sep='\n', file=file)
     summarybytype = collections.defaultdict(list)
     for doc in inv.source.values():
-        name = doc.doctype.__name__
+        name = doc.doctype.formatname
         summarybytype[name].append(doc.stem)
     for doctype, docs in summarybytype.items():
         count = len(docs)
