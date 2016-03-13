@@ -6,7 +6,7 @@ user-visible needs
 
   * add a manpage
 
-  * add support for .epub3 (or just .epub?)
+  * add support for .epub3 (or just .epub?) [python-epub ?]
 
   * consider adding support for metadata extraction from documents
 
