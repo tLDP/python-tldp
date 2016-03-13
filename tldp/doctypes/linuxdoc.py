@@ -18,10 +18,16 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
     signatures = ['<!doctype linuxdoc system', ]
 
     required = {'linuxdoc_sgml2html': isexecutable,
+                'linuxdoc_sgmlcheck': isexecutable,
                 'linuxdoc_html2text': isexecutable,
                 'linuxdoc_htmldoc': isexecutable,
                 }
 
+    def validate_source(self, **kwargs):
+        s = '"{config.linuxdoc_sgmlcheck}" "{source.filename}"'
+        return self.shellscript(s, **kwargs)
+
+    @depends(validate_source)
     def make_htmls(self, **kwargs):
         '''create a single page HTML output (with incorrect name)'''
         s = '"{config.linuxdoc_sgml2html}" --split=0 "{source.filename}"'
@@ -54,7 +60,7 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
 
     @depends(make_name_htmls)
     def make_name_html(self, **kwargs):
-        '''create final index.html symlink'''
+        '''create chunked output'''
         s = '"{config.linuxdoc_sgml2html}" "{source.filename}"'
         return self.shellscript(s, **kwargs)
 
@@ -68,6 +74,9 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
     def argparse(cls, p):
         descrip = 'executables and data files for %s' % (cls.formatname,)
         g = p.add_argument_group(title=cls.__name__, description=descrip)
+        g.add_argument('--linuxdoc-sgmlcheck', type=arg_isexecutable,
+                       default=which('sgmlcheck'),
+                       help='full path to sgmlcheck [%(default)s]')
         g.add_argument('--linuxdoc-sgml2html', type=arg_isexecutable,
                        default=which('sgml2html'),
                        help='full path to sgml2html [%(default)s]')
