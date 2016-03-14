@@ -456,8 +456,8 @@ def collectWorkset(config, args):
         if not config.sourcedir:
             return None, ERR_NEEDSOURCEDIR + "for inventory"
         inv = Inventory(config.pubdir, config.sourcedir)
-        logger.info("Collected inventory containing %s documents.",
-                    len(inv.all.keys()))
+        logger.info("Inventory contains %s source and %s output documents.",
+                    len(inv.source.keys()), len(inv.output.keys()))
     else:
         inv = None
 
