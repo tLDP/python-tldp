@@ -1,8 +1,8 @@
 %define sourcename tldp
 %define name python-tldp
-%define version 0.5.4
-%define unmangled_version 0.5.4
-%define unmangled_version 0.5.4
+%define version 0.5.5
+%define unmangled_version 0.5.5
+%define unmangled_version 0.5.5
 %define release 1
 
 Summary: tools for processing all TLDP source documents
