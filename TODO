@@ -10,7 +10,8 @@ user-visible needs
 
   * consider adding support for metadata extraction from documents
 
-  * create TLDP DocBook 5.0 XSL files (if we care)
+  * create TLDP customizations of DocBook 5.0 XSL (namespaced) files
+    (if we wish to do so)
 
 code internals
 --------------
