@@ -42,18 +42,16 @@ def depends(*predecessors):
 class SignatureChecker(object):
 
     @classmethod
-    def signatureLocation(cls, f):
-        f.seek(0)
-        buf = f.read(1024)
+    def signatureLocation(cls, buf, fname):
         for sig in cls.signatures:
             try:
                 sindex = buf.index(sig)
                 logger.debug("YES FOUND signature %r in %s at %s; doctype %s.",
-                             sig, f.name, sindex, cls)
+                             sig, fname, sindex, cls)
                 return sindex
             except ValueError:
                 logger.debug("not found signature %r in %s for type %s",
-                             sig, f.name, cls.__name__)
+                             sig, fname, cls.__name__)
         return None
 
 

@@ -4,10 +4,9 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import errno
 import inspect
 import logging
-
-from tldp.utils import makefh
 
 import tldp.doctypes
 
@@ -32,10 +31,10 @@ def getDoctypeClasses():
     return getDoctypeMembers(inspect.isclass)
 
 
-def guess(thing):
+def guess(fname):
     '''return a tldp.doctype class which is a best guess for document type
 
-    thing: Could be a filename or an open file.
+    :parama fname: A filename.
 
     The guess function will try to guess the document type (doctype) from the
     file extension.  If extension matching produces multiple possible doctype
@@ -55,11 +54,10 @@ def guess(thing):
       * It could/should use heuristics or something richer than signatures.
     '''
     try:
-        f = makefh(thing)
-    except TypeError:
+        stem, ext = os.path.splitext(fname)
+    except AttributeError:
         return None
 
-    stem, ext = os.path.splitext(f.name)
     if not ext:
         logger.debug("%s no file extension, skipping %s.", stem, ext)
         return None
@@ -77,19 +75,22 @@ def guess(thing):
     # -- for this extension, multiple document types, probably SGML, XML
     #
     logger.debug("%s multiple possible doctypes for extension %s on file %s.",
-                 stem, ext, f.name)
+                 stem, ext, fname)
     for doctype in possible:
         logger.debug("%s extension %s could be %s.", stem, ext, doctype)
 
+    with open(fname) as f:
+        buf = f.read(1024)
+
     guesses = list()
     for doctype in possible:
-        sindex = doctype.signatureLocation(f)
+        sindex = doctype.signatureLocation(buf, fname)
         if sindex is not None:
             guesses.append((sindex, doctype))
 
     if not guesses:
         logger.warning("%s no matching signature found for %s.",
-                       stem, f.name)
+                       stem, fname)
         return None
     if len(guesses) == 1:
         _, doctype = guesses.pop()
@@ -100,10 +101,10 @@ def guess(thing):
     #    first signature in the file as the more likely document type.
     #
     guesses.sort()
-    logger.info("%s multiple doctype guesses for file %s", stem, f.name)
+    logger.info("%s multiple doctype guesses for file %s", stem, fname)
     for sindex, doctype in guesses:
         logger.info("%s could be %s (sig at pos %s)", stem, doctype, sindex)
-    logger.info("%s going to guess %s for %s", stem, doctype, f.name)
+    logger.info("%s going to guess %s for %s", stem, doctype, fname)
     _, doctype = guesses.pop(0)
     return doctype
 
