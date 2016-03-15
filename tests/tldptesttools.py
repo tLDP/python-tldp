@@ -97,11 +97,11 @@ class CCTestTools(unittest.TestCase):
         shutil.rmtree(self.tempdir)
 
     def writeconfig(self, case):
-        f = ntf(prefix=case.tag, suffix='.cfg', dir=self.tempdir, delete=False)
-        f.close()
-        with codecs.open(f.name, 'w', encoding='utf-8') as fu:
-          fu.write(case.cfg)
-        case.configfile = f.name
+        tf = ntf(prefix=case.tag, suffix='.cfg', dir=self.tempdir, delete=False)
+        tf.close()
+        with codecs.open(tf.name, 'w', encoding='utf-8') as f:
+          f.write(case.cfg)
+        case.configfile = tf.name
 
 
 class TestOutputDirSkeleton(OutputNamingConvention):
@@ -140,7 +140,7 @@ class TestSourceDocSkeleton(object):
         if os.path.isfile(content):
             shutil.copy(content, fname)
         else:
-            with open(fname, 'w') as f:
+            with codecs.open(fname, 'w', encodeing='utf-8') as f:
                 f.write(content)
 
 
