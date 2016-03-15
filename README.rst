@@ -267,6 +267,13 @@ On Debian-based systems, there are packages available from the distributor
 called ldp-docbook-{xsl,dsssl}.  There aren't any such packages for RPM (yet).
 
 
+Supported Python versions
+-------------------------
+This package was built and used against Python-2.7.8 (OpenSUS) and
+Python-2.7.6 (Ubuntu).  It has been tested (success for test suite) against
+Python-3.4.1 and lightly used against Python-3.4.1.
+
+
 Installation
 ------------
 This is a pure-Python package, and you should be able to use your favorite
