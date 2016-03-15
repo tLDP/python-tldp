@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import time
+import codecs
 import random
 import shutil
 import unittest
@@ -97,8 +98,9 @@ class CCTestTools(unittest.TestCase):
 
     def writeconfig(self, case):
         f = ntf(prefix=case.tag, suffix='.cfg', dir=self.tempdir, delete=False)
-        f.write(case.cfg)
         f.close()
+        with codecs.open(f.name, 'w', encoding='utf-8') as fu:
+          fu.write(case.cfg)
         case.configfile = f.name
 
 
