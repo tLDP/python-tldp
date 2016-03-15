@@ -155,7 +155,7 @@ class TestSourceDocument(TestToolsFilesystem):
         with self.assertRaises(ValueError) as ecm:
             SourceDocument(fifo)
         e = ecm.exception
-        self.assertTrue('not identifiable' in e.message)
+        self.assertTrue('not identifiable' in e.args[0])
 
     def test_fromdir(self):
         dirname = os.path.dirname(example.ex_linuxdoc_dir.filename)
@@ -179,7 +179,7 @@ class TestSourceDocument(TestToolsFilesystem):
         with self.assertRaises(Exception) as ecm:
             SourceDocument(fullpath)
         e = ecm.exception
-        self.assertTrue('multiple document choices' in e.message)
+        self.assertTrue('multiple document choices' in e.args[0])
 
 
 class TestMissingSourceDocuments(TestToolsFilesystem):
@@ -195,7 +195,7 @@ class TestMissingSourceDocuments(TestToolsFilesystem):
         with self.assertRaises(ValueError) as ecm:
             SourceDocument(self.tempdir)
         e = ecm.exception
-        self.assertTrue('not identifiable' in e.message)
+        self.assertTrue('not identifiable' in e.args[0])
 
 #
 # -- end of file
