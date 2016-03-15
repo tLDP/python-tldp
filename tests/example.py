@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import codecs
 from argparse import Namespace
 
 import tldp.doctypes
@@ -75,7 +76,7 @@ unknown_doctype = Namespace(
 sources = [y for x, y in locals().items() if x.startswith('ex_')]
 
 for ex in sources:
-    with open(ex.filename) as f:
+    with codecs.open(ex.filename, encoding='utf-8') as f:
         ex.content = f.read()
     ex.stem, ex.ext = stem_and_ext(ex.filename)
 
