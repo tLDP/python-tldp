@@ -130,7 +130,8 @@ class Test_which(unittest.TestCase):
         f.close()
         notfound = which(f.name)
         self.assertIsNone(notfound)
-        os.chmod(f.name, 0755)
+        mode = stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH
+        os.chmod(f.name, mode)
         found = which(f.name)
         self.assertEqual(f.name, found)
         os.unlink(f.name)
