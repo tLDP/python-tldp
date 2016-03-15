@@ -1,13 +1,13 @@
 
 from __future__ import absolute_import, division, print_function
 
+import io
 import os
 import uuid
 import errno
 import codecs
 import random
 from tempfile import NamedTemporaryFile as ntf
-from io import StringIO
 from argparse import Namespace
 
 from tldptesttools import TestInventoryBase, TestToolsFilesystem
@@ -41,7 +41,7 @@ class TestDriverDetail(TestInventoryBase):
         c.verbose = True,
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         docs = inv.all.values()
-        stdout = StringIO()
+        stdout = io.StringIO()
         tldp.driver.detail(c, docs, file=stdout)
         stdout.seek(0)
         self.assertTrue('newer source' in stdout.read())
@@ -52,7 +52,7 @@ class TestDriverDetail(TestInventoryBase):
         c.verbose = True,
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         docs = inv.all.values()
-        stdout = StringIO()
+        stdout = io.StringIO()
         tldp.driver.detail(c, docs, file=stdout)
         stdout.seek(0)
         self.assertTrue('missing output' in stdout.read())
@@ -63,7 +63,7 @@ class TestDriverDetail(TestInventoryBase):
         c.verbose = True,
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         docs = inv.all.values()
-        stdout = StringIO()
+        stdout = io.StringIO()
         tldp.driver.detail(c, docs, file=stdout)
         stdout.seek(0)
         self.assertTrue('missing source' in stdout.read())
@@ -105,7 +105,7 @@ class TestDriverShowDoctypes(TestToolsFilesystem):
 class TestDriverShowStatustypes(TestToolsFilesystem):
 
     def test_show_statustypes(self):
-        stdout = StringIO()
+        stdout = io.StringIO()
         result = tldp.driver.show_statustypes(Namespace(), file=stdout)
         self.assertEqual(result, os.EX_OK)
         stdout.seek(0)
@@ -160,14 +160,14 @@ class TestDriverSummary(TestInventoryBase):
     def test_summary_longnames(self):
         c = self.config
         names = self.publishDocumentsWithLongNames(5)
-        stdout = StringIO()
+        stdout = io.StringIO()
         result = tldp.driver.summary(c, file=stdout)
         self.assertEqual(result, os.EX_OK)
         stdout.seek(0)
         data = stdout.read()
         self.assertTrue('and 4 more' in data)
         c.verbose = True
-        stdout = StringIO()
+        stdout = io.StringIO()
         result = tldp.driver.summary(c, file=stdout)
         self.assertEqual(result, os.EX_OK)
         stdout.seek(0)
@@ -186,14 +186,14 @@ class TestDriverSummary(TestInventoryBase):
     def test_summary_short(self):
         c = self.config
         names = self.publishDocumentsWithShortNames(20)
-        stdout = StringIO()
+        stdout = io.StringIO()
         result = tldp.driver.summary(c, file=stdout)
         self.assertEqual(result, os.EX_OK)
         stdout.seek(0)
         data = stdout.read()
         self.assertTrue('and 16 more' in data)
         c.verbose = True
-        stdout = StringIO()
+        stdout = io.StringIO()
         result = tldp.driver.summary(c, file=stdout)
         self.assertEqual(result, os.EX_OK)
         stdout.seek(0)
@@ -418,7 +418,7 @@ class TestDriverScript(TestInventoryBase):
     def test_script(self):
         c = self.config
         c.script = True
-        stdout = StringIO()
+        stdout = io.StringIO()
         self.add_published('Published-HOWTO', example.ex_linuxdoc)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         tldp.driver.script(c, inv.all.values(), file=stdout)
@@ -445,7 +445,7 @@ class TestDriverScript(TestInventoryBase):
         with self.assertRaises(Exception) as ecm:
             tldp.driver.script(c, inv.all.values())
         e = ecm.exception
-        self.assertTrue("neither --build nor --script" in e.message)
+        self.assertTrue("neither --build nor --script" in e.args[0])
 
 #
 # -- end of file
