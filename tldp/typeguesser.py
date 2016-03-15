@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import errno
+import codecs
 import inspect
 import logging
 
@@ -79,7 +80,7 @@ def guess(fname):
     for doctype in possible:
         logger.debug("%s extension %s could be %s.", stem, ext, doctype)
 
-    with open(fname) as f:
+    with codecs.open(fname, encoding='utf-8') as f:
         buf = f.read(1024)
 
     guesses = list()
