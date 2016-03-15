@@ -82,6 +82,7 @@ class Test_execute(TestToolsFilesystem):
         cmd = [exe, '/etc/hosts']
         devnull = open('/dev/null', 'w')
         result = execute(cmd, stdout=devnull, logdir=self.tempdir)
+        devnull.close()
         self.assertEqual(0, result)
 
     def test_execute_stderr_to_devnull(self):
@@ -89,6 +90,7 @@ class Test_execute(TestToolsFilesystem):
         cmd = [exe, '/etc/hosts']
         devnull = open('/dev/null', 'w')
         result = execute(cmd, stderr=devnull, logdir=self.tempdir)
+        devnull.close()
         self.assertEqual(0, result)
 
     def test_execute_returns_nonzero(self):
