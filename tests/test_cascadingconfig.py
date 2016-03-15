@@ -90,7 +90,7 @@ class CascadingConfigBasicTest(CCTestTools):
 
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
         config, args = cc.parse()
-        self.assertEquals(c.exp_config.size, config.size)
+        self.assertEqual(c.exp_config.size, config.size)
 
     def test_cfg_is_read_passed_by_env(self):
         ap = DefaultFreeArgumentParser()
@@ -111,7 +111,7 @@ class CascadingConfigBasicTest(CCTestTools):
         c.env.setdefault('TAG_CONFIGFILE', c.configfile)
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
         config, args = cc.parse()
-        self.assertEquals(c.exp_config.size, config.size)
+        self.assertEqual(c.exp_config.size, config.size)
 
     def test_cfg_is_read_passed_by_argv(self):
         ap = DefaultFreeArgumentParser()
@@ -133,7 +133,7 @@ class CascadingConfigBasicTest(CCTestTools):
         c.argv.extend(['--configfile', c.configfile])
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
         config, args = cc.parse()
-        self.assertEquals(c.exp_config.size, config.size)
+        self.assertEqual(c.exp_config.size, config.size)
 
     def test_precedence_env_cfg(self):
         ap = DefaultFreeArgumentParser()
@@ -155,7 +155,7 @@ class CascadingConfigBasicTest(CCTestTools):
         c.argv.extend(['--configfile', c.configfile])
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
         config, args = cc.parse()
-        self.assertEquals(c.exp_config.size, config.size)
+        self.assertEqual(c.exp_config.size, config.size)
 
     def test_precedence_argv_env_cfg(self):
         ap = DefaultFreeArgumentParser()
@@ -177,7 +177,7 @@ class CascadingConfigBasicTest(CCTestTools):
         c.argv.extend(['--configfile', c.configfile])
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
         config, args = cc.parse()
-        self.assertEquals(c.exp_config.size, config.size)
+        self.assertEqual(c.exp_config.size, config.size)
 
     def test_basic_emptydefault(self):
         ap = DefaultFreeArgumentParser()
@@ -194,8 +194,8 @@ class CascadingConfigBasicTest(CCTestTools):
         )
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
         config, args = cc.parse()
-        self.assertEquals(c.exp_config, config)
-        self.assertEquals(c.exp_args, args)
+        self.assertEqual(c.exp_config, config)
+        self.assertEqual(c.exp_args, args)
 
     def test_basic_argv(self):
         ap = DefaultFreeArgumentParser()
@@ -212,7 +212,7 @@ class CascadingConfigBasicTest(CCTestTools):
         )
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
         config, args = cc.parse()
-        self.assertEquals(c.exp_config, config)
-        self.assertEquals(c.exp_args, args)
+        self.assertEqual(c.exp_config, config)
+        self.assertEqual(c.exp_args, args)
 
 # -- end of file
