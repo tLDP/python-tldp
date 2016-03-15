@@ -6,12 +6,7 @@ import uuid
 import errno
 import random
 from tempfile import NamedTemporaryFile as ntf
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
-
+from io import StringIO
 from argparse import Namespace
 
 from tldptesttools import TestInventoryBase, TestToolsFilesystem
