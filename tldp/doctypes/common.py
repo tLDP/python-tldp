@@ -7,6 +7,7 @@ import os
 import sys
 import stat
 import errno
+import codecs
 import shutil
 import logging
 import inspect
@@ -202,12 +203,13 @@ class BaseDoctype(object):
 
         s = script.format(output=output, source=source, config=config)
         tf = ntf(dir=logdir, prefix=prefix, suffix='.sh', delete=False)
-        if preamble:
-            tf.write(preamble)
-        tf.write(s)
-        if postamble:
-            tf.write(postamble)
         tf.close()
+        with codecs.open(tf.name, 'w', encoding='utf-8') as f:
+            if preamble:
+                f.write(preamble)
+            f.write(s)
+            if postamble:
+                f.write(postamble)
 
         mode = stat.S_IXUSR | stat.S_IRUSR | stat.S_IWUSR
         os.chmod(tf.name, mode)
@@ -215,7 +217,7 @@ class BaseDoctype(object):
         cmd = [tf.name]
         result = execute(cmd, logdir=logdir)
         if result != 0:
-            with open(tf.name) as f:
+            with codecs.open(tf.name, encoding='utf-8') as f:
                 for line in f:
                     logger.info("Script: %s", line.rstrip())
             return False
