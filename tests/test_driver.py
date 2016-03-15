@@ -6,7 +6,12 @@ import uuid
 import errno
 import random
 from tempfile import NamedTemporaryFile as ntf
-from cStringIO import StringIO
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 from argparse import Namespace
 
 from tldptesttools import TestInventoryBase, TestToolsFilesystem
@@ -76,7 +81,7 @@ class TestDriverDetail(TestInventoryBase):
         argv = self.argv
         argv.append('--detail')
         exitcode = tldp.driver.run(argv)
-        self.assertEquals(exitcode, os.EX_OK)
+        self.assertEqual(exitcode, os.EX_OK)
 
 
 class TestDriverShowDoctypes(TestToolsFilesystem):
@@ -84,7 +89,7 @@ class TestDriverShowDoctypes(TestToolsFilesystem):
     def test_show_doctypes(self):
         f = ntf(dir=self.tempdir, prefix='doctypes-', delete=False)
         result = tldp.driver.show_doctypes(Namespace(), file=f)
-        self.assertEquals(result, os.EX_OK)
+        self.assertEqual(result, os.EX_OK)
         f.close()
         with open(f.name) as x:
             stdout = x.read()
@@ -97,7 +102,7 @@ class TestDriverShowDoctypes(TestToolsFilesystem):
 
     def test_run_doctypes(self):
         exitcode = tldp.driver.run(['--doctypes'])
-        self.assertEquals(exitcode, os.EX_OK)
+        self.assertEqual(exitcode, os.EX_OK)
 
 
 class TestDriverShowStatustypes(TestToolsFilesystem):
@@ -105,7 +110,7 @@ class TestDriverShowStatustypes(TestToolsFilesystem):
     def test_show_statustypes(self):
         stdout = StringIO()
         result = tldp.driver.show_statustypes(Namespace(), file=stdout)
-        self.assertEquals(result, os.EX_OK)
+        self.assertEqual(result, os.EX_OK)
         stdout.seek(0)
         data = stdout.read()
         for status in status_types:
@@ -117,7 +122,7 @@ class TestDriverShowStatustypes(TestToolsFilesystem):
 
     def test_run_statustypes(self):
         exitcode = tldp.driver.run(['--statustypes'])
-        self.assertEquals(exitcode, os.EX_OK)
+        self.assertEqual(exitcode, os.EX_OK)
 
 
 class TestDriverSummary(TestInventoryBase):
@@ -131,7 +136,7 @@ class TestDriverSummary(TestInventoryBase):
         argv = self.argv
         argv.append('--summary')
         exitcode = tldp.driver.run(argv)
-        self.assertEquals(exitcode, os.EX_OK)
+        self.assertEqual(exitcode, os.EX_OK)
 
     def test_summary_extraargs(self):
         result = tldp.driver.summary(Namespace(), 'bogus')
@@ -160,14 +165,14 @@ class TestDriverSummary(TestInventoryBase):
         names = self.publishDocumentsWithLongNames(5)
         stdout = StringIO()
         result = tldp.driver.summary(c, file=stdout)
-        self.assertEquals(result, os.EX_OK)
+        self.assertEqual(result, os.EX_OK)
         stdout.seek(0)
         data = stdout.read()
         self.assertTrue('and 4 more' in data)
         c.verbose = True
         stdout = StringIO()
         result = tldp.driver.summary(c, file=stdout)
-        self.assertEquals(result, os.EX_OK)
+        self.assertEqual(result, os.EX_OK)
         stdout.seek(0)
         data = stdout.read()
         for name in names:
@@ -186,14 +191,14 @@ class TestDriverSummary(TestInventoryBase):
         names = self.publishDocumentsWithShortNames(20)
         stdout = StringIO()
         result = tldp.driver.summary(c, file=stdout)
-        self.assertEquals(result, os.EX_OK)
+        self.assertEqual(result, os.EX_OK)
         stdout.seek(0)
         data = stdout.read()
         self.assertTrue('and 16 more' in data)
         c.verbose = True
         stdout = StringIO()
         result = tldp.driver.summary(c, file=stdout)
-        self.assertEquals(result, os.EX_OK)
+        self.assertEqual(result, os.EX_OK)
         stdout.seek(0)
         data = stdout.read()
         for name in names:
@@ -206,7 +211,7 @@ class TestcreateBuildDirectory(TestToolsFilesystem):
         d = os.path.join(self.tempdir, 'child', 'grandchild')
         ready, error = tldp.driver.createBuildDirectory(d)
         self.assertFalse(ready)
-        self.assertEquals(error, errno.ENOENT)
+        self.assertEqual(error, errno.ENOENT)
 
 
 class Testbuilddir_setup(TestToolsFilesystem):
@@ -297,16 +302,16 @@ class TestDriverRun(TestInventoryBase):
         argv = self.argv
         argv.extend(['--publish', 'stale', 'Orphan-HOWTO', fullpath])
         exitcode = tldp.driver.run(argv)
-        self.assertEquals(exitcode, os.EX_OK)
+        self.assertEqual(exitcode, os.EX_OK)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(4, len(inv.published.keys()))
-        self.assertEquals(1, len(inv.broken.keys()))
+        self.assertEqual(4, len(inv.published.keys()))
+        self.assertEqual(1, len(inv.broken.keys()))
 
     def test_run_no_work(self):
         self.add_published('Published-HOWTO', example.ex_linuxdoc)
         exitcode = tldp.driver.run(self.argv)
         # -- improvement: check for 'No work to do.' from logger
-        self.assertEquals(exitcode, os.EX_OK)
+        self.assertEqual(exitcode, os.EX_OK)
 
     def test_run_loglevel_resetting(self):
         '''just exercise the loglevel settings'''
@@ -328,7 +333,7 @@ class TestDriverRun(TestInventoryBase):
         tldp.driver.run(self.argv)
         docbuilddir = opj(c.builddir, ex.doctype.__name__)
         inv = tldp.inventory.Inventory(docbuilddir, c.sourcedir)
-        self.assertEquals(1, len(inv.published.keys()))
+        self.assertEqual(1, len(inv.published.keys()))
 
     def test_run_oops_no_sourcedir(self):
         c = self.config
@@ -362,9 +367,9 @@ class TestDriverRun(TestInventoryBase):
         argv = self.argv
         argv.extend(['--publish', 'stale'])
         exitcode = tldp.driver.run(argv)
-        self.assertEquals(exitcode, os.EX_OK)
+        self.assertEqual(exitcode, os.EX_OK)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(1, len(inv.published.keys()))
+        self.assertEqual(1, len(inv.published.keys()))
 
 
 class TestDriverProcessSkips(TestInventoryBase):
@@ -380,8 +385,8 @@ class TestDriverProcessSkips(TestInventoryBase):
         inc, exc = tldp.driver.processSkips(c, docs)
         self.assertTrue(1, len(exc))
         excluded = exc.pop()
-        self.assertEquals(excluded.stem, 'Stale-HOWTO')
-        self.assertEquals(len(inc) + 1, len(inv.all.keys()))
+        self.assertEqual(excluded.stem, 'Stale-HOWTO')
+        self.assertEqual(len(inc) + 1, len(inv.all.keys()))
 
     def test_skipDocuments_stem(self):
         c = self.config
@@ -394,8 +399,8 @@ class TestDriverProcessSkips(TestInventoryBase):
         inc, exc = tldp.driver.processSkips(c, docs)
         self.assertTrue(1, len(exc))
         excluded = exc.pop()
-        self.assertEquals(excluded.stem, 'Published-HOWTO')
-        self.assertEquals(len(inc) + 1, len(inv.all.keys()))
+        self.assertEqual(excluded.stem, 'Published-HOWTO')
+        self.assertEqual(len(inc) + 1, len(inv.all.keys()))
 
     def test_skipDocuments_doctype(self):
         c = self.config
@@ -407,8 +412,8 @@ class TestDriverProcessSkips(TestInventoryBase):
         inc, exc = tldp.driver.processSkips(c, docs)
         self.assertTrue(1, len(exc))
         excluded = exc.pop()
-        self.assertEquals(excluded.stem, 'Docbook4XML-HOWTO')
-        self.assertEquals(len(inc) + 1, len(inv.all.keys()))
+        self.assertEqual(excluded.stem, 'Docbook4XML-HOWTO')
+        self.assertEqual(len(inc) + 1, len(inv.all.keys()))
 
 
 class TestDriverScript(TestInventoryBase):
@@ -433,7 +438,7 @@ class TestDriverScript(TestInventoryBase):
         argv = self.argv
         argv.append('--script')
         exitcode = tldp.driver.run(argv)
-        self.assertEquals(exitcode, os.EX_OK)
+        self.assertEqual(exitcode, os.EX_OK)
 
     def test_script_bad_invocation(self):
         c = self.config

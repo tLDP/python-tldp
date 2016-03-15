@@ -7,7 +7,10 @@ import random
 import unittest
 from argparse import Namespace
 
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from tldptesttools import TestToolsFilesystem
 
@@ -33,10 +36,10 @@ class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
             d.reldir, d.absdir = self.adddir(d.reldir)
             _, _ = self.addfile(d.reldir, ex.filename, stem=d.stem)
         s = scansourcedirs([x.absdir for x in documents])
-        self.assertEquals(2, len(s))
+        self.assertEqual(2, len(s))
         expected = set([x.stem for x in documents])
         found = set(s.keys())
-        self.assertEquals(expected, found)
+        self.assertEqual(expected, found)
 
     def test_multidir_finding_namecollision(self):
         ex = random.choice(example.sources)
@@ -47,10 +50,10 @@ class TestFileSourceCollectionMultiDir(TestToolsFilesystem):
             d.reldir, d.absdir = self.adddir(d.reldir)
             _, _ = self.addfile(d.reldir, ex.filename, stem=d.stem)
         s = scansourcedirs([x.absdir for x in documents])
-        self.assertEquals(1, len(s))
+        self.assertEqual(1, len(s))
         expected = set([x.stem for x in documents])
         found = set(s.keys())
-        self.assertEquals(expected, found)
+        self.assertEqual(expected, found)
 
 
 class TestFileSourceCollectionOneDir(TestToolsFilesystem):
@@ -60,7 +63,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         reldir, absdir = self.adddir(maindir)
         os.mkfifo(os.path.join(absdir, 'non-dir-non-file.xml'))
         s = scansourcedirs([absdir])
-        self.assertEquals(0, len(s))
+        self.assertEqual(0, len(s))
 
     def test_finding_singlefile(self):
         ex = random.choice(example.sources)
@@ -68,7 +71,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         reldir, absdir = self.adddir(maindir)
         _, _ = self.addfile(reldir, ex.filename)
         s = scansourcedirs([absdir])
-        self.assertEquals(1, len(s))
+        self.assertEqual(1, len(s))
 
     def test_skipping_misnamed_singlefile(self):
         ex = random.choice(example.sources)
@@ -76,7 +79,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         reldir, absdir = self.adddir(maindir)
         self.addfile(reldir, ex.filename, ext=".mis")
         s = scansourcedirs([absdir])
-        self.assertEquals(1, len(s))
+        self.assertEqual(1, len(s))
 
     def test_multiple_stems_of_different_extensions(self):
         ex = random.choice(example.sources)
@@ -86,7 +89,7 @@ class TestFileSourceCollectionOneDir(TestToolsFilesystem):
         self.addfile(reldir, ex.filename, stem=stem, ext=".xml")
         self.addfile(reldir, ex.filename, stem=stem, ext=".md")
         s = scansourcedirs([absdir])
-        self.assertEquals(1, len(s))
+        self.assertEqual(1, len(s))
 
 
 class TestNullSourceCollection(TestToolsFilesystem):
@@ -116,7 +119,7 @@ class TestInvalidSourceCollection(TestToolsFilesystem):
 
     def testEmptyDir(self):
         s = scansourcedirs([self.tempdir])
-        self.assertEquals(0, len(s))
+        self.assertEqual(0, len(s))
 
 
 class Test_sourcedoc_fromdir(unittest.TestCase):
@@ -190,7 +193,7 @@ class TestMissingSourceDocuments(TestToolsFilesystem):
         with self.assertRaises(IOError) as ecm:
             SourceDocument(missing)
         e = ecm.exception
-        self.assertEquals(errno.ENOENT, e.errno)
+        self.assertEqual(errno.ENOENT, e.errno)
 
     def test_init_wrongtype(self):
         with self.assertRaises(ValueError) as ecm:
