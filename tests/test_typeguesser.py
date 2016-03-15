@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import codecs
 import unittest
 from tempfile import NamedTemporaryFile as ntf
 
@@ -14,12 +15,12 @@ from tldp.doctypes.common import SignatureChecker
 
 
 def genericGuessTest(content, ext):
-        f = ntf(prefix='tldp-guesser-test-', suffix=ext, delete=False)
-        f.write(content)
-        f.flush()
-        f.close()
-        dt = guess(f.name)
-        os.unlink(f.name)
+        tf = ntf(prefix='tldp-guesser-test-', suffix=ext, delete=False)
+        tf.close()
+        with codecs.open(tf.name, 'w', encoding='utf-8') as f:
+            f.write(content)
+        dt = guess(tf.name)
+        os.unlink(tf.name)
         return dt
 
 
