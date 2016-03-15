@@ -17,7 +17,7 @@ class TestConfigWorks(unittest.TestCase):
 
     def test_singleoptarg(self):
         config, args = collectconfiguration('tag', ['--pubdir', '.'])
-        self.assertEquals(config.pubdir, '.')
+        self.assertEqual(config.pubdir, '.')
 
 #
 # -- end of file

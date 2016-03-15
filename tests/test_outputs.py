@@ -33,13 +33,13 @@ class TestOutputCollection(TestToolsFilesystem):
         with self.assertRaises(IOError) as ecm:
             OutputCollection(missing)
         e = ecm.exception
-        self.assertEquals(errno.ENOENT, e.errno)
+        self.assertEqual(errno.ENOENT, e.errno)
 
     def test_file_in_output_collection(self):
         reldir, absdir = self.adddir('collection')
         self.addfile('collection', __file__,  stem='non-directory')
         oc = OutputCollection(absdir)
-        self.assertEquals(0, len(oc))
+        self.assertEqual(0, len(oc))
 
     def test_manyfiles(self):
         reldir, absdir = self.adddir('manyfiles')
@@ -47,7 +47,7 @@ class TestOutputCollection(TestToolsFilesystem):
         for x in range(count):
             self.adddir('manyfiles/Document-Stem-' + str(x))
         oc = OutputCollection(absdir)
-        self.assertEquals(count, len(oc))
+        self.assertEqual(count, len(oc))
 
 
 class TestOutputDirectory(TestToolsFilesystem):
@@ -57,7 +57,7 @@ class TestOutputDirectory(TestToolsFilesystem):
         with self.assertRaises(IOError) as ecm:
             OutputDirectory(odoc)
         e = ecm.exception
-        self.assertEquals(errno.ENOENT, e.errno)
+        self.assertEqual(errno.ENOENT, e.errno)
 
     def test_iscomplete(self):
         reldir, absdir = self.adddir('outputs/Frobnitz-HOWTO')

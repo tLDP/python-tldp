@@ -26,7 +26,7 @@ class TestDriverBuild(TestInventoryBase):
         self.add_new('Frobnitz-Borked-XML-4-HOWTO',
                      example.ex_docbook4xml, content=borked)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(2, len(inv.all.keys()))
+        self.assertEqual(2, len(inv.all.keys()))
         docs = inv.all.values()
         result = tldp.driver.build(c, docs)
         self.assertTrue('Build failed' in result)
@@ -40,8 +40,8 @@ class TestDriverBuild(TestInventoryBase):
         argv.extend(['--build', 'Published-HOWTO'])
         tldp.driver.run(argv)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(1, len(inv.published.keys()))
-        self.assertEquals(1, len(inv.work.keys()))
+        self.assertEqual(1, len(inv.published.keys()))
+        self.assertEqual(1, len(inv.work.keys()))
 
 
 class TestDriverPublish(TestInventoryBase):
@@ -51,10 +51,10 @@ class TestDriverPublish(TestInventoryBase):
         c.publish = True
         self.add_new('Frobnitz-DocBook-XML-5-HOWTO', example.ex_docbook5xml)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(1, len(inv.all.keys()))
+        self.assertEqual(1, len(inv.all.keys()))
         docs = inv.all.values()
         exitcode = tldp.driver.publish(c, docs)
-        self.assertEquals(exitcode, 0)
+        self.assertEqual(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -64,10 +64,10 @@ class TestDriverPublish(TestInventoryBase):
         c.publish = True
         self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(1, len(inv.all.keys()))
+        self.assertEqual(1, len(inv.all.keys()))
         docs = inv.all.values()
         exitcode = tldp.driver.publish(c, docs)
-        self.assertEquals(exitcode, 0)
+        self.assertEqual(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -77,11 +77,11 @@ class TestDriverPublish(TestInventoryBase):
         c.publish = True
         self.add_new('Frobnitz-Asciidoc-HOWTO', example.ex_asciidoc)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(1, len(inv.all.keys()))
+        self.assertEqual(1, len(inv.all.keys()))
         docs = inv.all.values()
         c.skip = []
         exitcode = tldp.driver.publish(c, docs)
-        self.assertEquals(exitcode, 0)
+        self.assertEqual(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -90,11 +90,11 @@ class TestDriverPublish(TestInventoryBase):
         c.publish = True
         self.add_new('Frobnitz-Linuxdoc-HOWTO', example.ex_linuxdoc)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(1, len(inv.all.keys()))
+        self.assertEqual(1, len(inv.all.keys()))
         docs = inv.all.values()
         c.skip = []
         exitcode = tldp.driver.publish(c, docs)
-        self.assertEquals(exitcode, 0)
+        self.assertEqual(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -104,10 +104,10 @@ class TestDriverPublish(TestInventoryBase):
         c.publish = True
         self.add_new('Frobnitz-DocBookSGML-HOWTO', example.ex_docbooksgml)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(1, len(inv.all.keys()))
+        self.assertEqual(1, len(inv.all.keys()))
         docs = inv.all.values()
         exitcode = tldp.driver.publish(c, docs)
-        self.assertEquals(exitcode, 0)
+        self.assertEqual(exitcode, 0)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -117,7 +117,7 @@ class TestDriverPublish(TestInventoryBase):
         c.publish = True
         doc = SourceDocument(example.ex_docbooksgml_dir.filename)
         exitcode = tldp.driver.publish(c, [doc])
-        self.assertEquals(exitcode, 0)
+        self.assertEqual(exitcode, 0)
         self.assertTrue(doc.output.iscomplete)
         outputimages = os.path.join(doc.output.dirname, 'images')
         self.assertTrue(os.path.exists(outputimages))

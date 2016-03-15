@@ -43,55 +43,55 @@ class TestInventoryUsage(TestInventoryBase):
         ex = random.choice(example.sources)
         self.add_published('Frobnitz-HOWTO', ex)
         i = Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(0, len(i.stale))
-        self.assertEquals(1, len(i.published))
-        self.assertEquals(0, len(i.new))
-        self.assertEquals(0, len(i.orphan))
-        self.assertEquals(0, len(i.broken))
+        self.assertEqual(0, len(i.stale))
+        self.assertEqual(1, len(i.published))
+        self.assertEqual(0, len(i.new))
+        self.assertEqual(0, len(i.orphan))
+        self.assertEqual(0, len(i.broken))
 
     def test_detect_status_new(self):
         c = self.config
         ex = random.choice(example.sources)
         self.add_new('Frobnitz-HOWTO', ex)
         i = Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(0, len(i.stale))
-        self.assertEquals(0, len(i.published))
-        self.assertEquals(1, len(i.new))
-        self.assertEquals(0, len(i.orphan))
-        self.assertEquals(0, len(i.broken))
+        self.assertEqual(0, len(i.stale))
+        self.assertEqual(0, len(i.published))
+        self.assertEqual(1, len(i.new))
+        self.assertEqual(0, len(i.orphan))
+        self.assertEqual(0, len(i.broken))
 
     def test_detect_status_orphan(self):
         c = self.config
         ex = random.choice(example.sources)
         self.add_orphan('Frobnitz-HOWTO', ex)
         i = Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(0, len(i.stale))
-        self.assertEquals(0, len(i.published))
-        self.assertEquals(0, len(i.new))
-        self.assertEquals(1, len(i.orphan))
-        self.assertEquals(0, len(i.broken))
+        self.assertEqual(0, len(i.stale))
+        self.assertEqual(0, len(i.published))
+        self.assertEqual(0, len(i.new))
+        self.assertEqual(1, len(i.orphan))
+        self.assertEqual(0, len(i.broken))
 
     def test_detect_status_stale(self):
         c = self.config
         ex = random.choice(example.sources)
         self.add_stale('Frobnitz-HOWTO', ex)
         i = Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(1, len(i.stale))
-        self.assertEquals(1, len(i.published))
-        self.assertEquals(0, len(i.new))
-        self.assertEquals(0, len(i.orphan))
-        self.assertEquals(0, len(i.broken))
+        self.assertEqual(1, len(i.stale))
+        self.assertEqual(1, len(i.published))
+        self.assertEqual(0, len(i.new))
+        self.assertEqual(0, len(i.orphan))
+        self.assertEqual(0, len(i.broken))
 
     def test_detect_status_broken(self):
         c = self.config
         ex = random.choice(example.sources)
         self.add_broken('Frobnitz-HOWTO', ex)
         i = Inventory(c.pubdir, c.sourcedir)
-        self.assertEquals(0, len(i.stale))
-        self.assertEquals(1, len(i.published))
-        self.assertEquals(0, len(i.new))
-        self.assertEquals(0, len(i.orphan))
-        self.assertEquals(1, len(i.broken))
+        self.assertEqual(0, len(i.stale))
+        self.assertEqual(1, len(i.published))
+        self.assertEqual(0, len(i.new))
+        self.assertEqual(0, len(i.orphan))
+        self.assertEqual(1, len(i.broken))
 
 #
 # -- end of file

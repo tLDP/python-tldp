@@ -48,7 +48,7 @@ class Test_isreadablefile_and_friends(unittest.TestCase):
 
     def test_arg_isreadablefile(self):
         f = ntf(prefix='readable-file')
-        self.assertEquals(f.name, arg_isreadablefile(f.name))
+        self.assertEqual(f.name, arg_isreadablefile(f.name))
         os.chmod(f.name, 0)
         self.assertIsNone(arg_isreadablefile(f.name))
 
@@ -56,10 +56,10 @@ class Test_isreadablefile_and_friends(unittest.TestCase):
 class Test_arg_isloglevel(unittest.TestCase):
 
     def test_arg_isloglevel_integer(self):
-        self.assertEquals(7, arg_isloglevel(7))
-        self.assertEquals(40, arg_isloglevel('frobnitz'))
-        self.assertEquals(20, arg_isloglevel('INFO'))
-        self.assertEquals(10, arg_isloglevel('DEBUG'))
+        self.assertEqual(7, arg_isloglevel(7))
+        self.assertEqual(40, arg_isloglevel('frobnitz'))
+        self.assertEqual(20, arg_isloglevel('INFO'))
+        self.assertEqual(10, arg_isloglevel('DEBUG'))
 
 
 class Test_arg_isdirectory(TestToolsFilesystem):
@@ -174,7 +174,7 @@ class Test_statfiles(unittest.TestCase):
         this = os.path.join(here, str(uuid.uuid4()))
         statinfo = statfiles(this)
         self.assertIsInstance(statinfo, dict)
-        self.assertEquals(0, len(statinfo))
+        self.assertEqual(0, len(statinfo))
 
 
 class Test_statfile(TestToolsFilesystem):

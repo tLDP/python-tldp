@@ -55,7 +55,7 @@ class TestDoctypes(unittest.TestCase):
     def testGuessSingleMatchAsciidoc(self):
         ex = example.ex_asciidoc
         dt = genericGuessTest(ex.content, '.txt')
-        self.assertEquals(ex.doctype, dt)
+        self.assertEqual(ex.doctype, dt)
 
     def testGuessTooManyMatches(self):
         a = example.ex_docbook4xml.content
