@@ -17,7 +17,7 @@ CLISEP = CFGSEP = '-'   # -- dash -
 MULTIVALUESEP = ','
 
 try:
-    from configparser import SafeConfigParser as ConfigParser
+    from configparser import ConfigParser as ConfigParser
 except ImportError:
     from ConfigParser import SafeConfigParser as ConfigParser
 
