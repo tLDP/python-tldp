@@ -17,8 +17,8 @@ def genericGuessTest(content, ext):
         f = ntf(prefix='tldp-guesser-test-', suffix=ext, delete=False)
         f.write(content)
         f.flush()
-        dt = guess(f.name)
         f.close()
+        dt = guess(f.name)
         os.unlink(f.name)
         return dt
 
