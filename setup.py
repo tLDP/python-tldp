@@ -20,7 +20,7 @@ setup(
     long_description=readme,
     packages=find_packages(),
     test_suite='nose.collector',
-    install_requires=['networkx'],
+    install_requires=['networkx', 'nose'],
     include_package_data = True,
     package_data = {'extras': ['extras/collateindex.pl'],
                     'extras/xsl': glob.glob('extras/xsl/*.xsl'),
