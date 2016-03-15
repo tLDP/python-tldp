@@ -128,7 +128,7 @@ class OutputDirectory(OutputNamingConvention):
     def detail(self, widths, verbose, file=sys.stdout):
         template = '{s.status:{w.status}} {s.stem:{w.stem}}'
         outstr = template.format(s=self, w=widths)
-        print(outstr)
+        print(outstr, file=file)
         if verbose:
             print('  missing source', file=file)
 

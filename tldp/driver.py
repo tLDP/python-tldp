@@ -55,7 +55,7 @@ def show_doctypes(config, *args, **kwargs):
         return ERR_EXTRAARGS + ' '.join(args)
     file = kwargs.get('file', sys.stdout)
     print("Supported source document types:", file=file)
-    print(file=file)
+    print('', file=file)
     for doctype in knowndoctypes:
         classname = doctype.__name__
         fname = os.path.abspath(inspect.getmodule(doctype).__file__)
@@ -66,8 +66,8 @@ def show_doctypes(config, *args, **kwargs):
         print('  file extensions: {}'.format(extensions), file=file)
         for signature in doctype.signatures:
             print('        signature: {}'.format(signature), file=file)
-        print(file=file)
-    print(file=file)
+        print('', file=file)
+    print('', file=file)
     return os.EX_OK
 
 
@@ -77,20 +77,20 @@ def show_statustypes(config, *args, **kwargs):
     file = kwargs.get('file', sys.stdout)
     width = 2 + max([len(x) for x in status_types])
     print("Basic status types:", file=file)
-    print(file=file)
+    print('', file=file)
     for status, descrip in stypes.items():
         fmt = '{status:>{width}}:  {descrip}'
         text = fmt.format(status=status, descrip=descrip, width=width)
         print(text, file=file)
-    print(file=file)
+    print('', file=file)
     print("Synonyms and groups:", file=file)
-    print(file=file)
+    print('', file=file)
     for status, descrip in status_classes.items():
         fmt = '{status:>{width}}:  {descrip}'
         descrip = ', '.join(descrip)
         text = fmt.format(status=status, descrip=descrip, width=width)
         print(text, file=file)
-    print(file=file)
+    print('', file=file)
     return os.EX_OK
 
 
@@ -151,7 +151,7 @@ def summary(config, *args, **kwargs):
                 if abbrev:
                     s = s + ', and %d more ...' % (len(abbrev))
             print(s, file=file)
-    print(file=file)
+    print('', file=file)
     return os.EX_OK
 
 
