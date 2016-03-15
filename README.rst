@@ -7,15 +7,18 @@ software is:
 
   https://github.com/tLDP/python-tldp/
 
-The `ldptool` executable will:
+The `ldptool` executable can:
 
 - crawl through any number of source collection directories
 - crawl through a single output collection
 - match the sources to the outputs (based on document stem name)
-- report information on document type and status (stale, new, orphaned)
-- build the desired outputs from each source
-- build and publish the outputs
-- produce runnable shell script to STDOUT
+- describe supported source formats (`--formats`)
+- describe the meaning of document status (`--statustypes`)
+- describe the collection by type and status (`--summary`)
+- list out individual document type and status (`--list`)
+- build the expected (non-configurable) set of outputs (`--build`)
+- build and publish the outputs (`--publish`)
+- produce runnable shell script to STDOUT (`--script`)
 
 The tools in this package process source documents in the `TLDP document
 repository <https://github.com/tLDP/LDP>`_ and generate the following set of
@@ -26,7 +29,7 @@ outputs from each source document.
 - -single.html, a one-page HTML document
 - .html, a multipage HTML document
 
-(We may add other output formats.)
+(We may add other output formats; an epub format is under consideration.)
 
 Supported input formats are:
 
@@ -129,6 +132,18 @@ To print out a shell script for building a specific document:::
   $ ldptool --script ~/vcs/LDP/LDP/howto/docbook/Assembly-HOWTO.xml
 
 
+Logging
+-------
+The `ldptool` utility is largely written to be interactive or a supervised
+batch process.  It uses STDERR as its logstream and sets the default loglevel
+at logging.ERROR.  At this log level, in `--script`, `--build` and `--publish`
+mode, it should report nothing to STDERR.  To increase progress verbosity,
+setting the loglevel to info (`--loglevel info`) may help with understanding
+what work the tool is performing.  If you need to collect diagnostic
+information for troubleshooting or bug reports, `ldptool` supports `--loglevel
+debug`.
+
+
 Configuration
 -------------
 The `ldptool` comes with support for reading its settings from the
@@ -204,6 +219,12 @@ There are a large number of packages listed here in the dependency set.  This
 is because the supporting software for processing Linuxdoc and the various
 DocBook formats is split across many upstream packages and repositories.
 
+The generated python packages (see below) do not include the explicit
+dependencies to allow the package manager (e.g. apt, zypper, dnf) to install
+the dependencies.  This would be a nice improvement.
+
+Here are the dependencies needed for this tool to run:
+
 Ubuntu / Debian
 +++++++++++++++
 - linuxdoc-tools{,-text,-latex}
@@ -256,7 +277,7 @@ tidbits.
 
 Build an RPM:::
 
-  python setup.py bdist_rpm
+  python setup.py sdist && rpmbuild -ta ./dist/python-tldp-${VERSION}.tar.gz
 
 There's a file, `contrib/tldp.spec`, which makes a few changes to the
 setuptools stock-generated specfile.  Specifically, the package gets named
@@ -278,6 +299,7 @@ try that, please let me know any problems you encounter.
 Links
 -----
 
+* `Canonical python-tldp repository <https://github.com/tLDP/python-tldp`_
 * `Source tree on GitHub <https://github.com/tLDP/LDP>`_
 * `Output documentation tree (sample) <http://www.tldp.org/>`_
 
