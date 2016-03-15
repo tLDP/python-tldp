@@ -13,7 +13,7 @@ from tempfile import NamedTemporaryFile as ntf
 from tldptesttools import TestToolsFilesystem
 
 # -- SUT
-from tldp.utils import makefh, which, execute
+from tldp.utils import which, execute
 from tldp.utils import statfile, statfiles, stem_and_ext
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.utils import arg_isreadablefile, isreadablefile
