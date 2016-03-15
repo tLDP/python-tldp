@@ -1,13 +1,21 @@
 tldp - tools for publishing from TLDP sources
 =============================================
-This package was written for the Linux Documentation Project to help with
-management and automation of publication of source documents.  The primary
-interface provided is a command-line toolset.
+This package was written for the Linux Documentation Project (TLDP) to help
+with management and publication automation of source documents.  The primary
+interface provided is a command-line toolset.  The canonical  location of this
+software is:
 
-The supported source formats can be listed, but contain at least, Linuxdoc,
-DocBookSGML and DocBook XML 4.x.
+  https://github.com/tLDP/python-tldp/
 
-TLDP = The Linux Documentation Project.
+The `ldptool` executable will:
+
+- crawl through any number of source collection directories
+- crawl through a single output collection
+- match the sources to the outputs (based on document stem name)
+- report information on document type and status (stale, new, orphaned)
+- build the desired outputs from each source
+- build and publish the outputs
+- produce runnable shell script to STDOUT
 
 The tools in this package process source documents in the `TLDP document
 repository <https://github.com/tLDP/LDP>`_ and generate the following set of
@@ -28,56 +36,6 @@ Supported input formats are:
 - Docbook SGML 4.x
 - Docbook XML 4.x
 - Docbook XML 5.x (basic support, as of 2016-03-10)
-
-
-Behaviour
----------
-There's a source repository which has many source directories containing
-documents.  Each directory containing (sourcedir).
-
-A source document can be a file in a sourcedir or a directory in the
-sourcedir.  Note that the file Assembly-HOWTO.xml is self-contained.  The
-directory BRIDGE-STP-HOWTO a file BRIDGE-STP-HOWTO.sgml.::
-
-  Assembly-HOWTO.xml
-  BRIDGE-STP-HOWTO/
-  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.sgml
-  BRIDGE-STP-HOWTO/images
-  BRIDGE-STP-HOWTO/images/hardware-setup.eps
-  BRIDGE-STP-HOWTO/images/hardware-setup.png
-  BRIDGE-STP-HOWTO/images/old-hardware-setup.eps
-  BRIDGE-STP-HOWTO/images/old-hardware-setup.png
-
-Each document can be identified by its stem name.  In the above, the stems are
-`Assembly-HOWTO` and `BRIDGE-STP-HOWTO`.
-
-There is a directory containing the output collection.  Each directory is named
-by the stem name of the source document and contains the output formats for
-each source document.  Here are the corresponding output directories for the
-above two documents:::
-
-  Assembly-HOWTO/
-  Assembly-HOWTO/Assembly-HOWTO.html
-  Assembly-HOWTO/Assembly-HOWTO.pdf
-  Assembly-HOWTO/Assembly-HOWTO-single.html
-  Assembly-HOWTO/Assembly-HOWTO.txt
-  Assembly-HOWTO/index.html
-  Assembly-HOWTO/mips.html
-  Assembly-HOWTO/nasm.html
-    ... and more ...
-  
-  BRIDGE-STP-HOWTO/
-  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.html
-  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.pdf
-  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO-single.html
-  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.txt
-  BRIDGE-STP-HOWTO/images
-  BRIDGE-STP-HOWTO/images/hardware-setup.eps
-  BRIDGE-STP-HOWTO/images/hardware-setup.png
-  BRIDGE-STP-HOWTO/images/old-hardware-setup.eps
-  BRIDGE-STP-HOWTO/images/old-hardware-setup.png
-  BRIDGE-STP-HOWTO/index.html
-    ... and more ...
 
 
 Example usages:
@@ -181,6 +139,63 @@ later, you can run:::
   ldptool --dump-cfg > my-ldptool.cfg
   ldptool --configfile my-ldptool.cfg --list
   LDPTOOL_CONFIGFILE=/path/to/ldptool.cfg ldptool --list
+
+
+Source document identification
+------------------------------
+TLDP's source repository contains many separate directories containing
+documents (e.g. LDP/howto/docbook, LDP/howto/linuxdoc).  Each of these
+directories may contain documents; to `ldptool` each of these is a
+`--sourcedir`.
+
+A source document (in a `--sourcedir`) can be a file or a directory.  Here are
+two examples.  The Assembly-HOWTO.xml is an entire document stored as a single
+file.  The directory BRIDGE-STP-HOWTO exists and contains its main document, a
+file named BRIDGE-STP-HOWTO.sgml.  In the case of a source document that is a
+directory, the stem name of the primary document must match the name of the
+directory.::
+
+  Assembly-HOWTO.xml
+  BRIDGE-STP-HOWTO/
+  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.sgml
+  BRIDGE-STP-HOWTO/images
+  BRIDGE-STP-HOWTO/images/hardware-setup.eps
+  BRIDGE-STP-HOWTO/images/hardware-setup.png
+  BRIDGE-STP-HOWTO/images/old-hardware-setup.eps
+  BRIDGE-STP-HOWTO/images/old-hardware-setup.png
+
+Each document for a single run of `ldptool` can be uniquely identified by its
+stem name.  In the above, the stems are `Assembly-HOWTO` and
+`BRIDGE-STP-HOWTO`.  It is an error to have two documents with the same stem
+name and the second discovered document will be ignored.
+
+There is a directory containing the output collection.  Each directory is named
+by the stem name of the source document and contains the output formats for
+each source document.  Here are the corresponding output directories for the
+above two documents:::
+
+  Assembly-HOWTO/
+  Assembly-HOWTO/Assembly-HOWTO.html
+  Assembly-HOWTO/Assembly-HOWTO.pdf
+  Assembly-HOWTO/Assembly-HOWTO-single.html
+  Assembly-HOWTO/Assembly-HOWTO.txt
+  Assembly-HOWTO/index.html
+  Assembly-HOWTO/mips.html
+  Assembly-HOWTO/nasm.html
+    ... and more ...
+  
+  BRIDGE-STP-HOWTO/
+  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.html
+  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.pdf
+  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO-single.html
+  BRIDGE-STP-HOWTO/BRIDGE-STP-HOWTO.txt
+  BRIDGE-STP-HOWTO/images
+  BRIDGE-STP-HOWTO/images/hardware-setup.eps
+  BRIDGE-STP-HOWTO/images/hardware-setup.png
+  BRIDGE-STP-HOWTO/images/old-hardware-setup.eps
+  BRIDGE-STP-HOWTO/images/old-hardware-setup.png
+  BRIDGE-STP-HOWTO/index.html
+    ... and more ...
 
 
 Software dependencies
