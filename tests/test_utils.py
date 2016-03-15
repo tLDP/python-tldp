@@ -251,18 +251,5 @@ class Test_att_statinfo(unittest.TestCase):
     def test_max_mtime(self):
         pass
 
-
-class Test_makefh(unittest.TestCase):
-
-    def test_makefh(self):
-        f = ntf(prefix='tldp-makefh-openfile-test-', delete=False)
-        # fprime = makefh(f.file)
-        # self.assertIs(f, fprime)
-        # del fprime
-        f.close()
-        fprime = makefh(f.name)
-        self.assertIs(f.name, fprime.name)
-        os.unlink(f.name)
-
 #
 # -- end of file

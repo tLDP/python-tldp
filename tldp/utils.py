@@ -231,18 +231,6 @@ http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python/37
     return None
 
 
-def makefh(thing):
-    '''return a file object; given an existing filename name or file object'''
-    if isinstance(thing, io.IOBase):
-        f = thing
-    elif isinstance(thing, str) and os.path.isfile(thing):
-        f = open(thing)
-    else:
-        raise TypeError("Cannot make file from %s of %r" %
-                        (type(thing), thing,))
-    return f
-
-
 def statfile(name):
     '''return posix.stat_result (or None) for a single file name'''
     try:
