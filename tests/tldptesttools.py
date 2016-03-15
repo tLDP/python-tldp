@@ -140,7 +140,7 @@ class TestSourceDocSkeleton(object):
         if os.path.isfile(content):
             shutil.copy(content, fname)
         else:
-            with codecs.open(fname, 'w', encodeing='utf-8') as f:
+            with codecs.open(fname, 'w', encoding='utf-8') as f:
                 f.write(content)
 
 
