@@ -273,7 +273,7 @@ def docbuild(config, docs, **kwargs):
         result.append(runner.generate(**kwargs))
     if all(result):
         buildsuccess = True
-    return buildsuccess, zip(result, docs)
+    return buildsuccess, list(zip(result, docs))
 
 
 def script(config, docs, **kwargs):
