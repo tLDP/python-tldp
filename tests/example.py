@@ -75,7 +75,8 @@ unknown_doctype = Namespace(
 sources = [y for x, y in locals().items() if x.startswith('ex_')]
 
 for ex in sources:
-    ex.content = open(ex.filename).read()
+    with open(ex.filename) as f:
+        ex.content = f.read()
     ex.stem, ex.ext = stem_and_ext(ex.filename)
 
 
