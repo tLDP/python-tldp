@@ -7,6 +7,7 @@ import os
 import io
 import time
 import errno
+import codecs
 import operator
 import subprocess
 import functools
@@ -106,7 +107,7 @@ def swapdirs(a, b):
 
 def logfilecontents(logmethod, prefix, fname):
     '''log all lines of a file with a prefix '''
-    with open(fname) as f:
+    with codecs.open(fname, encoding='utf-8') as f:
         for line in f:
             logmethod("%s: %s", prefix, line.rstrip())
 
