@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import uuid
 import errno
+import codecs
 import random
 from tempfile import NamedTemporaryFile as ntf
 from io import StringIO
@@ -82,11 +83,12 @@ class TestDriverDetail(TestInventoryBase):
 class TestDriverShowDoctypes(TestToolsFilesystem):
 
     def test_show_doctypes(self):
-        f = ntf(dir=self.tempdir, prefix='doctypes-', delete=False)
-        result = tldp.driver.show_doctypes(Namespace(), file=f)
+        tf = ntf(dir=self.tempdir, prefix='doctypes-', delete=False)
+        tf.close()
+        with codecs.open(tf.name, 'w', encoding='utf-8') as f:
+            result = tldp.driver.show_doctypes(Namespace(), file=f)
         self.assertEqual(result, os.EX_OK)
-        f.close()
-        with open(f.name) as x:
+        with codecs.open(f.name, encoding='utf-8') as x:
             stdout = x.read()
         for doctype in knowndoctypes:
             self.assertTrue(doctype.formatname in stdout)
