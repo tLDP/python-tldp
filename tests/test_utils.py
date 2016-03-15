@@ -103,7 +103,7 @@ class Test_execute(TestToolsFilesystem):
         with self.assertRaises(ValueError) as ecm:
             execute([exe], logdir=None)
         e = ecm.exception
-        self.assertTrue('logdir must be a directory' in e.message)
+        self.assertTrue('logdir must be a directory' in e.args[0])
 
     def test_execute_exception_when_logdir_enoent(self):
         exe = which('true')
@@ -118,7 +118,7 @@ class Test_which(unittest.TestCase):
 
     def test_good_which_python(self):
         python = which('python')
-        self.assertIsInstance(python, str)
+        self.assertIsNotNone(python)
         self.assertTrue(os.path.isfile(python))
         qualified_python = which(python)
         self.assertEqual(python, qualified_python)
