@@ -80,8 +80,13 @@ def guess(fname):
     for doctype in possible:
         logger.debug("%s extension %s could be %s.", stem, ext, doctype)
 
-    with codecs.open(fname, encoding='utf-8') as f:
-        buf = f.read(1024)
+    try:
+        with codecs.open(fname, encoding='utf-8') as f:
+            buf = f.read(1024)
+    except UnicodeDecodeError:
+        # -- a wee bit ugly, but many SGML docs used iso-8859-1, so fall back
+        with codecs.open(fname, encoding='iso-8859-1') as f:
+            buf = f.read(1024)
 
     guesses = list()
     for doctype in possible:
