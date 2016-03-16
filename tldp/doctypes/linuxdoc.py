@@ -55,6 +55,7 @@ class Linuxdoc(BaseDoctype, SignatureChecker):
                  --size universal \\
                  --firstpage p1 \\
                  --format pdf \\
+                 --footer c.1 \\
                  --outfile "{output.name_pdf}" \\
                  "{output.name_htmls}"'''
         return self.shellscript(s, **kwargs)
