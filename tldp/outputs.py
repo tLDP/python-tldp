@@ -126,8 +126,10 @@ class OutputDirectory(OutputNamingConvention):
         self.logdir = os.path.join(self.dirname, logdir)
 
     def detail(self, widths, verbose, file=sys.stdout):
-        template = '{s.status:{w.status}} {s.stem:{w.stem}}'
-        outstr = template.format(s=self, w=widths)
+        template = ' '.join(('{s.status:{w.status}}',
+                             '{u:{w.doctype}}',
+                             '{s.stem:{w.stem}}'))
+        outstr = template.format(s=self, w=widths, u="<unknown>")
         print(outstr, file=file)
         if verbose:
             print('  missing source', file=file)
