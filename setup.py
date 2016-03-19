@@ -2,7 +2,7 @@
 import os
 
 import glob
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as r_file:
@@ -18,7 +18,7 @@ setup(
     url="http://en.tldp.org/",
     description='tools for processing all TLDP source documents',
     long_description=readme,
-    packages=find_packages(),
+    packages=['tldp'],
     test_suite='nose.collector',
     install_requires=['networkx', 'nose'],
     include_package_data = True,
