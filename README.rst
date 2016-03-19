@@ -50,10 +50,11 @@ repository and a local cache of the output tree:
 To see what work needs to be done, `ldptool --list`::
 
   $ ldptool  --list
-  new       DocBook-Demystification-HOWTO                  
-  stale     Linux-Dictionary                               
-  broken    PHP-Nuke-HOWTO                                 
-  orphan    Traffic-Control-tcng-HTB-HOWTO   
+  orphan    <unknown>            Bugzilla-Guide
+  new       DocBook XML 4.x      DocBook-Demystification-HOWTO
+  stale     DocBook XML 4.x      Linux-Dictionary
+  broken    DocBook SGML 3.x/4.x PHP-Nuke-HOWTO
+  stale     Linuxdoc             User-Group-HOWTO
 
 To see publication status of each document:::
 
