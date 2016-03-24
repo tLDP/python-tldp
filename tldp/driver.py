@@ -245,7 +245,11 @@ def post_publish_cleanup(docs):
 def prepare_docs_script_mode(config, docs):
     for source in docs:
         if not source.output:
-            source.working = OutputDirectory.fromsource(config.pubdir, source)
+            fromsource = OutputDirectory.fromsource
+            if not config.pubdir:
+                source.working = fromsource(source.dirname, source)
+            else:
+                source.working = fromsource(config.pubdir, source)
         else:
             source.working = source.output
     return True, None

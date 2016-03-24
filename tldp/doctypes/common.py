@@ -87,6 +87,8 @@ class BaseDoctype(object):
 
     def build_precheck(self):
         classname = self.__class__.__name__
+        if self.config.script:
+            return True
         for tool, validator in self.required.items():
             thing = getattr(self.config, tool, None)
             logger.debug("%s, tool = %s, thing = %s", classname, tool, thing)
@@ -282,7 +284,8 @@ class BaseDoctype(object):
         #     - chdir to output dir
         #     - copy source images/resources to output dir
         #
-        opwd = os.getcwd()
+        if not self.config.script:
+            opwd = os.getcwd()
         if not self.build_prepare():
             return False
 
@@ -301,7 +304,8 @@ class BaseDoctype(object):
         else:
             self.hook_build_failure()
 
-        os.chdir(opwd)
+        if not self.config.script:
+            os.chdir(opwd)
 
         return result
 

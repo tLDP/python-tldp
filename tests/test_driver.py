@@ -424,7 +424,19 @@ class TestDriverScript(TestInventoryBase):
         tldp.driver.script(c, inv.all.values(), file=stdout)
         stdout.seek(0)
         data = stdout.read()
-        self.assertTrue(c.linuxdoc_sgml2html in data)
+        self.assertTrue('Published-HOWTO' in data)
+
+    def test_script_no_pubdir(self):
+        c = self.config
+        c.script = True
+        stdout = io.StringIO()
+        self.add_published('New-HOWTO', example.ex_linuxdoc)
+        c.pubdir = None
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        tldp.driver.script(c, inv.all.values(), file=stdout)
+        stdout.seek(0)
+        data = stdout.read()
+        self.assertTrue('New-HOWTO' in data)
 
     def test_run_script(self):
         self.add_published('Published-HOWTO', example.ex_linuxdoc)
