@@ -7,7 +7,7 @@ before_install:
 python:
   - "2.7"
   - "3.4"
-script: nosetests --cover-erase --with-coverage --cover-package tldp
+script: nosetests --cover-erase --with-coverage --cover-package tldp -- tests/long_tests.py tests/
 
 # -- comments on install set on an Ubuntu system:
 #    Here is the full set of packages that need to be installed in order for
