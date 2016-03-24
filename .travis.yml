@@ -3,7 +3,7 @@ sudo: required
 dist: trusty
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install htmldoc fop jing xsltproc asciidoc docbook docbook5-xml docbook-xsl-ns linuxdoc-tools-latex linuxdoc-tools-text sgml2x ldp-docbook-xsl ldp-docbook-dsssl
+  - sudo apt-get --assume-yes install htmldoc fop jing xsltproc asciidoc docbook docbook5-xml docbook-xsl-ns linuxdoc-tools-latex linuxdoc-tools-text sgml2x ldp-docbook-xsl ldp-docbook-dsssl
 python:
   - "2.7"
   - "3.4"
