@@ -1,5 +1,40 @@
 language: python
+sudo: required
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install htmldoc fop jing xsltproc asciidoc docbook docbook5-xml docbook-xsl-ns linuxdoc-tools-latex linuxdoc-tools-text sgml2x ldp-docbook-xsl ldp-docbook-dsssl
 python:
   - "2.7"
   - "3.4"
-script: tox
+script: nosetests --cover-erase --with-coverage --cover-package tldp
+
+# -- comments on install set on an Ubuntu system:
+#    Here is the full set of packages that need to be installed in order for
+#    this software to work/build.  The leftmost string should say 'ii' for
+#    each of the packages listed in this command-line:
+#
+# dpkg-query --list  \
+#   asciidoc \
+#   docbook \
+#   docbook-dsssl \
+#   docbook-xsl \
+#   docbook-utils \
+#   docbook-xsl-ns \
+#   docbook5-xml \
+#   fop \
+#   htmldoc \
+#   htmldoc-common \
+#   html2text \
+#   jing \
+#   ldp-docbook-xsl \
+#   ldp-docbook-dsssl \
+#   libxml2-utils \
+#   linuxdoc-tools \
+#   linuxdoc-tools-text \
+#   linuxdoc-tools-latex \
+#   opensp \
+#   openjade \
+#   sgml2x \
+#   xsltproc \
+#
+#
