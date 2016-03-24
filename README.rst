@@ -1,9 +1,13 @@
 tldp - tools for publishing from TLDP sources
 =============================================
+
+.. image:: https://api.travis-ci.org/martin-a-brown/python-tldp.svg
+    :target: https://github.com/tLDP/python-tldp
+
 This package was written for the Linux Documentation Project (TLDP) to help
 with management and publication automation of source documents.  The primary
-interface provided is a command-line toolset.  The canonical  location of this
-software is:
+interface provided is a command-line tool caalled `ldptool`.  The canonical
+location of this software is:
 
   https://github.com/tLDP/python-tldp/
 
@@ -310,5 +314,3 @@ Links
 * `Canonical python-tldp repository <https://github.com/tLDP/python-tldp`_
 * `Source tree on GitHub <https://github.com/tLDP/LDP>`_
 * `Output documentation tree (sample) <http://www.tldp.org/>`_
-
-
