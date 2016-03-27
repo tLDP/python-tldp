@@ -324,18 +324,19 @@ def build(config, docs, **kwargs):
 def publish(config, docs, **kwargs):
     config.build = True
     result = build(config, docs, **kwargs)
-    if result == os.EX_OK:
-        for x, source in enumerate(docs, 1):
-            logger.info("Publishing (%d of %d) to %s.",
-                        x, len(docs), source.output.dirname)
-            # -- swapdirs must raise an error if there are problems
-            #
-            swapdirs(source.working.dirname, source.output.dirname)
-            if os.path.isdir(source.working.dirname):
-                logger.debug("%s removing old directory %s",
-                             source.stem, source.working.dirname)
-                shutil.rmtree(source.working.dirname)
-        post_publish_cleanup(docs)
+    if result != os.EX_OK:
+        return result
+    for x, source in enumerate(docs, 1):
+        logger.info("Publishing (%d of %d) to %s.",
+                    x, len(docs), source.output.dirname)
+        # -- swapdirs must raise an error if there are problems
+        #
+        swapdirs(source.working.dirname, source.output.dirname)
+        if os.path.isdir(source.working.dirname):
+            logger.debug("%s removing old directory %s",
+                         source.stem, source.working.dirname)
+            shutil.rmtree(source.working.dirname)
+    post_publish_cleanup(docs)
     return os.EX_OK
 
 
