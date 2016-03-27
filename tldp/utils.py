@@ -225,7 +225,12 @@ def isreadablefile(f):
 
 def isstr(s):
     '''True if argument is stringy (unicode or string)'''
-    return isinstance(s, basestring)
+    try:
+        unicode
+        stringy = (str, unicode)
+    except NameError:
+        stringy = (str,)
+    return isinstance(s, stringy)
 
 
 def which(program):
