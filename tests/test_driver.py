@@ -355,19 +355,6 @@ class TestDriverRun(TestInventoryBase):
         exitcode = tldp.driver.run(argv)
         self.assertTrue('to --build' in exitcode)
 
-    def test_run_status_selection(self):
-        self.add_docbook4xml_xsl_to_config()
-        c = self.config
-        c.script = True
-        self.add_stale('Asciidoc-Stale-HOWTO', example.ex_asciidoc)
-        self.add_new('DocBook4XML-New-HOWTO', example.ex_docbook4xml)
-        argv = self.argv
-        argv.extend(['--publish', 'stale'])
-        exitcode = tldp.driver.run(argv)
-        self.assertEqual(exitcode, os.EX_OK)
-        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
-        self.assertEqual(1, len(inv.published.keys()))
-
 
 class TestDriverProcessSkips(TestInventoryBase):
 

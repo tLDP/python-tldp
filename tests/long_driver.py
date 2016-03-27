@@ -14,6 +14,24 @@ import example
 import tldp.driver
 
 
+class TestDriverRun(TestInventoryBase):
+
+    def test_run_status_selection(self):
+        self.add_docbook4xml_xsl_to_config()
+        c = self.config
+        self.add_stale('Asciidoc-Stale-HOWTO', example.ex_asciidoc)
+        self.add_new('DocBook4XML-New-HOWTO', example.ex_docbook4xml)
+        argv = self.argv
+        argv.extend(['--publish', 'stale'])
+        argv.extend(['--docbook4xml-xslprint', c.docbook4xml_xslprint])
+        argv.extend(['--docbook4xml-xslchunk', c.docbook4xml_xslchunk])
+        argv.extend(['--docbook4xml-xslsingle', c.docbook4xml_xslsingle])
+        exitcode = tldp.driver.run(argv)
+        self.assertEqual(exitcode, os.EX_OK)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEqual(1, len(inv.published.keys()))
+
+
 class TestDriverBuild(TestInventoryBase):
 
     def test_build_one_broken(self):
