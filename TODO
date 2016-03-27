@@ -1,6 +1,12 @@
 python-tldp TODO
 ================
 
+Bugs
+----
+
+  * when running --sourcedir $FILE, the error message is TERRIBLE;
+    fix it;
+
 user-visible needs
 ------------------
 
