@@ -103,6 +103,8 @@ class Docbook5XML(BaseDoctype, SignatureChecker):
     def make_fo(self, **kwargs):
         '''generate the Formatting Objects intermediate output'''
         s = '''"{config.docbook5xml_xsltproc}" > "{output.name_fo}" \\
+                  --stringparam fop.extensions 0 \\
+                  --stringparam fop1.extensions 1 \\
                   "{config.docbook5xml_xslprint}" \\
                   "{output.validsource}"'''
         if not self.config.script:

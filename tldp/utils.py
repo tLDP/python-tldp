@@ -59,6 +59,12 @@ def arg_isloglevel(l):
     return level
 
 
+def arg_isstr(s):
+    if isstr(s):
+        return s
+    return None
+
+
 def arg_isreadablefile(f):
     if isreadablefile(f):
         return f
@@ -215,6 +221,11 @@ def isexecutable(f):
 def isreadablefile(f):
     '''True if argument is readable file'''
     return os.path.isfile(f) and os.access(f, os.R_OK)
+
+
+def isstr(s):
+    '''True if argument is stringy (unicode or string)'''
+    return isinstance(s, basestring)
 
 
 def which(program):

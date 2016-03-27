@@ -9,6 +9,7 @@ import logging
 from tldp.utils import which, firstfoundfile
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.utils import arg_isreadablefile, isreadablefile
+from tldp.utils import arg_isstr, isstr
 
 from tldp.doctypes.common import BaseDoctype, SignatureChecker, depends
 
@@ -17,20 +18,24 @@ logger = logging.getLogger(__name__)
 
 def xslchunk_finder():
     l = ['/usr/share/xml/docbook/stylesheet/ldp/html/tldp-sections.xsl',
+         'http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl',
          ]
     return firstfoundfile(l)
 
 
 def xslsingle_finder():
     l = ['/usr/share/xml/docbook/stylesheet/ldp/html/tldp-one-page.xsl',
+         'http://docbook.sourceforge.net/release/xsl/current/html/docbook.xsl',
          ]
     return firstfoundfile(l)
 
 
 def xslprint_finder():
-    l = ['/usr/share/xml/docbook/stylesheet/ldp/fo/tldp-print.xsl',
+    l = ['http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl',
+         #'/usr/share/xml/docbook/stylesheet/ldp/fo/tldp-print.xsl',
          ]
-    return firstfoundfile(l)
+    return l[0]
+    #return firstfoundfile(l)
 
 
 class Docbook4XML(BaseDoctype, SignatureChecker):
@@ -48,7 +53,7 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
                 'docbook4xml_xmllint': isexecutable,
                 'docbook4xml_xslchunk': isreadablefile,
                 'docbook4xml_xslsingle': isreadablefile,
-                'docbook4xml_xslprint': isreadablefile,
+                'docbook4xml_xslprint': isstr,
                 }
 
     def make_validated_source(self, **kwargs):
@@ -84,6 +89,8 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
     def make_fo(self, **kwargs):
         '''generate the Formatting Objects intermediate output'''
         s = '''"{config.docbook4xml_xsltproc}" > "{output.name_fo}" \\
+                  --stringparam fop.extensions 0 \\
+                  --stringparam fop1.extensions 1 \\
                   "{config.docbook4xml_xslprint}" \\
                   "{output.validsource}"'''
         if not self.config.script:
@@ -164,7 +171,7 @@ class Docbook4XML(BaseDoctype, SignatureChecker):
         gadd('--docbook4xml-xslsingle', type=arg_isreadablefile,
              default=xslsingle_finder(),
              help='full path to LDP HTML single-page XSL [%(default)s]')
-        gadd('--docbook4xml-xslprint', type=arg_isreadablefile,
+        gadd('--docbook4xml-xslprint', type=arg_isstr,
              default=xslprint_finder(),
              help='full path to LDP FO print XSL [%(default)s]')
         gadd('--docbook4xml-xmllint', type=arg_isexecutable,
