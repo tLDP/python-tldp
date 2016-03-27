@@ -14,6 +14,13 @@ opd = os.path.dirname
 opa = os.path.abspath
 sampledocs = opa(opj(opd(__file__), 'sample-documents'))
 
+
+def load_content(ex):
+    with codecs.open(ex.filename, encoding='utf-8') as f:
+        ex.content = f.read()
+    ex.stem, ex.ext = stem_and_ext(ex.filename)
+
+
 ex_linuxdoc = Namespace(
                doctype=tldp.doctypes.linuxdoc.Linuxdoc,
                filename=opj(sampledocs, 'linuxdoc-simple.sgml'),
@@ -67,18 +74,24 @@ ex_docbooksgml_dir = Namespace(
                             'DocBookSGML-Larger.sgml'),
               )
 
+# -- a bit ugly, but grab each dict
+sources = [y for x, y in locals().items() if x.startswith('ex_')]
+
+for ex in sources:
+    load_content(ex)
+
+
 unknown_doctype = Namespace(
                doctype=None,
                filename=opj(sampledocs, 'Unknown-Doctype.xqf'),
               )
 
-# -- a bit ugly, but grab each dict
-sources = [y for x, y in locals().items() if x.startswith('ex_')]
+broken_docbook4xml = Namespace(
+                 doctype=tldp.doctypes.docbook4xml.Docbook4XML,
+                 filename=opj(sampledocs, 'docbook4xml-broken.xml'),
+                )
+load_content(broken_docbook4xml)
 
-for ex in sources:
-    with codecs.open(ex.filename, encoding='utf-8') as f:
-        ex.content = f.read()
-    ex.stem, ex.ext = stem_and_ext(ex.filename)
 
 
 # -- end of file
