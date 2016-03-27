@@ -64,6 +64,17 @@ class TestDriverBuild(TestInventoryBase):
 
 class TestDriverPublish(TestInventoryBase):
 
+    def test_publish_fail_because_broken(self):
+        c = self.config
+        c.publish = True
+        self.add_new('Frobnitz-DocBook-XML-4-HOWTO', example.ex_docbook4xml)
+        self.add_stale('Broken-DocBook-XML-4-HOWTO', example.broken_docbook4xml)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEqual(2, len(inv.all.keys()))
+        docs = inv.all.values()
+        exitcode = tldp.driver.publish(c, docs)
+        self.assertNotEqual(exitcode, os.EX_OK)
+
     def test_publish_docbook5xml(self):
         c = self.config
         c.publish = True
@@ -72,7 +83,7 @@ class TestDriverPublish(TestInventoryBase):
         self.assertEqual(1, len(inv.all.keys()))
         docs = inv.all.values()
         exitcode = tldp.driver.publish(c, docs)
-        self.assertEqual(exitcode, 0)
+        self.assertEqual(exitcode, os.EX_OK)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -85,7 +96,7 @@ class TestDriverPublish(TestInventoryBase):
         self.assertEqual(1, len(inv.all.keys()))
         docs = inv.all.values()
         exitcode = tldp.driver.publish(c, docs)
-        self.assertEqual(exitcode, 0)
+        self.assertEqual(exitcode, os.EX_OK)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -99,7 +110,7 @@ class TestDriverPublish(TestInventoryBase):
         docs = inv.all.values()
         c.skip = []
         exitcode = tldp.driver.publish(c, docs)
-        self.assertEqual(exitcode, 0)
+        self.assertEqual(exitcode, os.EX_OK)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -112,7 +123,7 @@ class TestDriverPublish(TestInventoryBase):
         docs = inv.all.values()
         c.skip = []
         exitcode = tldp.driver.publish(c, docs)
-        self.assertEqual(exitcode, 0)
+        self.assertEqual(exitcode, os.EX_OK)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -125,7 +136,7 @@ class TestDriverPublish(TestInventoryBase):
         self.assertEqual(1, len(inv.all.keys()))
         docs = inv.all.values()
         exitcode = tldp.driver.publish(c, docs)
-        self.assertEqual(exitcode, 0)
+        self.assertEqual(exitcode, os.EX_OK)
         doc = docs.pop(0)
         self.assertTrue(doc.output.iscomplete)
 
@@ -135,7 +146,7 @@ class TestDriverPublish(TestInventoryBase):
         c.publish = True
         doc = SourceDocument(example.ex_docbooksgml_dir.filename)
         exitcode = tldp.driver.publish(c, [doc])
-        self.assertEqual(exitcode, 0)
+        self.assertEqual(exitcode, os.EX_OK)
         self.assertTrue(doc.output.iscomplete)
         outputimages = os.path.join(doc.output.dirname, 'images')
         self.assertTrue(os.path.exists(outputimages))
