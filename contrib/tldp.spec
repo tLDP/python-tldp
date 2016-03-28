@@ -1,8 +1,8 @@
 %define sourcename tldp
 %define name python-tldp
-%define version 0.6.7
-%define unmangled_version 0.6.7
-%define unmangled_version 0.6.7
+%define version 0.6.8
+%define unmangled_version 0.6.8
+%define unmangled_version 0.6.8
 %define release 1
 
 Summary: processing tools for Asciidoc, DocBook XML, DocBook SGML and Linuxdoc
