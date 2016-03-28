@@ -32,10 +32,10 @@ def xslsingle_finder():
 
 def xslprint_finder():
     l = ['http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl',
-         #'/usr/share/xml/docbook/stylesheet/ldp/fo/tldp-print.xsl',
+         # '/usr/share/xml/docbook/stylesheet/ldp/fo/tldp-print.xsl',
          ]
     return l[0]
-    #return firstfoundfile(l)
+    # return firstfoundfile(l)
 
 
 class Docbook4XML(BaseDoctype, SignatureChecker):
