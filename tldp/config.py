@@ -4,9 +4,13 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
+import os
+import argparse
+import copy as _copy
+
 import logging
 
-from tldp.utils import arg_isdirectory, arg_isloglevel, arg_isreadablefile
+from tldp.utils import arg_isloglevel, arg_isreadablefile
 from tldp.cascadingconfig import CascadingConfig, DefaultFreeArgumentParser
 
 import tldp.typeguesser
@@ -14,6 +18,30 @@ import tldp.typeguesser
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIGFILE = '/etc/ldptool/ldptool.ini'
+
+
+class DirectoriesExist(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not os.path.isdir(values):
+            message = "No such directory: %r for option %r, removing..."
+            message = message % (values, option_string)
+            logger.critical(message)
+            raise ValueError(message)
+        items = _copy.copy(argparse._ensure_value(namespace, self.dest, []))
+        items.append(values)
+        setattr(namespace, self.dest, items)
+
+
+class DirectoryExists(argparse._StoreAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not os.path.isdir(values):
+            message = "No such directory: %r for option %r, removing..."
+            message = message % (values, option_string)
+            logger.critical(message)
+            raise ValueError(message)
+        setattr(namespace, self.dest, values)
 
 
 def collectconfiguration(tag, argv):
@@ -63,15 +91,15 @@ def collectconfiguration(tag, argv):
                     help='subdirs to copy during build [%(default)s]')
     ap.add_argument('--sourcedir', '--source-dir', '--source-directory',
                     '-s',
-                    action='append', default='', type=arg_isdirectory,
+                    default=[], action=DirectoriesExist,
                     help='a directory containing LDP source documents')
     ap.add_argument('--pubdir', '--output', '--outputdir', '--outdir',
                     '-o',
-                    default=None, type=arg_isdirectory,
+                    default=None, action=DirectoryExists,
                     help='a directory containing LDP output documents')
     ap.add_argument('--builddir', '--build-dir', '--build-directory',
                     '-d',
-                    default=None, type=arg_isdirectory,
+                    default=None, action=DirectoryExists,
                     help='a scratch directory used for building')
     ap.add_argument('--configfile', '--config-file', '--cfg',
                     '-c',

@@ -21,5 +21,12 @@ class TestConfigWorks(unittest.TestCase):
         config, args = collectconfiguration('tag', ['--pubdir', '.'])
         self.assertEqual(config.pubdir, '.')
 
+    def test_nonexistent_directory(self):
+        argv = ['--pubdir', '/path/to/nonexistent/directory']
+        with self.assertRaises(ValueError) as ecm:
+            config, args = collectconfiguration('tag', argv)
+        e = ecm.exception
+        self.assertTrue("/path/to/nonexistent/directory" in e.args[0])
+
 #
 # -- end of file
