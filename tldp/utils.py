@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import os
-import io
 import time
 import errno
 import codecs
@@ -47,7 +46,7 @@ def firstfoundfile(locations):
     return None
 
 
-def arg_isloglevel(l):
+def arg_isloglevel(l, defaultlevel=logging.ERROR):
     try:
         level = int(l)
         return level
@@ -55,7 +54,7 @@ def arg_isloglevel(l):
         pass
     level = getattr(logging, l.upper(), None)
     if not level:
-        level = logging.ERROR
+        level = defaultlevel
     return level
 
 
