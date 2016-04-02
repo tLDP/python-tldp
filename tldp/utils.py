@@ -310,6 +310,8 @@ def statfiles(name, relative=None):
             inodes.extend(files)
             for x in inodes:
                 foundpath = os.path.join(root, x)
+                if os.path.isdir(foundpath):
+                    continue
                 if relative:
                     relpath = os.path.relpath(foundpath, start=relative)
                 else:

@@ -147,7 +147,8 @@ class Test_statfiles(unittest.TestCase):
         here = os.path.dirname(os.path.abspath(__file__))
         statinfo = statfiles(here, relative=here)
         self.assertIsInstance(statinfo, dict)
-        self.assertTrue(os.path.basename('sample-documents') in statinfo)
+        adoc = 'sample-documents/asciidoc-complete.txt'
+        self.assertTrue(adoc in statinfo)
 
     def test_statfiles_dir_rel(self):
         here = os.path.dirname(os.path.abspath(__file__))
