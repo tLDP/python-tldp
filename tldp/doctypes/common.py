@@ -11,13 +11,14 @@ import time
 import errno
 import codecs
 import shutil
+import socket
 import logging
 import inspect
 from tempfile import NamedTemporaryFile as ntf
 from functools import wraps
 import networkx as nx
 
-from tldp.utils import execute, logtimings
+from tldp.utils import execute, logtimings, writemd5sums
 
 logger = logging.getLogger(__name__)
 
@@ -149,29 +150,27 @@ cd -- "{output.dirname}"'''
     def generate_md5sums(self, **kwargs):
         logger.debug("%s generating MD5SUMS in %s.",
                      self.output.stem, self.output.dirname)
+        timestr = time.strftime('%F-%T', time.gmtime())
         md5file = self.output.MD5SUMS
-        fileset = sorted(self.source.md5sums.items())
         if self.config.script:
             l = list()
-            for fname, hashval in fileset:
+            for fname, hashval in sorted(self.source.md5sums.items()):
                 l.append('# {}  {}'.format(hashval, fname))
             md5s = '\n'.join(l)
-            s = '''# -- calculating MD5SUMS file
+            s = '''# -- MD5SUMS file from source tree at {}
 #
 # md5sum > {} -- {}
 #
-# -- These are the values for sources at timestamp {}
-#
 {}
 #'''
-            s = s.format(md5file,
-                         ' '.join(self.source.statinfo.keys()),
-                         time.strftime('%F-%T', time.gmtime()),
+            s = s.format(timestr,
+                         md5file,
+                         ' '.join(self.source.md5sums.keys()),
                          md5s)
             return self.shellscript(s, **kwargs)
-        with codecs.open(md5file, 'w', encoding='utf-8') as f:
-            for fname, hashval in fileset:
-                print(hashval + '  ' + fname, file=f)
+        header = '# -- MD5SUMS for {} computed on {} at {}'
+        header = header.format(self.source.stem, socket.gethostname(), timestr)
+        writemd5sums(md5file, self.source.md5sums, header=header)
         return True
 
     def copy_static_resources(self, **kwargs):
