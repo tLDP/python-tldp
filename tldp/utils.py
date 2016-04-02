@@ -229,7 +229,7 @@ def isstr(s):
         unicode
         stringy = (str, unicode)
     except NameError:
-        stringy = (str,)
+        stringy = (str,)  # -- python3
     return isinstance(s, stringy)
 
 
@@ -348,40 +348,6 @@ def fileinfo(name, relative=None, func=statfile):
                 if info[relpath] is None:
                     del info[relpath]
     return info
-
-
-def att_statinfo(statinfo, attr='st_mtime', func=max):
-    if statinfo:
-        return func([getattr(v, attr) for v in statinfo.values()])
-    else:
-        return 0
-
-
-max_size = functools.partial(att_statinfo, attr='st_size', func=max)
-min_size = functools.partial(att_statinfo, attr='st_size', func=min)
-
-max_mtime = functools.partial(att_statinfo, attr='st_mtime', func=max)
-min_mtime = functools.partial(att_statinfo, attr='st_mtime', func=min)
-
-max_ctime = functools.partial(att_statinfo, attr='st_ctime', func=max)
-min_ctime = functools.partial(att_statinfo, attr='st_ctime', func=min)
-
-max_atime = functools.partial(att_statinfo, attr='st_atime', func=max)
-min_atime = functools.partial(att_statinfo, attr='st_atime', func=min)
-
-
-def sieve(operand, statinfo, attr='st_mtime', func=operator.gt):
-    result = set()
-    for fname, stbuf in statinfo.items():
-        if func(getattr(stbuf, attr), operand):
-            result.add(fname)
-    return result
-
-mtime_gt = functools.partial(sieve, attr='st_mtime', func=operator.gt)
-mtime_lt = functools.partial(sieve, attr='st_mtime', func=operator.lt)
-
-size_gt = functools.partial(sieve, attr='st_size', func=operator.gt)
-size_lt = functools.partial(sieve, attr='st_size', func=operator.lt)
 
 #
 # -- end of file

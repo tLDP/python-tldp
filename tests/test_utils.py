@@ -19,6 +19,7 @@ from tldp.utils import statfile, statfiles, stem_and_ext
 from tldp.utils import arg_isexecutable, isexecutable
 from tldp.utils import arg_isreadablefile, isreadablefile
 from tldp.utils import arg_isdirectory, arg_isloglevel
+from tldp.utils import arg_isstr
 from tldp.utils import swapdirs
 
 
@@ -53,6 +54,12 @@ class Test_isreadablefile_and_friends(unittest.TestCase):
         os.chmod(f.name, 0)
         self.assertIsNone(arg_isreadablefile(f.name))
 
+
+class Test_arg_isstr(unittest.TestCase):
+
+    def test_arg_isstr(self):
+        self.assertEqual('s', arg_isstr('s'))
+        self.assertEqual(None, arg_isstr(7))
 
 class Test_arg_isloglevel(unittest.TestCase):
 
@@ -246,12 +253,6 @@ class Test_swapdirs(TestToolsFilesystem):
         self.assertFalse(os.path.exists(afile))
         self.assertTrue(os.path.exists(b))
         self.assertTrue(os.path.exists(bfile))
-
-
-class Test_att_statinfo(unittest.TestCase):
-
-    def test_max_mtime(self):
-        pass
 
 #
 # -- end of file
