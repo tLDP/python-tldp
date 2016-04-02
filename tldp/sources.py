@@ -192,7 +192,8 @@ class SourceDocument(object):
         parentbase = os.path.basename(self.dirname)
         logger.debug("%s found source %s", self.stem, self.filename)
         if parentbase == self.stem:
-            self.statinfo = statfiles(self.dirname, relative=self.dirname)
+            parentdir = os.path.dirname(self.dirname)
+            self.statinfo = statfiles(self.dirname, relative=parentdir)
         else:
             self.statinfo = statfiles(self.filename, relative=self.dirname)
 
