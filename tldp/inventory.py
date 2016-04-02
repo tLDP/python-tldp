@@ -123,23 +123,7 @@ class Inventory(object):
         self.published = s
         logger.debug("Identified %d published documents.", len(self.published))
 
-        # -- stale identification
-        #
-        self.stale = SourceCollection()
-        for stem, sdoc in s.items():
-            odoc = sdoc.output
-            mtime = max_mtime(odoc.statinfo)
-            fset = mtime_gt(mtime, sdoc.statinfo)
-            if fset:
-                sdoc.newer = fset
-                for f in fset:
-                    logger.debug("%s found updated source file %s", stem, f)
-                odoc.status = sdoc.status = 'stale'
-                self.stale[stem] = sdoc
-        logger.debug("Identified %d stale documents: %r.", len(self.stale),
-                     self.stale.keys())
-
-        # -- stale identification
+        # -- broken identification
         #
         self.broken = SourceCollection()
         for stem, sdoc in s.items():
@@ -148,6 +132,31 @@ class Inventory(object):
                 sdoc.status = sdoc.output.status = 'broken'
         logger.debug("Identified %d broken documents: %r.", len(self.broken),
                      self.broken.keys())
+
+        # -- stale identification
+        #
+        self.stale = SourceCollection()
+        for stem, sdoc in s.items():
+            odoc = sdoc.output
+            omd5, smd5 = odoc.md5sums, sdoc.md5sums
+            if omd5 != smd5:
+                logger.debug("%s differing MD5 sets %r %r", stem, smd5, omd5)
+                changed = set()
+                for gone in set(omd5.keys()).difference(smd5.keys()):
+                    logger.debug("%s gone %s", stem, gone)
+                    changed.add(('gone', gone))
+                for new in set(smd5.keys()).difference(omd5.keys()):
+                    changed.add(('new', new))
+                for sfn in set(smd5.keys()).intersection(omd5.keys()):
+                    if smd5[sfn] != omd5[sfn]:
+                        changed.add(('changed', sfn))
+                for why, sfn in changed:
+                    logger.debug("%s differing source %s (%s)", stem, sfn, why)
+                odoc.status = sdoc.status = 'stale'
+                sdoc.differing = changed
+                self.stale[stem] = sdoc
+        logger.debug("Identified %d stale documents: %r.", len(self.stale),
+                     self.stale.keys())
 
     def getByStatusClass(self, status_class):
         desired = status_classes.get(status_class, None)
