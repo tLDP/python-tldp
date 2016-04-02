@@ -107,7 +107,6 @@ def collectconfiguration(tag, argv):
                     default=['images', 'resources'], action='append', type=str,
                     help='subdirs to copy during build [%(default)s]')
 
-
     # -- and the distinct, mutually exclusive actions this script can perform
     #
     g = ap.add_mutually_exclusive_group()
@@ -145,7 +144,6 @@ def collectconfiguration(tag, argv):
     g.add_argument('--statustypes', '--list-statustypes',
                    action='store_true', default=False,
                    help='show status types and classes [%(default)s]')
-
 
     # -- collect up the distributed configuration fragments
     #
