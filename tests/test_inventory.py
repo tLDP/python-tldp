@@ -43,7 +43,7 @@ class TestInventoryUsage(TestInventoryBase):
     def test_detect_status_published(self):
         c = self.config
         ex = random.choice(example.sources)
-        self.add_published('Frobnitz-HOWTO', ex)
+        self.add_published('Frobnitz-Published-HOWTO', ex)
         i = Inventory(c.pubdir, c.sourcedir)
         self.assertEqual(0, len(i.stale))
         self.assertEqual(1, len(i.published))
@@ -54,7 +54,7 @@ class TestInventoryUsage(TestInventoryBase):
     def test_detect_status_new(self):
         c = self.config
         ex = random.choice(example.sources)
-        self.add_new('Frobnitz-HOWTO', ex)
+        self.add_new('Frobnitz-New-HOWTO', ex)
         i = Inventory(c.pubdir, c.sourcedir)
         self.assertEqual(0, len(i.stale))
         self.assertEqual(0, len(i.published))
@@ -65,7 +65,7 @@ class TestInventoryUsage(TestInventoryBase):
     def test_detect_status_orphan(self):
         c = self.config
         ex = random.choice(example.sources)
-        self.add_orphan('Frobnitz-HOWTO', ex)
+        self.add_orphan('Frobnitz-Orphan-HOWTO', ex)
         i = Inventory(c.pubdir, c.sourcedir)
         self.assertEqual(0, len(i.stale))
         self.assertEqual(0, len(i.published))
@@ -76,7 +76,7 @@ class TestInventoryUsage(TestInventoryBase):
     def test_detect_status_stale(self):
         c = self.config
         ex = random.choice(example.sources)
-        self.add_stale('Frobnitz-HOWTO', ex)
+        self.add_stale('Frobnitz-Stale-HOWTO', ex)
         i = Inventory(c.pubdir, c.sourcedir)
         self.assertEqual(1, len(i.stale))
         self.assertEqual(1, len(i.published))
@@ -87,7 +87,7 @@ class TestInventoryUsage(TestInventoryBase):
     def test_detect_status_broken(self):
         c = self.config
         ex = random.choice(example.sources)
-        self.add_broken('Frobnitz-HOWTO', ex)
+        self.add_broken('Frobnitz-Broken-HOWTO', ex)
         i = Inventory(c.pubdir, c.sourcedir)
         self.assertEqual(0, len(i.stale))
         self.assertEqual(1, len(i.published))
