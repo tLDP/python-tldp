@@ -140,7 +140,6 @@ class OutputDirectory(OutputNamingConvention):
         if not os.path.isdir(parent):
             logger.critical("Missing output collection directory %s.", parent)
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), parent)
-        self.statinfo = statfiles(self.dirname, relative=self.dirname)
         self.status = 'output'
         self.source = source
         self.logdir = os.path.join(self.dirname, logdir)
