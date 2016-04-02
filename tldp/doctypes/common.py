@@ -149,7 +149,7 @@ cd -- "{output.dirname}"'''
     def generate_md5sums(self, **kwargs):
         logger.debug("%s generating MD5SUMS in %s.",
                      self.output.stem, self.output.dirname)
-        md5file = os.path.join(self.output.dirname, 'MD5SUMS')
+        md5file = self.output.MD5SUMS
         fileset = sorted(self.source.md5sums.items())
         if self.config.script:
             l = list()
