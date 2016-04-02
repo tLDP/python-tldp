@@ -127,7 +127,9 @@ class DocbookSGML(BaseDoctype, SignatureChecker):
                 logger.error("%s expected to find %s",
                              self.source.stem, self.output.dirname)
                 return False
-        s = '''find . -mindepth 1 -maxdepth 1 -not -type d -delete -print'''
+        preserve = os.path.basename(self.output.MD5SUMS)
+        s = '''find . -mindepth 1 -maxdepth 1 -not -type d -not -name {} -delete -print'''
+        s = s.format(preserve)
         return self.shellscript(s, **kwargs)
 
     @depends(cleaned_indexsgml)
