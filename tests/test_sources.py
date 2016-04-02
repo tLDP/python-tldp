@@ -144,7 +144,7 @@ class TestSourceDocument(TestToolsFilesystem):
     def test_init(self):
         for ex in example.sources:
             fullpath = ex.filename
-            fn = os.path.basename(fullpath)
+            fn = os.path.relpath(fullpath, start=example.sampledocs)
             doc = SourceDocument(fullpath)
             self.assertIsInstance(doc, SourceDocument)
             self.assertTrue(fn in str(doc))
