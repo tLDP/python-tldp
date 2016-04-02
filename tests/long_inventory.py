@@ -42,6 +42,17 @@ class TestInventoryHandling(TestInventoryBase):
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEqual(1, len(inv.published.keys()))
 
+        # -- remove the generated MD5SUMS file, ensure rebuild occurs
+        #
+        doc = inv.published.values().pop()
+        os.unlink(doc.output.MD5SUMS)
+        self.assertEqual(dict(), doc.output.md5sums)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEqual(1, len(inv.stale.keys()))
+        exitcode = tldp.driver.run(argv)
+        inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
+        self.assertEqual(1, len(inv.published.keys()))
+
         # -- remove a source file, add a source file, change a source file
         #
         main = opj(mysource.dirname, opb(exdir), opb(ex.filename))
