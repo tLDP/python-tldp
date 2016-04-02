@@ -14,6 +14,13 @@ import example
 from tldp.typeguesser import guess
 from tldp.doctypes.common import SignatureChecker
 
+# -- shorthand
+opj = os.path.join
+opd = os.path.dirname
+opa = os.path.abspath
+
+sampledocs = opj(opd(__file__), 'sample-documents')
+
 
 def genericGuessTest(content, ext):
         tf = ntf(prefix='tldp-guesser-test-', suffix=ext, delete=False)
@@ -26,6 +33,10 @@ def genericGuessTest(content, ext):
 
 
 class TestDoctypes(unittest.TestCase):
+
+    def testISO_8859_1(self):
+        dt = guess(opj(sampledocs, 'ISO-8859-1.sgml'))
+        self.assertIsNotNone(dt)
 
     def testDetectionBySignature(self):
         for ex in example.sources:
