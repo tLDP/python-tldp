@@ -25,7 +25,7 @@ import example
 import tldp.config
 import tldp.driver
 
-# -- variables
+# -- shorthand
 opj = os.path.join
 opd = os.path.dirname
 opa = os.path.abspath
