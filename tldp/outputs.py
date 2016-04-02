@@ -32,6 +32,10 @@ class OutputNamingConvention(object):
         self.stem = stem
 
     @property
+    def MD5SUMS(self):
+        return os.path.join(self.dirname, '.LDP-source-MD5SUMS')
+
+    @property
     def name_txt(self):
         return os.path.join(self.dirname, self.stem + '.txt')
 
@@ -83,6 +87,15 @@ class OutputNamingConvention(object):
             if not os.path.isfile(name):
                 missing.add(name)
         return missing
+
+    @property
+    def md5sums(self):
+        d = dict()
+        with codecs.open(self.MD5SUMS, encoding='utf-8') as f:
+            for line in f:
+                hashval, fname = line.strip().split()
+                d[fname] = hashval
+        return d
 
 
 class OutputDirectory(OutputNamingConvention):
