@@ -8,6 +8,7 @@ import os
 import time
 import errno
 import codecs
+import hashlib
 import operator
 import subprocess
 import functools
@@ -248,6 +249,27 @@ http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python/37
     return None
 
 
+def writemd5sums(fname, md5s, header=None):
+    '''write an MD5SUM file from [(filename, MD5), ...]'''
+    with codecs.open(fname, 'w', encoding='utf-8') as file:
+        if header:
+            print(header, file=file)
+        for fname, hashval in md5s.items():
+            print(hashval + '  ' + fname, file=file)
+
+
+def md5file(name):
+    '''return MD5 hash for a single file name'''
+    with open(name, 'rb') as f:
+        bs = f.read()
+    md5 = hashlib.md5(bs).hexdigest()
+    try:
+        md5 = unicode(md5)
+    except NameError:
+        pass  # -- python3
+    return md5
+
+
 def statfile(name):
     '''return posix.stat_result (or None) for a single file name'''
     try:
@@ -259,7 +281,22 @@ def statfile(name):
     return st
 
 
+def md5files(name, relative=None):
+    '''get all of the MD5s for files from here downtree'''
+    return fileinfo(name, relative=relative, func=md5file)
+
 def statfiles(name, relative=None):
+    '''
+    >>> statfiles('./docs/x509').keys()
+    ['./docs/x509/tutorial.rst', './docs/x509/reference.rst', './docs/x509/index.rst']
+    >>> statfiles('./docs/x509', relative='./').keys()
+    ['docs/x509/reference.rst', 'docs/x509/tutorial.rst', 'docs/x509/index.rst']
+    >>> statfiles('./docs/x509', relative='./docs/x509/').keys()
+    ['index.rst', 'tutorial.rst', 'reference.rst']
+    '''
+    return fileinfo(name, relative=relative, func=statfile)
+
+def fileinfo(name, relative=None, func=statfile):
     '''return a dict() with keys being filenames and posix.stat_result values
 
     Required:
@@ -282,27 +319,18 @@ def statfiles(name, relative=None):
       least we can try to rely on them as best we can--mostly, by just
       excluding any files (in the output dict()) which did not return a valid
       posix.stat_result.
-
-    Examples:
-
-    >>> statfiles('./docs/x509').keys()
-    ['./docs/x509/tutorial.rst', './docs/x509/reference.rst', './docs/x509/index.rst']
-    >>> statfiles('./docs/x509', relative='./').keys()
-    ['docs/x509/reference.rst', 'docs/x509/tutorial.rst', 'docs/x509/index.rst']
-    >>> statfiles('./docs/x509', relative='./docs/x509/').keys()
-    ['index.rst', 'tutorial.rst', 'reference.rst']
     '''
-    statinfo = dict()
+    info = dict()
     if not os.path.exists(name):
-        return statinfo
+        return info
     if not os.path.isdir(name):
         if relative:
             relpath = os.path.relpath(name, start=relative)
         else:
             relpath = name
-        statinfo[relpath] = statfile(name)
-        if statinfo[relpath] is None:
-            del statinfo[relpath]
+        info[relpath] = func(name)
+        if info[relpath] is None:
+            del info[relpath]
     else:
         for root, dirs, files in os.walk(name):
             inodes = list()
@@ -316,10 +344,10 @@ def statfiles(name, relative=None):
                     relpath = os.path.relpath(foundpath, start=relative)
                 else:
                     relpath = foundpath
-                statinfo[relpath] = statfile(foundpath)
-                if statinfo[relpath] is None:
-                    del statinfo[relpath]
-    return statinfo
+                info[relpath] = func(foundpath)
+                if info[relpath] is None:
+                    del info[relpath]
+    return info
 
 
 def att_statinfo(statinfo, attr='st_mtime', func=max):
