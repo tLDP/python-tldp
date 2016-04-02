@@ -8,14 +8,15 @@ import os
 import sys
 import errno
 import logging
-import hashlib
 
 from tldp.ldpcollection import LDPDocumentCollection
 
-from tldp.utils import statfiles, stem_and_ext
+from tldp.utils import md5files, stem_and_ext
 from tldp.typeguesser import guess, knownextensions
 
 logger = logging.getLogger(__name__)
+
+IGNORABLE_SOURCE = ('index.sgml')
 
 
 def scansourcedirs(dirnames):
@@ -83,6 +84,8 @@ def scansourcedirs(dirnames):
 def arg_issourcedoc(filename):
     filename = os.path.abspath(filename)
     if os.path.isfile(filename):
+        if os.path.basename(filename) in IGNORABLE_SOURCE:
+            return None
         return filename
     elif os.path.isdir(filename):
         return sourcedoc_fromdir(filename)
@@ -187,19 +190,16 @@ class SourceDocument(object):
         self.status = 'source'
         self.output = None
         self.working = None
-        self.newer = set()
+        self.differing = set()
         self.dirname, self.basename = os.path.split(self.filename)
         self.stem, self.ext = stem_and_ext(self.basename)
         parentbase = os.path.basename(self.dirname)
         logger.debug("%s found source %s", self.stem, self.filename)
         if parentbase == self.stem:
             parentdir = os.path.dirname(self.dirname)
-            self.statinfo = statfiles(self.dirname, relative=parentdir)
+            self.md5sums = md5files(self.dirname, relative=parentdir)
         else:
-            self.statinfo = statfiles(self.filename, relative=self.dirname)
-        self.md5sums = dict()
-        for sourcefile in self.statinfo.keys():
-            self.md5sums[sourcefile] = hashlib.md5(sourcefile).hexdigest()
+            self.md5sums = md5files(self.filename, relative=self.dirname)
 
     def detail(self, widths, verbose, file=sys.stdout):
         '''produce a small tabular output about the document'''
@@ -214,9 +214,9 @@ class SourceDocument(object):
                 print('      output dir {}'.format(self.output.dirname),
                       file=file)
             print('     source file {}'.format(self.filename), file=file)
-            for f in sorted(self.newer):
+            for why, f in sorted(self.differing):
                 fname = os.path.join(self.dirname, f)
-                print('    newer source {}'.format(fname), file=file)
+                print('  {:7} source {}'.format(why, fname), file=file)
             if self.output:
                 for f in sorted(self.output.missing):
                     print('  missing output {}'.format(f), file=file)
