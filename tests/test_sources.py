@@ -148,7 +148,7 @@ class TestSourceDocument(TestToolsFilesystem):
             doc = SourceDocument(fullpath)
             self.assertIsInstance(doc, SourceDocument)
             self.assertTrue(fn in str(doc))
-            self.assertTrue(fn in doc.statinfo)
+            self.assertTrue(fn in doc.md5sums)
 
     def test_fromfifo_should_fail(self):
         fifo = os.path.join(self.tempdir, 'fifofile')
