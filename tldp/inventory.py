@@ -8,8 +8,6 @@ import copy
 import logging
 from collections import OrderedDict
 
-from tldp.utils import max_mtime, mtime_gt
-
 from tldp.sources import SourceCollection
 from tldp.outputs import OutputCollection
 
