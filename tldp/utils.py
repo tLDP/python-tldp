@@ -254,7 +254,7 @@ def writemd5sums(fname, md5s, header=None):
     with codecs.open(fname, 'w', encoding='utf-8') as file:
         if header:
             print(header, file=file)
-        for fname, hashval in md5s.items():
+        for fname, hashval in sorted(md5s.items()):
             print(hashval + '  ' + fname, file=file)
 
 
