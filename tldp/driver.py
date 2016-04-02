@@ -273,8 +273,10 @@ def docbuild(config, docs, **kwargs):
     for x, source in enumerate(docs, 1):
         working = source.working
         runner = source.doctype(source=source, output=working, config=config)
-        logger.info("%s (%d of %d) initiating build",
-                    source.stem, x, len(docs))
+        status = 'progress, %d failures, %d successes' 
+        status = status % (result.count(False), result.count(True),)
+        logger.info("%s (%d of %d) initiating build [%s]",
+                    source.stem, x, len(docs), status)
         result.append(runner.generate(**kwargs))
     if all(result):
         buildsuccess = True
