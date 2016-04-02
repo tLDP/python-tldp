@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import os
 import sys
 import errno
+import codecs
 import logging
 
 from tldp.ldpcollection import LDPDocumentCollection
@@ -91,10 +92,16 @@ class OutputNamingConvention(object):
     @property
     def md5sums(self):
         d = dict()
-        with codecs.open(self.MD5SUMS, encoding='utf-8') as f:
-            for line in f:
-                hashval, fname = line.strip().split()
-                d[fname] = hashval
+        try:
+            with codecs.open(self.MD5SUMS, encoding='utf-8') as f:
+                for line in f:
+                    if line.startswith('#'):
+                        continue
+                    hashval, fname = line.strip().split()
+                    d[fname] = hashval
+        except IOError as e:
+            if e.errno != errno.ENOENT:
+                raise
         return d
 
 
