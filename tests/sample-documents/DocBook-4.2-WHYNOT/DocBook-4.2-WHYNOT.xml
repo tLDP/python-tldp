@@ -21,6 +21,18 @@
     <sect2>
       <title>Intro</title>
       <para>Text</para>
+      <mediaobject>
+          <imageobject>
+              <imagedata fileref="images/warning.svg" format="SVG"/>
+          </imageobject>
+          <imageobject>
+              <imagedata fileref="images/warning.png" format="PNG"/>
+          </imageobject>
+          <imageobject>
+              <imagedata fileref="images/warning.jpg" format="JPG"/>
+          </imageobject>
+      </mediaobject>
+      <para>FIXME</para>
     </sect2>
   </sect1>
 
