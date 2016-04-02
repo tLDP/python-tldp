@@ -216,7 +216,7 @@ class SourceDocument(object):
             print('     source file {}'.format(self.filename), file=file)
             for why, f in sorted(self.differing):
                 fname = os.path.join(self.dirname, f)
-                print('  {:7} source {}'.format(why, fname), file=file)
+                print('  {:>7} source {}'.format(why, fname), file=file)
             if self.output:
                 for f in sorted(self.output.missing):
                     print('  missing output {}'.format(f), file=file)
