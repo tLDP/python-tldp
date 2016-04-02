@@ -13,6 +13,7 @@ from tempfile import NamedTemporaryFile as ntf
 
 import tldp.config
 from tldp.outputs import OutputNamingConvention
+from tldp.utils import writemd5sums, md5file
 
 # -- short names
 #
@@ -111,18 +112,14 @@ class TestOutputDirSkeleton(OutputNamingConvention):
         if not os.path.isdir(self.dirname):
             os.mkdir(self.dirname)
 
-    def create_expected_docs(self, func=None):
+    def create_md5sum_file(self, md5s):
+        writemd5sums(self.MD5SUMS, md5s)
+
+    def create_expected_docs(self):
         for name in self.expected:
             fname = getattr(self, name)
             with open(fname, 'w'):
                 pass
-            if func:
-                func(fname)
-
-    def create_stale_expected_docs(self):
-        def thirtysecondsago(fname):
-            os.utime(fname, (time.time() - 30, time.time() - 30))
-        self.create_expected_docs(func=thirtysecondsago)
 
 
 class TestSourceDocSkeleton(object):
@@ -135,6 +132,18 @@ class TestSourceDocSkeleton(object):
         self.dirname = dirname
         if not os.path.isdir(self.dirname):
             os.mkdir(self.dirname)
+        self.md5s = dict()
+
+    def create_stale(self, fname):
+        l = list(self.md5s[fname])
+        random.shuffle(l)
+        if l == self.md5s[fname]:
+            self.invalidate_checksum(fname)
+        self.md5s[fname] = ''.join(l)
+
+    @property
+    def md5sums(self):
+        return self.md5s
 
     def addsourcefile(self, filename, content):
         fname = os.path.join(self.dirname, filename)
@@ -143,6 +152,8 @@ class TestSourceDocSkeleton(object):
         else:
             with codecs.open(fname, 'w', encoding='utf-8') as f:
                 f.write(content)
+        relpath = os.path.relpath(fname, start=self.dirname)
+        self.md5s[relpath] = md5file(fname)
 
 
 class TestInventoryBase(unittest.TestCase):
@@ -177,19 +188,24 @@ class TestInventoryBase(unittest.TestCase):
 
     def add_stale(self, stem, ex):
         c = self.config
+        mysource = TestSourceDocSkeleton(c.sourcedir)
+        fname = stem + ex.ext
+        mysource.addsourcefile(fname, ex.filename)
+        mysource.create_stale(fname)
         myoutput = TestOutputDirSkeleton(os.path.join(c.pubdir, stem), stem)
         myoutput.mkdir()
-        myoutput.create_stale_expected_docs()
-        mysource = TestSourceDocSkeleton(c.sourcedir)
-        mysource.addsourcefile(stem + ex.ext, ex.filename)
+        myoutput.create_expected_docs()
+        myoutput.create_md5sum_file(mysource.md5sums)
 
     def add_broken(self, stem, ex):
         c = self.config
         mysource = TestSourceDocSkeleton(c.sourcedir)
-        mysource.addsourcefile(stem + ex.ext, ex.filename)
+        fname = stem + ex.ext
+        mysource.addsourcefile(fname, ex.filename)
         myoutput = TestOutputDirSkeleton(os.path.join(c.pubdir, stem), stem)
         myoutput.mkdir()
         myoutput.create_expected_docs()
+        myoutput.create_md5sum_file(mysource.md5sums)
         prop = random.choice(myoutput.expected)
         fname = getattr(myoutput, prop, None)
         assert fname is not None
@@ -224,6 +240,7 @@ class TestInventoryBase(unittest.TestCase):
         myoutput = TestOutputDirSkeleton(os.path.join(c.pubdir, stem), stem)
         myoutput.mkdir()
         myoutput.create_expected_docs()
+        myoutput.create_md5sum_file(mysource.md5sums)
 
     def add_docbooksgml_support_to_config(self):
         c = self.config
