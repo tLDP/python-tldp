@@ -46,7 +46,7 @@ class TestDriverDetail(TestInventoryBase):
         stdout = io.StringIO()
         tldp.driver.detail(c, docs, file=stdout)
         stdout.seek(0)
-        self.assertTrue('newer source' in stdout.read())
+        self.assertTrue('changed source' in stdout.read())
 
     def test_broken_detail_verbosity(self):
         c = self.config
