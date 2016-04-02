@@ -134,6 +134,10 @@ class TestSourceDocSkeleton(object):
             os.mkdir(self.dirname)
         self.md5s = dict()
 
+    def copytree(self, source):
+        dst = opj(self.dirname, opb(source))
+        shutil.copytree(source, dst)
+
     def create_stale(self, fname):
         l = list(self.md5s[fname])
         random.shuffle(l)
