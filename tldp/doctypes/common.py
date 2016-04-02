@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import os
 import sys
 import stat
+import time
 import errno
 import codecs
 import shutil
@@ -140,9 +141,37 @@ class BaseDoctype(object):
             s = '''
 # - - - - - {source.stem} - - - - - -
 
-            cd -- "{output.dirname}"'''
+cd -- "{output.dirname}"'''
             return self.shellscript(s, **kwargs)
         os.chdir(self.output.dirname)
+        return True
+
+    def generate_md5sums(self, **kwargs):
+        logger.debug("%s generating MD5SUMS in %s.",
+                     self.output.stem, self.output.dirname)
+        md5file = os.path.join(self.output.dirname, 'MD5SUMS')
+        fileset = sorted(self.source.md5sums.items())
+        if self.config.script:
+            l = list()
+            for fname, hashval in fileset:
+                l.append('# {}  {}'.format(hashval, fname))
+            md5s = '\n'.join(l)
+            s = '''# -- calculating MD5SUMS file
+#
+# md5sum > {} -- {}
+#
+# -- These are the values for sources at timestamp {}
+#
+{}
+#'''
+            s = s.format(md5file,
+                         ' '.join(self.source.statinfo.keys()),
+                         time.strftime('%F-%T', time.gmtime()),
+                         md5s)
+            return self.shellscript(s, **kwargs)
+        with codecs.open(md5file, 'w', encoding='utf-8') as f:
+            for fname, hashval in fileset:
+                print(hashval + '  ' + fname, file=f)
         return True
 
     def copy_static_resources(self, **kwargs):
@@ -233,6 +262,7 @@ class BaseDoctype(object):
                  'clear_output',
                  'mkdir_output',
                  'chdir_output',
+                 'generate_md5sums',
                  'copy_static_resources',
                  ]
 
