@@ -8,6 +8,7 @@ import os
 import sys
 import errno
 import logging
+import hashlib
 
 from tldp.ldpcollection import LDPDocumentCollection
 
@@ -196,6 +197,9 @@ class SourceDocument(object):
             self.statinfo = statfiles(self.dirname, relative=parentdir)
         else:
             self.statinfo = statfiles(self.filename, relative=self.dirname)
+        self.md5sums = dict()
+        for sourcefile in self.statinfo.keys():
+            self.md5sums[sourcefile] = hashlib.md5(sourcefile).hexdigest()
 
     def detail(self, widths, verbose, file=sys.stdout):
         '''produce a small tabular output about the document'''
