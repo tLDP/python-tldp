@@ -4,6 +4,10 @@ tldp - tools for publishing from TLDP sources
 .. image:: https://api.travis-ci.org/martin-a-brown/python-tldp.svg
     :target: https://github.com/tLDP/python-tldp
 
+.. image:: http://img.shields.io/badge/license-MIT-brightgreen.svg 
+    :target: http://opensource.org/licenses/MIT
+    :alt: MIT license
+
 This package was written for the Linux Documentation Project (TLDP) to help
 with management and publication automation of source documents.  The primary
 interface provided is a command-line tool caalled `ldptool`.  The canonical
