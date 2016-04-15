@@ -11,7 +11,6 @@ import time
 import errno
 import codecs
 import shutil
-import socket
 import logging
 import inspect
 from tempfile import NamedTemporaryFile as ntf
@@ -168,8 +167,7 @@ cd -- "{output.dirname}"'''
                          ' '.join(self.source.md5sums.keys()),
                          md5s)
             return self.shellscript(s, **kwargs)
-        header = '# -- MD5SUMS for {} computed on {} at {}'
-        header = header.format(self.source.stem, socket.gethostname(), timestr)
+        header = '# -- MD5SUMS for {}'.format(self.source.stem)
         writemd5sums(md5file, self.source.md5sums, header=header)
         return True
 
