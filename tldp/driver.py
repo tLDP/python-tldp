@@ -228,13 +228,12 @@ def create_dtworkingdir(config, docs):
     return True, None
 
 
-def post_publish_cleanup(docs):
-    '''clean up any doctype directories left in --builddir'''
-    dtworkingdirs = set([x.dtworkingdir for x in docs])
-    for d in dtworkingdirs:
+def post_publish_cleanup(workingdirs):
+    '''clean up empty directories left under --builddir'''
+    for d in workingdirs:
         if os.path.isdir(d):
             try:
-                logger.debug("removing doctype build dir %s", d)
+                logger.debug("removing build dir %s", d)
                 os.rmdir(d)
             except OSError as e:
                 if e.errno != errno.ENOTEMPTY:
@@ -338,7 +337,9 @@ def publish(config, docs, **kwargs):
             logger.debug("%s removing old directory %s",
                          source.stem, source.working.dirname)
             shutil.rmtree(source.working.dirname)
-    post_publish_cleanup(docs)
+    workingdirs = list(set([x.dtworkingdir for x in docs]))
+    workingdirs.append(config.builddir)
+    post_publish_cleanup(workingdirs)
     return os.EX_OK
 
 
