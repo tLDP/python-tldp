@@ -283,7 +283,7 @@ class Test_post_publish_cleanup(TestInventoryBase):
         tldp.driver.prepare_docs_build_mode(c, [doc])
         with open(opj(doc.dtworkingdir, 'annoyance-file.txt'), 'w'):
             pass
-        tldp.driver.post_publish_cleanup([doc])
+        tldp.driver.post_publish_cleanup([doc.dtworkingdir])
         self.assertTrue(os.path.isdir(doc.dtworkingdir))
 
 
