@@ -11,7 +11,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as r_file:
 
 setup(
     name='tldp',
-    version='0.7.4',
+    version='0.7.5',
     license='MIT',
     author='Martin A. Brown',
     author_email='martin@linux-ip.net',
