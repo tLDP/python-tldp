@@ -49,6 +49,8 @@ class TestInventoryHandling(TestInventoryBase):
         self.assertEqual(dict(), doc.output.md5sums)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEqual(1, len(inv.stale.keys()))
+        if not os.path.isdir(c.builddir):
+            os.mkdir(c.builddir)
         exitcode = tldp.driver.run(argv)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
         self.assertEqual(1, len(inv.published.keys()))
@@ -75,6 +77,8 @@ class TestInventoryHandling(TestInventoryBase):
 
         # -- rebuild (why not?)
         #
+        if not os.path.isdir(c.builddir):
+            os.mkdir(c.builddir)
         exitcode = tldp.driver.run(argv)
         self.assertEqual(exitcode, os.EX_OK)
         inv = tldp.inventory.Inventory(c.pubdir, c.sourcedir)
