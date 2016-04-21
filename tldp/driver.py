@@ -106,10 +106,11 @@ def summary(config, *args, **kwargs):
     if inv is None:
         inv = Inventory(config.pubdir, config.sourcedir)
     width = Namespace()
-    width.doctype = max([len(x.formatname) for x in knowndoctypes])
+    width.doctype = max([len(x.__name__) for x in knowndoctypes])
     width.status = max([len(x) for x in status_types])
     width.count = len(str(len(inv.source.keys())))
-    print('By Status Type', '--------------', sep='\n', file=file)
+    print('By Document Status (STATUS)', '---------------------------', 
+          sep='\n', file=file)
     for status in status_types:
         count = len(getattr(inv, status, 0))
         s = '{0:{w.status}}  {1:{w.count}}  '.format(status, count, w=width)
@@ -128,10 +129,11 @@ def summary(config, *args, **kwargs):
                 if abbrev:
                     s = s + ', and %d more ...' % (len(abbrev))
             print(s, file=file)
-    print('', 'By Document Type', '----------------', sep='\n', file=file)
+    print('', 'By Document Type (DOCTYPE)', '--------------------------', 
+          sep='\n', file=file)
     summarybytype = collections.defaultdict(list)
     for doc in inv.source.values():
-        name = doc.doctype.formatname
+        name = doc.doctype.__name__
         summarybytype[name].append(doc.stem)
     for doctype, docs in summarybytype.items():
         count = len(docs)
@@ -158,7 +160,7 @@ def summary(config, *args, **kwargs):
 def detail(config, docs, **kwargs):
     file = kwargs.get('file', sys.stdout)
     width = Namespace()
-    width.doctype = max([len(x.formatname) for x in knowndoctypes])
+    width.doctype = max([len(x.__name__) for x in knowndoctypes])
     width.status = max([len(x) for x in status_types])
     width.stem = max([len(x.stem) for x in docs])
     # -- if user just said "list" with no args, then give the user something
