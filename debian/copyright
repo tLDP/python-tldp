@@ -1,0 +1,84 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: python-tldp
+Upstream-Contact:  Martin A. Brown <martin@linux-ip.net>
+Source: https://github.com/tLDP/python-tldp
+
+Files: *
+Copyright: 2016 Linux Documentation Project
+License: MIT
+
+Files: extras/dsssl/* extras/css/*
+Copyright: 2000-2003  - Greg Ferguson (gferg@metalab.unc.edu)
+License: GPL-2+
+
+Files: extras/dsssl/* extras/xsl/* extras/css/*
+Copyright: 2000-2002  - David Horton (dhorton@speakeasy.net)
+License: GFDL-1.2
+
+Files: tests/sample-documents/Docbook-4.2-WHYNOT/images/* tests/sample-documents/DocBookSGML-Larger/images/bullet.png tests/sample-documents/Linuxdoc-Larger/images/*
+Copyright: Copyright (C) 2011-2012 O'Reilly Media
+License: MIT
+
+Files: extras/collateindex.pl
+Copyright: 1997-2001 Norman Walsh
+License: MIT
+
+
+License: MIT
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+ files (the ``Software''), to deal in the Software without
+ restriction, including without limitation the rights to use,
+ copy, modify, merge, publish, distribute, sublicense, and/or
+ sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following
+ conditions:
+ .
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+ .
+ Except as contained in this notice, the names of individuals
+ credited with contribution to this software shall not be used in
+ advertising or otherwise to promote the sale, use or other
+ dealings in this Software without prior written authorization
+ from the individuals in question.
+ .
+ Any stylesheet derived from this Software that is publically
+ distributed will be identified with a different name and the
+ version strings in any derived Software will be changed so that
+ no possibility of confusion between the derived package and this
+ Software will exist.
+ .
+ Warranty
+ --------
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT.  IN NO EVENT SHALL NORMAN WALSH OR ANY OTHER
+ CONTRIBUTOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+
+License: GPL-2+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+ .
+ On Debian systems, the complete text of the GPL-2 can be found in
+ /usr/share/common-licenses/GPL-2
+
+License: GFDL-1.2
+ On Debian systems, the complete text of the GFDL-1.2 can be found in
+ /usr/share/common-licenses/GFDL-1.2
+ 
