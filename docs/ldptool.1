@@ -1,0 +1,528 @@
+.\" Man page generated from reStructuredText.
+.
+.TH "LDPTOOL" "1" "2016-04-21" "1.9.2" "ldptool"
+.SH NAME
+ldptool \- DocBook, Linuxdoc and Asciidoc build/publishing tool.
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.SH SYNOPSIS
+.sp
+\fBldptool\fP [\fIoptions\fP]  [\fIpathname\fP [...]]
+.SH DESCRIPTION
+.sp
+\fBldptool\fP creates chunked HTML, single\-page HTML, PDF and plain text
+outputs for each source document it is passed as a \fIpathname\fP\&.  See
+\fI\%Source document discovery\fP\&.
+.sp
+If it is not passed any arguments, \fIldptool\fP will collect all of the
+directories specified with the \-\-sourcedir option and scan through these
+directories looking for valid source documents.
+.sp
+The action taken depends on the options passed to the utility.  If no options
+are passed, then the default \fI\-\-build\fP action will be attempted.  The options
+controlling the overall program are described in the sections \fI\%Action
+options\fP and \fI\%Main options\fP\&.  All other options are relegated to the tail of
+the manpage, because they are merely configurables for individual document
+processors.
+.sp
+The \fIldptool\fP can:
+.INDENT 0.0
+.IP \(bu 2
+generate an inventory from multiple source directories (\fI\-\-sourcedir\fP)
+.IP \(bu 2
+crawl through a single output collection (\fI\-\-pubdir\fP)
+.IP \(bu 2
+match the sources to the outputs (based on document stem name)
+.IP \(bu 2
+describe the collection by type and status (\fI\-\-summary\fP)
+.IP \(bu 2
+list out individual document type and status (\fI\-\-list\fP)
+.IP \(bu 2
+describe supported source formats (\fI\-\-formats\fP)
+.IP \(bu 2
+describe the meaning of document status (\fI\-\-statustypes\fP)
+.IP \(bu 2
+build the expected (non\-configurable) set of outputs (\fI\-\-build\fP)
+.IP \(bu 2
+build and publish the outputs (\fI\-\-publish\fP)
+.IP \(bu 2
+produce runnable shell script to STDOUT (\fI\-\-script\fP)
+.IP \(bu 2
+generate configuration files that it can then take as input
+.UNINDENT
+.SH ACTION OPTIONS
+.INDENT 0.0
+.TP
+.B \-h\fP,\fB  \-\-help
+show a help message and exit
+.TP
+.B \-b\fP,\fB  \-\-build
+Build LDP documentation into the \fI\-\-builddir\fP and exit.
+This is the default action if no other action is specified.
+.TP
+.B \-p\fP,\fB  \-\-publish
+Build LDP documentation into the \fI\-\-builddir\fP\&.  If all builds are
+successful, then copy the result for each source document into the
+\fI\-\-pubdir\fP, effectively replacing (and deleting) the older documents;
+finally, remove \fI\-\-builddir\fP, if empty.
+.TP
+.B \-S\fP,\fB  \-\-script
+Print a runnable bash script to STDOUT.  This will produce a
+shell script showing what would be executed upon \fI\-\-build\fP\&.
+.TP
+.B \-l\fP,\fB  \-\-detail\fP,\fB  \-\-list
+Examine the various SOURCEDIRs and the PUBDIR and generate a report
+showing the FORMAT of the source document and STATUS of the document.
+Add the \fI\-\-verbose\fP flag for more information.
+.TP
+.B \-t\fP,\fB  \-\-summary
+Examine the various SOURCEDIRs and the PUBDIR and generate a short
+report summarizing documents by STATUS and by DOCTYPE.  Add the
+\fI\-\-verbose\fP flag for more information.
+.TP
+.B \-T\fP,\fB  \-\-doctypes\fP,\fB  \-\-formats\fP,\fB  \-\-format\fP,\fB  \-\-list\-doctypes\fP,\fB  \-\-list\-formats
+List the supported DOCTYPEs; there is one processor for each DOCTYPE.
+.TP
+.B \-\-statustypes\fP,\fB  \-\-list\-statustypes
+List the possible document STATUS types.  There are only seven basic status
+types, but several synonyms and groups of STATUS types (internally called
+\(aqclasses\(aq).
+.UNINDENT
+.SH MAIN OPTIONS
+.INDENT 0.0
+.TP
+.B \-s, \-\-sourcedir, \-\-source\-dir, \-\-source\-directory SOURCEDIR (default: None)
+Specify the name of a SOURCEDIR which contains source documents.  See
+also \fI\%Source document discovery\fP\&.
+.sp
+The \fI\-\-sourcedir\fP option may be used more than once.
+.TP
+.B \-o, \-\-pubdir, \-\-output, \-\-outputdir, \-\-outdir PUBDIR (default: None)
+Specify the the name of a PUBDIR.  Used as the publication if the build
+succeeds.  When \fI\-\-publish\fP is used with \fI\-\-pubdir\fP, the output of
+a successful document build will be used to replace any existing document
+output directory in PUBDIR.
+.TP
+.B \-d, \-\-builddir, \-\-build\-dir, \-\-build\-directory BUILDDIR (default: \(aqldptool\-build\(aq)
+Specify the name of a BUILDDIR.  A scratch directory used to build each
+source document; directory is temporary and will be removed if the
+build succeeds AND \fI\-\-publish\fP has been requested.  Under the \fI\-\-build\fP
+action, all output directories and contents remain in the BUILDDIR for
+inspection.
+.TP
+.B \-\-verbose [True | False] (default: False)
+Provide more information in \-\-list and \-\-detail actions.  The option can
+be thrown without an argument which is equivalent to True.  To allow the
+CLI to supersede environment or configuration file values, \fI\-\-verbose
+false\fP is also supported.
+.TP
+.B \-\-skip [STEM | DOCTYPE | STATUS]
+Specify a source document name, document type or document status to skip
+during processing.  Each document is known by its STEM (see also \fI\%Source
+document discovery\fP), its document DOCTYPE (see list below),
+and by the document STATUS (see list below).
+.sp
+The \fI\-\-skip\fP option may be used more than once.
+.INDENT 7.0
+.TP
+.B DOCTYPE can be one of:
+Asciidoc, Docbook4XML, Docbook5XML, DocbookSGML, or Linuxdoc
+(See also output of \fI\-\-doctypes\fP)
+.TP
+.B STATUS can be one of:
+source, sources, output, outputs, published, stale, broken, new
+orphan, orphans, orphaned, problems, work, all
+(See also output of \fI\-\-statustypes\fP)
+.UNINDENT
+.TP
+.B \-\-resources RESOURCEDIR (default: [\(aqimages\(aq, \(aqresources\(aq])
+Some source documents provide images, scripts and other content.  These
+files are usually stored in a directory such as ./images/ that need to be
+copied intact into the output directory.  Adjust the set of resource
+directories wyth this option.
+.sp
+The \fI\-\-resources\fP option may be used more than once.
+.TP
+.B \-\-loglevel LOGLEVEL (default: ERROR)
+set the loglevel to LOGLEVEL; can be passed as numeric or textual; in
+increasing order: CRITICAL (50), ERROR (40), WARNING (30), INFO (20),
+DEBUG (10); N.B. the text names are not case\-sensitive: \(aqinfo\(aq is OK
+.TP
+.B \-c, \-\-configfile, \-\-config\-file, \-\-cfg CONFIGFILE (default: None)
+Specify the name of a CONFIGFILE containing parameters to be read for
+this invocation; an INI\-style configuration file.  A sample can be
+generated with \-\-dump\-cfg.  Although only one CONFIGFILE can be specified
+via the environment or the command\-line, the system config file
+(/etc/ldptool/ldptool.ini) is always read.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-dump_cli\fP,\fB  \-\-dump\-cli
+Produce the resulting, merged configuration as in CLI form.  (After
+processing all configuration sources (defaults, system configuration, user
+configuration, environment variables, command\-line.)
+.TP
+.B \-\-dump_env\fP,\fB  \-\-dump\-env
+Produce the resulting, merged configuration as a shell environment file.
+.TP
+.B \-\-dump_cfg\fP,\fB  \-\-dump\-cfg
+Produce the resulting, merged configuration as an INI\-configuration file.
+.TP
+.B \-\-debug_options\fP,\fB  \-\-debug\-options
+Provide lots of debugging information on option\-processing; see also
+\fI\-\-loglevel debug\fP\&.
+.UNINDENT
+.SH SOURCE DOCUMENT DISCOVERY
+.sp
+Almost all documentation formats provide the possibility that a document can
+span multiple files.  Although more than half of the LDP document collection
+consists of single\-file HOWTO contributions, there are a number of documents
+that are composed of dozens, even hundreds of files.  In order to accommodate
+both the simple documents and these much more complex documents, LDP adopted a
+simple (unoriginal) naming strategy to allow a single document to span
+multiple files:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+Each document is referred to by a stem, which is the filename without any
+extension.  A single file document is simple STEM.EXT.  A document that
+requires many files must be contained in a directory with the STEM name.
+Therefore, the primary source document will always be called either STEM.EXT
+or STEM/STEM.EXT.
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+(If there is a STEM/STEM.xml and STEM/STEM.sgml in the same directory, that is
+an error, and \fIldptool\fP will freak out and shoot pigeons.)
+.sp
+During document discovery, \fIldptool\fP will walk through all of the source
+directories specified with \fI\-\-sourcedir\fP and build a complete list of all
+identifiable source documents.  Then, it will walk through the publication
+directory \fI\-\-pubdir\fP and match up each output directory (by its STEM) with the
+corresponding STEM found in one of the source directories.
+.sp
+Then, \fIldptool\fP can then determine whether any source files are newer.  It uses
+content\-hashing, i.e. MD5, and if a source file is newer, the status is
+\fIstale\fP\&.  If there is no matching output, the source file is \fInew\fP\&.  If
+there\(aqs an output with no source, that is in \fIorphan\fP\&.  See the
+\fI\-\-statustypes\fP output for the full list of STATUS types.
+.SH EXAMPLES
+.sp
+To build and publish a single document:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+$ ldptool \-\-publish DocBook\-Demystification\-HOWTO
+$ ldptool \-\-publish ~/vcs/LDP/LDP/howto/docbook/Valgrind\-HOWTO.xml
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+To build and publish anything that is new or updated work:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+$ ldptool \-\-publish
+$ ldptool \-\-publish work
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+To (re\-)build and publish everything, regardless of state:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+$ ldptool \-\-publish all
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+To generate a specific output (into a \-\-builddir):
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+$ ldptool \-\-build DocBook\-Demystification\-HOWTO
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+To generate all outputs into a \-\-builddir (should exist):
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+$ ldptool \-\-builddir ~/tmp/scratch\-directory/ \-\-build all
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+To build new/updated work, but pass over a trouble\-maker:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+$ ldptool \-\-build \-\-skip HOWTO\-INDEX
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+To loudly generate all outputs, except a trouble\-maker:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+$ ldptool \-\-build all \-\-loglevel debug \-\-skip HOWTO\-INDEX
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+To print out a shell script for building a specific document:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+$ ldptool \-\-script TransparentProxy
+$ ldptool \-\-script ~/vcs/LDP/LDP/howto/docbook/Assembly\-HOWTO.xml
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SH ENVIRONMENT
+.sp
+The \fIldptool\fP accepts configuration via environment variables.  All such
+environment variables are prefixed with the name \fILDPTOOL_\fP\&.
+.sp
+The name of each variable is constructed from the primary
+command\-line option name.  The \fI\-b\fP is better known as \fI\-\-builddir\fP, so the
+environment variable would be \fILDPTOOL_BUILDDIR\fP\&.  Similarly, the environment
+variable names for each of the handlers can be derived from the name of the
+handler and its option.  For example, the Asciidoc processor needs to have
+access to the \fIxmllint\fP and \fIasciidoc\fP utilities.
+.sp
+The environment variable corresponding to the CLI option \fI\-\-asciidoc\-xmllint\fP
+would be \fILDPTOOL_ASCIIDOC_XMLLINT\fP\&.  Similarly, \fI\-\-asciidoc\-asciidoc\fP should
+be \fILDPTOOL_ASCIIDOC_ASCIIDOC\fP\&.
+.sp
+Variables accepting multiple options use the comma as a separator:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+LDPTOOL_RESOURCES=images,resources
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+The complete listing of possible environment variables with all current values
+can be printed by using \fIldptool \-\-dump\-env\fP\&.
+.SH CONFIGURATION FILE
+.sp
+The system\-installed configuration file is \fI/etc/ldptool/ldptool.ini\fP\&.  The
+format is a simple INI\-style configuration file with a block for the main
+program and a block for each handler.  Here\(aqs a partial example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[ldptool]
+resources = images,
+        resources
+loglevel = 40
+
+[ldptool\-asciidoc]
+asciidoc = /usr/bin/asciidoc
+xmllint = /usr/bin/xmllint
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+Note that the comma separates multiple values for a single option
+(\fIresources\fP) in the above config fragment.
+.sp
+The complete, current configuration file can be printed by using \fIldptool
+\-\-dump\-cfg\fP\&.
+.SH CONFIGURATION OPTION FRAGMENTS FOR EACH DOCTYPE HANDLER
+.sp
+Every source format has a single handler and each DOCTYPE handler may require
+a different set of executables and/or data files to complete its job.  The
+defaults depend on the platform and are detected at runtime.  In most cases,
+the commands are found in \fI/usr/bin\fP (see below).  The data files, for example
+the LDP XSL files and the docbook.rng, may live in different places on
+different systems.
+.sp
+If a given DOCTYPE handler cannot find all of its requirements, it will
+complain to STDERR during execution, but will not abort the rest of the run.
+.sp
+If, for some reason, \fIldptool\fP cannot find data files, but you know where they
+are, consider generating a configuration file with the \fI\-\-dump\-cfg\fP option,
+adjusting the relevant options and then passing the \fI\-\-configfile your.ini\fP to
+specify these paths.
+.SH ASCIIDOC
+.INDENT 0.0
+.TP
+.BI \-\-asciidoc\-asciidoc \ PATH
+full path to asciidoc [/usr/bin/asciidoc]
+.TP
+.BI \-\-asciidoc\-xmllint \ PATH
+full path to xmllint [/usr/bin/xmllint]
+.UNINDENT
+.sp
+N.B. The Asciidoc processor simply converts the source document to a
+Docbook4XML document and then uses the richer Docbook4XML toolchain.
+.SH DOCBOOK4XML
+.INDENT 0.0
+.TP
+.BI \-\-docbook4xml\-xslchunk \ PATH
+full path to LDP HTML chunker XSL
+.TP
+.BI \-\-docbook4xml\-xslsingle \ PATH
+full path to LDP HTML single\-page XSL
+.TP
+.BI \-\-docbook4xml\-xslprint \ PATH
+full path to LDP FO print XSL
+.TP
+.BI \-\-docbook4xml\-xmllint \ PATH
+full path to xmllint [/usr/bin/xmllint]
+.TP
+.BI \-\-docbook4xml\-xsltproc \ PATH
+full path to xsltproc [/usr/bin/xsltproc]
+.TP
+.BI \-\-docbook4xml\-html2text \ PATH
+full path to html2text [/usr/bin/html2text]
+.TP
+.BI \-\-docbook4xml\-fop \ PATH
+full path to fop [/usr/bin/fop]
+.TP
+.BI \-\-docbook4xml\-dblatex \ PATH
+full path to dblatex [/usr/bin/dblatex]
+.UNINDENT
+.SH DOCBOOK5XML
+.INDENT 0.0
+.TP
+.BI \-\-docbook5xml\-xslchunk \ PATH
+full path to LDP HTML chunker XSL
+.TP
+.BI \-\-docbook5xml\-xslsingle \ PATH
+full path to LDP HTML single\-page XSL
+.TP
+.BI \-\-docbook5xml\-xslprint \ PATH
+full path to LDP FO print XSL
+.TP
+.BI \-\-docbook5xml\-rngfile \ PATH
+full path to docbook.rng
+.TP
+.BI \-\-docbook5xml\-xmllint \ PATH
+full path to xmllint [/usr/bin/xmllint]
+.TP
+.BI \-\-docbook5xml\-xsltproc \ PATH
+full path to xsltproc [/usr/bin/xsltproc]
+.TP
+.BI \-\-docbook5xml\-html2text \ PATH
+full path to html2text [/usr/bin/html2text]
+.TP
+.BI \-\-docbook5xml\-fop \ PATH
+full path to fop [/usr/bin/fop]
+.TP
+.BI \-\-docbook5xml\-dblatex \ PATH
+full path to dblatex [/usr/bin/dblatex]
+.TP
+.BI \-\-docbook5xml\-jing \ PATH
+full path to jing [/usr/bin/jing]
+.UNINDENT
+.SH DOCBOOKSGML
+.INDENT 0.0
+.TP
+.BI \-\-docbooksgml\-docbookdsl \ PATH
+full path to html/docbook.dsl
+.TP
+.BI \-\-docbooksgml\-ldpdsl \ PATH
+full path to ldp/ldp.dsl [None]
+.TP
+.BI \-\-docbooksgml\-jw \ PATH
+full path to jw [/usr/bin/jw]
+.TP
+.BI \-\-docbooksgml\-html2text \ PATH
+full path to html2text [/usr/bin/html2text]
+.TP
+.BI \-\-docbooksgml\-openjade \ PATH
+full path to openjade [/usr/bin/openjade]
+.TP
+.BI \-\-docbooksgml\-dblatex \ PATH
+full path to dblatex [/usr/bin/dblatex]
+.TP
+.BI \-\-docbooksgml\-collateindex \ PATH
+full path to collateindex
+.UNINDENT
+.SH LINUXDOC
+.INDENT 0.0
+.TP
+.BI \-\-linuxdoc\-sgmlcheck \ PATH
+full path to sgmlcheck [/usr/bin/sgmlcheck]
+.TP
+.BI \-\-linuxdoc\-sgml2html \ PATH
+full path to sgml2html [/usr/bin/sgml2html]
+.TP
+.BI \-\-linuxdoc\-html2text \ PATH
+full path to html2text [/usr/bin/html2text]
+.TP
+.BI \-\-linuxdoc\-htmldoc \ PATH
+full path to htmldoc [/usr/bin/htmldoc]
+.UNINDENT
+.SH AUTHOR
+Martin A. Brown <martin@linux-ip.net>
+.SH COPYRIGHT
+Manual page (C) 2016, Linux Documentation Project
+.\" Generated by docutils manpage writer.
+.
