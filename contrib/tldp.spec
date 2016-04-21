@@ -54,7 +54,7 @@ python setup.py build
 
 %install
 python setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
-install -D --mode 0644 doc/ldptool.1 %{buildroot}%{_mandir}/man1/ldptool.1
+install -D --mode 0644 docs/ldptool.1 %{buildroot}%{_mandir}/man1/ldptool.1
 perl -pi -e 's,(/etc/ldptool/ldptool.ini),%config(noreplace) $1,' INSTALLED_FILES
 
 %clean
