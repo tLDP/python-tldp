@@ -62,3 +62,4 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f INSTALLED_FILES
 %defattr(-,root,root)
+%{_mandir}/man1/ldptool.1*
