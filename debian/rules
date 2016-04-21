@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-export PYBUILD_VERBOSE=1
+# export PYBUILD_VERBOSE=1
 export PYBUILD_NAME=tldp
 
 %:
