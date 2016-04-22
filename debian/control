@@ -1,4 +1,4 @@
-Source: python3-tldp
+Source: tldp
 Maintainer: Martin A. Brown <martin@linux-ip.net>
 Section: python
 X-Python3-Version: >= 3.4
