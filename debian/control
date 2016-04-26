@@ -1,0 +1,42 @@
+Source: tldp
+Maintainer: Martin A. Brown <martin@linux-ip.net>
+Section: python
+X-Python3-Version: >= 3.4
+Priority: optional
+Homepage: https://github.com/tLDP/python-tldp
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               python3-all,
+               python3-networkx,
+               python3-nose,
+               python3-coverage,
+               htmldoc,
+               fop,
+               jing,
+               sgml2x,
+               xsltproc,
+               asciidoc,
+               docbook,
+               docbook5-xml,
+               docbook-xsl-ns,
+               linuxdoc-tools-latex,
+               linuxdoc-tools-text,
+               ldp-docbook-xsl,
+               ldp-docbook-dsssl,
+               html2text
+Standards-Version: 3.9.8
+Vcs-Git: https://github.com/tLDP/python-tldp.git
+Vcs-Browser: https://github.com/tLDP/python-tldp
+
+Package: python3-tldp
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         python3,
+         python3-networkx
+Description: automatic publishing tool for DocBook, Linuxdoc and Asciidoc
+ The Linux Documentation Project (TLDP) stores hundreds of documents in
+ DocBook SGML, DocBook XML, Linuxdoc and Asciidoc formats.  This tool
+ automatically detects the source format and generates a directory containing
+ chunked and single-page HTML, a PDF and a plain text output.
+

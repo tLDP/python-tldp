@@ -1,8 +1,8 @@
 %define sourcename tldp
 %define name python-tldp
-%define version 0.7.5
-%define unmangled_version 0.7.5
-%define unmangled_version 0.7.5
+%define version 0.7.7
+%define unmangled_version 0.7.7
+%define unmangled_version 0.7.7
 %define release 1
 
 Summary: processing tools for Asciidoc, DocBook XML, DocBook SGML and Linuxdoc
@@ -54,6 +54,7 @@ python setup.py build
 
 %install
 python setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+install -D --mode 0644 docs/ldptool.1 %{buildroot}%{_mandir}/man1/ldptool.1
 perl -pi -e 's,(/etc/ldptool/ldptool.ini),%config(noreplace) $1,' INSTALLED_FILES
 
 %clean
@@ -61,3 +62,4 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f INSTALLED_FILES
 %defattr(-,root,root)
+%{_mandir}/man1/ldptool.1*
