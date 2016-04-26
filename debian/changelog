@@ -1,4 +1,4 @@
-tldp (0.7.7) unstable; urgency=low
+tldp (0.7.8) unstable; urgency=low
 
   * creating a manpage to satisfy Lintian, bumping version
   * renamed source package to 'tldp'
