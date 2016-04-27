@@ -1,8 +1,8 @@
 %define sourcename tldp
 %define name python-tldp
-%define version 0.7.9
-%define unmangled_version 0.7.9
-%define unmangled_version 0.7.9
+%define version 0.7.10
+%define unmangled_version 0.7.10
+%define unmangled_version 0.7.10
 %define release 1
 
 Summary: automatic publishing tool for DocBook, Linuxdoc and Asciidoc
