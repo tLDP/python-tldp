@@ -41,15 +41,3 @@ Description: automatic publishing tool for DocBook, Linuxdoc and Asciidoc
  DocBook SGML, DocBook XML, Linuxdoc and Asciidoc formats.  This tool
  automatically detects the source format and generates a directory containing
  chunked and single-page HTML, a PDF and a plain text output.
-
-Package: ldptool
-Architecture: all
-Depends: ${misc:Depends},
-         ${python3:Depends},
-         python3,
-         python3-tldp
-Description: command-line tool for publishing DocBook, Linuxdoc and Asciidoc
- The main user-level interface to the suite of tools for processing
- DocBook SGML, DocBook XML, Linuxdoc and Asciidoc formats.  This tool
- automatically detects the source format and generates a directory containing
- chunked and single-page HTML, a PDF and a plain text output.
