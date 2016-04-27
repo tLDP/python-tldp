@@ -21,7 +21,8 @@ def transform(mapping, text):
         text = text.replace(tag, replacement)
     return text
 
-subst = {'@' + VERSION + '@': VERSION}
+subst = {'@VERSION@': VERSION}
+print(subst)
 
 fout.write(transform(subst, fin.read()))
 
