@@ -1,6 +1,6 @@
 Source: tldp
 Maintainer: Martin A. Brown <martin@linux-ip.net>
-Section: python
+Section: text
 X-Python3-Version: >= 3.4
 Priority: optional
 Homepage: https://github.com/tLDP/python-tldp
@@ -10,6 +10,8 @@ Build-Depends: debhelper (>= 9),
                python3-networkx,
                python3-nose,
                python3-coverage,
+               python3-setuptools,
+               python3-sphinx,
                htmldoc,
                fop,
                jing,
@@ -39,4 +41,3 @@ Description: automatic publishing tool for DocBook, Linuxdoc and Asciidoc
  DocBook SGML, DocBook XML, Linuxdoc and Asciidoc formats.  This tool
  automatically detects the source format and generates a directory containing
  chunked and single-page HTML, a PDF and a plain text output.
-

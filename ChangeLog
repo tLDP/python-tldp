@@ -1,0 +1,207 @@
+
+2016-04-21 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to tldp-0.7.7
+  * Debian packaging attempt #1, created build with 'native' source format
+    which will not be accepted
+  * add debian/copyright file
+  * ldptool manpage (sphinx-generated for Debian; statically installed in RPM)
+  * switch --detail reporting to use predictable DOCTYPE and STATUSTYPE names
+
+2016-04-09 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.7.5
+  * remove 'random' text from .LDP-source-MD5SUMS
+  * remove the --builddir if empty after complete run
+
+2016-04-02 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.7.2
+  * using filesystem age for determining build need will not work; switch
+    to using content hash (MD5) to determine whether a rebuild is necessary or
+    not
+  * create .LDP-source-MD5SUMS in each output directory that lists all of
+    the hashes of the source files used to create that output directory
+  * remove testing and references to statfiles() and supporting friends
+  * add a 'lifecycle' test to the testing suite
+  * report on running success and failure counts during the run (to allow
+    interruptability if the user wishes)
+
+2016-03-28 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.7.0
+  * support better handling of --verbose; --verbose yes, --verbose false
+  * update and improve documentation in stock configuration file
+  * provide better feedback on directory existence (or not) rather than
+    silently doing something unpredicable
+
+2016-03-27 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.6.7
+  * correct situation where publish() was not propagating errors returned
+    from the build() function; add test
+  * add broken example Docbook 4 XML file to test suite
+  * use unicode_literals in all testing code, too
+
+2016-03-24 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.6.2
+  * fix all sorts of runtime requirements to build under Ubuntu
+    and run the full test suite on Travis CI
+
+2016-03-15 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.6.0
+  * full support for Python3, all unicode-ified and happy
+  * add test to fall back to iso-8859-1 for SGML docs
+  * success testing with tox under Python 2.7 and 3.4
+
+2016-03-14 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.5.5
+  * use sgmlcheck for Linuxdoc sources
+  * adjust reporting of discovered documents
+  * use context to prevent more FD leakage
+  * begin changes to support Python3; e.g. io.StringIO, absolute_import
+    unicode changes, lots of codecs.open(), unicode_literals, 
+
+2016-03-11 Martin A. Brown <martin@linux-ip.net>
+  * handle EPIPE and INT with signal.SIG_DFL
+
+2016-03-10 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.5.3
+  * create long running tests that exercise more of the code in the likely
+    way that a user would use the utility
+  * add testing for Docbook 5 XML
+  * improve look and consistency for --list (--detail) output
+  * improve README.rst
+
+2016-03-09 Martin A. Brown <martin@linux-ip.net>
+  * remove unused markdown and rst skeleton processors
+  * pass **kwargs through all processor tools
+
+2016-03-07 Martin A. Brown <martin@linux-ip.net>
+  * add support for --builddir, ensure that --builddir is on the same
+    filesystem as --pubdir
+  * add new option --publish; can't replace a directory atomically, but
+    get as close as possible by swapping the newly built output (from
+    --builddir) with the old one (formerly in --pubdir)
+  * switch to using 'return os.EX_OK' from functions in driver.py that
+    can be tested and/or wrapped in sys.exit(function(args))
+  * testing improvements for Asciidoc and driver.py
+
+2016-03-06 Martin A. Brown <martin@linux-ip.net>
+  * provide user-discoverable support for --doctypes and --statustypes
+  * correct removal of Docbook4XML generated source document during build
+
+2016-03-05 Martin A. Brown <martin@linux-ip.net>
+  * use a simplified technique (arbitrary attributes on function objects)
+    to generate the DAG used for topological sorting and build order
+    generation (thanks to Python mailing lists for the idea)
+
+2016-03-04 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.4.8
+  * add FO generation XSL
+  * do not set a system default for --sourcedir / --pubdir (user must
+    specify, somehow)
+  * DocBook5/DocBook4: process xincludes before validation with xmllint
+  * add support for AsciiDoc detection and processing
+
+2016-03-03 Martin A. Brown <martin@linux-ip.net>
+  * validate all documents (where possible) before processing
+  * provide support for DocBook 5.0 (XML)
+  * correct --loglevel handling in driver.py (finally works properly!)
+  * complete support for --script output
+
+2016-03-02 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.4.5
+  * fix handling of STEMs which contain a '.' in the name
+  * review signature identification in each DOCTYPE processor and 
+    validate and reconcile errors with PUBLIC / SYSTEM identifiers
+    for the SGML and XML declarations
+  * make sure that build() exits non-zero if ANY build fails
+
+2016-03-01 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to 0.4.2
+  * support a system configuration file /etc/ldptool
+  * add entry points and make first full installable build
+  * allow empty OutputDirectory() object
+  * begin overhauling the porcelain in driver.py
+
+2016-02-29 Martin A. Brown <martin@linux-ip.net>
+  * overhaul generation of inventory object from sources/outputs
+  * add command-line features and options; actions in particular
+  * continue improving coverage, at 100% on utils.py
+  * complete CascadingConfig object creation
+
+2016-02-26 Martin A. Brown <martin@linux-ip.net>
+  * generate a DAG for each processor class, so dependencies can
+    be localized (controlled, abstracted) to each processor class
+  * use topological sort of the DAG to drive generation of the shellscript,
+    which leads to massive simplification of the generate() method
+  * user can specify explicit file to process
+  * better PDF generation logic (relying on jw)
+  * provide support for --script outputs (logical equiv. of --dryrun)
+  * if a document processor is missing prerequisites, gripe to logging
+    and skip to the next document
+  * support a SourceDocument named by its directory
+  * add timing to each processor (some documents take minutes to process,
+    others just a few seconds; good for users trying to understand which...)
+
+2016-02-25 Martin A. Brown <martin@linux-ip.net>
+  * overhaul where and how logging module gets called; driver.py is main
+  * adding --skip feature; can skip STEM, DOCTYPE or STATUSTYPE
+  * automatically detect configuration fragments in document processors
+    with object inspection
+
+2016-02-23 Martin A. Brown <martin@linux-ip.net>
+  * add support for --detail (and --verbose) for both source and output docs
+  * pass args into all driver functions
+  * get rid of platform.py and references (not necessary any longer)
+  * fix FD leakage in function execute() and add test case (prevent reversion)
+    (and start switching to contextlib 'with' usage to avoid in future)
+  * start generalizing the build process for all doctypes in common.py
+  * move all generic functionality into BaseDoctype object
+  * revise fundamental execution approach; generate a shellscript (which can
+    be executed or simply printed)
+  * make logging readability improvements: clarity, relevance and alignment
+
+2016-02-22 Martin A. Brown <martin@linux-ip.net>
+  * adding ArgumentParser wrapper so can support config file + envars
+  * all sorts of work for support cascading configuration
+  * allow each processor to have its own configuration fragment, e.g.
+    --docbook4xml-xmllint; owned by the Docbook4XML object
+  * add support for --dump-cfg, --dump-env, --dump-cli, --debug-options
+  * adding the license text (MIT) and all of that stuff
+  * creating and fixing the setup.py
+
+2016-02-19 Martin A. Brown <martin@linux-ip.net>
+
+2016-02-18 Martin A. Brown <martin@linux-ip.net>
+  * process and report on documents in case-insensitive stem-sorted order
+  * add many docstrings for internal usage
+  * move all source directory scanning logic out of the SourceCollection
+    object; easier to test and simpler to understand
+
+2016-02-17 Martin A. Brown <martin@linux-ip.net>
+  * add logic for testing file age, assuming a fresh checkout of the
+    source documents; use filesystem age to determine whether or not
+    a document rebuild is necessary
+  * initial support for driver.py (eventually, the main user entry point
+    and inventory.py (for managing the identification and pairing of
+    source and output documents)
+
+2016-02-16 Martin A. Brown <martin@linux-ip.net>
+  * adding tons of testing for document types, edge cases, duplicate
+    stems, sample valid and broken documents
+
+2016-02-15 Martin A. Brown <martin@linux-ip.net>
+  * first processor, Linuxdoc, reaches success
+  * provide better separation between a SourceCollection and the
+    individual SourceDocuments; analogously, between OutputDirectory
+    and OutputCollection
+  * provide similar dict-like behaviour for SourceCollection and
+    OutputCollection (which is known to the user as --pubdir)
+
+2016-02-12 Martin A. Brown <martin@linux-ip.net>
+  * first processor, Linuxdoc, fleshed out, created (failed)
+  * generate skeletons for other supported source document formats
+  * automate detection of source document format; add initial testing tools
+
+2016-02-11 Martin A. Brown <martin@linux-ip.net>
+  * core source collection and output directory scanning complete
+
+2016-02-10 Martin A. Brown <martin@linux-ip.net>
+  * initial commit and basic beginnings

@@ -1,13 +1,5 @@
-tldp (0.7.7) unstable; urgency=low
+tldp (0.7.10-1) unstable; urgency=low
 
-  * creating a manpage to satisfy Lintian, bumping version
-  * renamed source package to 'tldp'
   * Initial release (Closes: #822181)
 
- -- Martin A. Brown <martin@linux-ip.net>  Tue, 19 Apr 2016 15:40:13 -0400
-
-python3-tldp (0.7.5) UNRELEASED; urgency=low
-
-  * first attempt at Debianization
-
- -- Martin A. Brown <martin@linux-ip.net>  Tue, 19 Apr 2016 15:40:13 -0400
+ -- Martin A. Brown <martin@linux-ip.net>  Wed, 27 Apr 2016 17:09:56 +0000

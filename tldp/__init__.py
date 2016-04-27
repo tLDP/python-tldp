@@ -6,3 +6,5 @@ import tldp.config
 import tldp.outputs
 import tldp.sources
 import tldp.inventory
+
+VERSION="0.7.10"
