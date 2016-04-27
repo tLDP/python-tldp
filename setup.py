@@ -3,6 +3,7 @@ import os
 
 import glob
 from setuptools import setup
+from tldp import VERSION
 
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as r_file:
@@ -11,12 +12,12 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as r_file:
 
 setup(
     name='tldp',
-    version='0.7.8',
+    version=VERSION,
     license='MIT',
     author='Martin A. Brown',
     author_email='martin@linux-ip.net',
     url="http://en.tldp.org/",
-    description='tools for processing all TLDP source documents',
+    description='automatic publishing tool for DocBook, Linuxdoc and Asciidoc',
     long_description=readme,
     packages=['tldp', 'tldp/doctypes'],
     test_suite='nose.collector',
