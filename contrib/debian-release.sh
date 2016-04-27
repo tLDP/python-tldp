@@ -21,6 +21,6 @@ git archive \
     --to-stdout \
   > "${TARBALL}"
 
-exec debuild
+exec debuild "$@"
 
 # -- end of file
