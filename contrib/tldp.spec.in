@@ -1,11 +1,11 @@
 %define sourcename tldp
 %define name python-tldp
-%define version 0.7.8
-%define unmangled_version 0.7.8
-%define unmangled_version 0.7.8
+%define version @@VERSION@@
+%define unmangled_version @@VERSION@@
+%define unmangled_version @@VERSION@@
 %define release 1
 
-Summary: processing tools for Asciidoc, DocBook XML, DocBook SGML and Linuxdoc
+Summary: automatic publishing tool for DocBook, Linuxdoc and Asciidoc
 Name: %{name}
 Version: %{version}
 Release: %{release}
@@ -31,8 +31,8 @@ Requires: libxslt-tools
 Requires: python-networkx
 
 %description
-tldp - processing tools for Asciidoc, DocBook XML, DocBook SGML and Linuxdoc
-============================================================================
+tldp - automatic publishing tool for DocBook, Linuxdoc and Asciidoc
+===================================================================
 A toolset for publishing multiple output formats (PDF, text, chunked HTML and
 single-page HTML) from each source document in one of the supported formats.
 
