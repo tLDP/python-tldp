@@ -15,4 +15,5 @@ override_dh_installman:
 override_dh_clean:
 	(cd docs && \
 	        rm -rf -- ./_build)
+	rm -rf -- ./$(PYBUILD_NAME).egg-info
 	dh_clean
