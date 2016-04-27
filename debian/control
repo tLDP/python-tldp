@@ -1,6 +1,6 @@
 Source: tldp
 Maintainer: Martin A. Brown <martin@linux-ip.net>
-Section: python
+Section: text
 X-Python3-Version: >= 3.4
 Priority: optional
 Homepage: https://github.com/tLDP/python-tldp
