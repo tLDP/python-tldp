@@ -9,7 +9,6 @@ import time
 import errno
 import codecs
 import hashlib
-import operator
 import subprocess
 import functools
 from functools import wraps
