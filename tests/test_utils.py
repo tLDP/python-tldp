@@ -61,6 +61,7 @@ class Test_arg_isstr(unittest.TestCase):
         self.assertEqual('s', arg_isstr('s'))
         self.assertEqual(None, arg_isstr(7))
 
+
 class Test_arg_isloglevel(unittest.TestCase):
 
     def test_arg_isloglevel_integer(self):

@@ -38,7 +38,7 @@ class TestOutputCollection(TestToolsFilesystem):
 
     def test_file_in_output_collection(self):
         reldir, absdir = self.adddir('collection')
-        self.addfile('collection', __file__,  stem='non-directory')
+        self.addfile('collection', __file__, stem='non-directory')
         oc = OutputCollection(absdir)
         self.assertEqual(0, len(oc))
 
