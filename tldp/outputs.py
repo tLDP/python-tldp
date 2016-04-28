@@ -11,7 +11,7 @@ import codecs
 import logging
 
 from tldp.ldpcollection import LDPDocumentCollection
-from tldp.utils import logdir, statfiles
+from tldp.utils import logdir
 
 logger = logging.getLogger(__name__)
 
