@@ -15,7 +15,7 @@ Files: extras/xsl/tldp-*.xsl extras/css/style.css
 Copyright: 2000-2002  - David Horton (dhorton@speakeasy.net)
 License: GFDL-1.2
 
-Files: tests/sample-documents/Docbook-4.2-WHYNOT/images/* tests/sample-documents/DocBookSGML-Larger/images/bullet.png tests/sample-documents/Linuxdoc-Larger/images/*
+Files: tests/sample-documents/DocBook-4.2-WHYNOT/images/* tests/sample-documents/DocBookSGML-Larger/images/bullet.png
 Copyright: Copyright (C) 2011-2012 O'Reilly Media
 License: MIT
 
