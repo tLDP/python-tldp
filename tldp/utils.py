@@ -284,6 +284,7 @@ def md5files(name, relative=None):
     '''get all of the MD5s for files from here downtree'''
     return fileinfo(name, relative=relative, func=md5file)
 
+
 def statfiles(name, relative=None):
     '''
     >>> statfiles('./docs/x509').keys()
@@ -294,6 +295,7 @@ def statfiles(name, relative=None):
     ['index.rst', 'tutorial.rst', 'reference.rst']
     '''
     return fileinfo(name, relative=relative, func=statfile)
+
 
 def fileinfo(name, relative=None, func=statfile):
     '''return a dict() with keys being filenames and posix.stat_result values

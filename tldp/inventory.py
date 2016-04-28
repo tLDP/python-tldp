@@ -71,8 +71,7 @@ class Inventory(object):
                len(self.orphan),
                len(self.new),
                len(self.stale),
-               len(self.broken),
-               )
+               len(self.broken),)
 
     def __init__(self, pubdir, sourcedirs):
         '''construct an Inventory

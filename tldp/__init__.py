@@ -7,4 +7,4 @@ import tldp.outputs
 import tldp.sources
 import tldp.inventory
 
-VERSION="0.7.11"
+VERSION = "0.7.11"

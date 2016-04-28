@@ -31,7 +31,7 @@ signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s ' \
-     + '%(funcName)s %(message)s'
+    + '%(funcName)s %(message)s'
 logging.basicConfig(stream=sys.stderr, format=logformat, level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
@@ -109,7 +109,7 @@ def summary(config, *args, **kwargs):
     width.doctype = max([len(x.__name__) for x in knowndoctypes])
     width.status = max([len(x) for x in status_types])
     width.count = len(str(len(inv.source.keys())))
-    print('By Document Status (STATUS)', '---------------------------', 
+    print('By Document Status (STATUS)', '---------------------------',
           sep='\n', file=file)
     for status in status_types:
         count = len(getattr(inv, status, 0))
@@ -129,7 +129,7 @@ def summary(config, *args, **kwargs):
                 if abbrev:
                     s = s + ', and %d more ...' % (len(abbrev))
             print(s, file=file)
-    print('', 'By Document Type (DOCTYPE)', '--------------------------', 
+    print('', 'By Document Type (DOCTYPE)', '--------------------------',
           sep='\n', file=file)
     summarybytype = collections.defaultdict(list)
     for doc in inv.source.values():
@@ -274,7 +274,7 @@ def docbuild(config, docs, **kwargs):
     for x, source in enumerate(docs, 1):
         working = source.working
         runner = source.doctype(source=source, output=working, config=config)
-        status = 'progress, %d failures, %d successes' 
+        status = 'progress, %d failures, %d successes'
         status = status % (result.count(False), result.count(True),)
         logger.info("%s (%d of %d) initiating build [%s]",
                     source.stem, x, len(docs), status)
