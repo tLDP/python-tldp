@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <article xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
-  <title>Simple article</title>
+  <title>Bad Dir Multiple Doctypes (DocBook XML 5.0)</title>
   <para>This is a ridiculously terse article.</para>
 </article>
