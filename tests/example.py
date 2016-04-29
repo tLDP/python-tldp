@@ -41,16 +41,6 @@ ex_docbook5xml = Namespace(
 ex_asciidoc = Namespace(
     doctype=tldp.doctypes.asciidoc.Asciidoc,
     filename=opj(sampledocs, 'asciidoc-complete.txt'),)
-#
-# ex_rst = Namespace(
-#           doctype=tldp.doctypes.rst.RestructuredText,
-#           filename=opj(sampledocs, 'restructuredtext-simple.rst'),
-#          )
-#
-# ex_markdown = Namespace(
-#                doctype=tldp.doctypes.markdown.Markdown,
-#                filename=opj(sampledocs, 'markdown-simple.md'),
-#               )
 
 ex_linuxdoc_dir = Namespace(
     doctype=tldp.doctypes.linuxdoc.Linuxdoc,
