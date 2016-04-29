@@ -1,5 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
+#
+# Copyright (c) 2016 Linux Documentation Project
 
 from __future__ import absolute_import, division, print_function
 
