@@ -1,3 +1,6 @@
+# -*- coding: utf8 -*-
+#
+# Copyright (c) 2016 Linux Documentation Project
 
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
@@ -60,6 +63,7 @@ class Test_arg_isstr(unittest.TestCase):
     def test_arg_isstr(self):
         self.assertEqual('s', arg_isstr('s'))
         self.assertEqual(None, arg_isstr(7))
+
 
 class Test_arg_isloglevel(unittest.TestCase):
 

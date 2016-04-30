@@ -7,13 +7,5 @@ export PYBUILD_NAME=tldp
 
 override_dh_installman:
 	(cd docs && \
-	 sphinx-build \
-	        -b man -D today="$(BUILD_DATE)" \
-	        -d _build/doctrees . _build/man)
+	    sphinx-build -b man -d _build/doctrees . _build/man)
 	dh_installman docs/_build/man/ldptool.1
-
-override_dh_clean:
-	(cd docs && \
-	        rm -rf -- ./_build)
-	rm -rf -- ./$(PYBUILD_NAME).egg-info
-	dh_clean

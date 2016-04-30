@@ -1,5 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
+#
+# Copyright (c) 2016 Linux Documentation Project
 
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
@@ -11,7 +13,7 @@ import codecs
 import logging
 
 from tldp.ldpcollection import LDPDocumentCollection
-from tldp.utils import logdir, statfiles
+from tldp.utils import logdir
 
 logger = logging.getLogger(__name__)
 

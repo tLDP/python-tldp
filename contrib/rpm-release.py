@@ -10,7 +10,7 @@ import sys
 opd = os.path.dirname
 opj = os.path.join
 
-sys.path.append(opd(opd(__file__)))
+sys.path.insert(0, opd(opd(__file__)))
 from tldp import VERSION
 
 fin = open(opj(opd(__file__), 'tldp.spec.in'))

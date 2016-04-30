@@ -1,3 +1,6 @@
+# -*- coding: utf8 -*-
+#
+# Copyright (c) 2016 Linux Documentation Project
 
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
@@ -38,7 +41,7 @@ class TestOutputCollection(TestToolsFilesystem):
 
     def test_file_in_output_collection(self):
         reldir, absdir = self.adddir('collection')
-        self.addfile('collection', __file__,  stem='non-directory')
+        self.addfile('collection', __file__, stem='non-directory')
         oc = OutputCollection(absdir)
         self.assertEqual(0, len(oc))
 
