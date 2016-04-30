@@ -338,9 +338,11 @@ called ldp-docbook-{xsl,dsssl}.  There aren't any such packages for RPM (yet).
 
 Supported Python versions
 -------------------------
-This package was built and used against Python-2.7.8 (OpenSUS) and
-Python-2.7.6 (Ubuntu).  It has been tested (success for test suite) against
-Python-3.4.1 and lightly used against Python-3.4.1.
+This package was developed against Python-2.7.8 and Python-3.4.1 (on
+OpenSUSE).  It has been used on Python-2.7.6 (Ubuntu-14.04) and Python-3.4.2 and Python-2.7.9 (on Debian 8).
+
+Continuous Integration testing information and coverage can be reviewed at
+`this project's Travis CI page <https://travis-ci.org/martin-a-brown/python-tldp/>`_.
 
 
 Installation
@@ -351,25 +353,39 @@ requires a large number of other packages, most of which are outside of the
 Python ecosystem.  There's room for improvement here, but here are a few
 tidbits.
 
-Build an RPM:::
+Build an RPM::
 
   python setup.py sdist && rpmbuild -ta ./dist/python-tldp-${VERSION}.tar.gz
 
-There's a file, `contrib/tldp.spec`, which makes a few changes to the
-setuptools stock-generated specfile.  Specifically, the package gets named
-`python-tldp` instead of `tldp` and the configuration file is marked
-`%config(noreplace)`.
+There's a generated file, `contrib/tldp.spec`, which makes a few changes to the
+setuptools stock-generated specfile.  It adds the dependencies, marks the
+configuration file as %config(noreplace), adds a manpage and names the binary
+package `python-tldp`.
 
-I know less about packaging for Debian.  Relying on python-stdeb yields a
-working and usable Debian package which has been tested out on an Ubuntu
-14.04.3 system.
+Build a DEB::
 
-Build a DEB:::
+Check to see if the package is available from upstream.  It may be included in
+the Debian repositories already::
+
+  apt-cache search tldp
+
+The quick and dirty way is as follows::
 
   python setup.py --command-packages=stdeb.command bdist_deb
 
-I have not tried installing the package in a virtualenv or with pip.  If you
-try that, please let me know any problems you encounter.
+But, there is also a `debian` directory.  If you are working straight from the
+git checkout, you should be able to generate an installable (unsigned) Debian
+package with::
+
+  bash contrib/debian-release.sh -us -uc
+
+Install using pip:
+
+Unknown.  Because the tool relies so heavily on system-installed non-Python
+tools, I have not bothered to try installing the package using pip.  It should
+work equivalently as well as running the program straight from a checkout.
+If you learn anything here or have suggestions, for me, please feel free to
+send them along.
 
 
 Links
