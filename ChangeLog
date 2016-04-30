@@ -1,4 +1,13 @@
 
+2016-04-30 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to tldp-0.7.12
+  * adding ChangeLog (this file)
+  * cosmetic changes; deduplication of test data, copyright in many files
+  * add contrib/debian-release.sh
+  * put version number in tldp/__init__.py
+  * generate specfile after tagging, using contrib/rpm-release.py
+  * Debian packaging issues larger addressed
+
 2016-04-21 Martin A. Brown <martin@linux-ip.net>
   * bumping version to tldp-0.7.7
   * Debian packaging attempt #1, created build with 'native' source format
