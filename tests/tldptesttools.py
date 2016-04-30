@@ -1,9 +1,11 @@
+# -*- coding: utf8 -*-
+#
+# Copyright (c) 2016 Linux Documentation Project
 
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import os
-import time
 import codecs
 import random
 import shutil
@@ -102,7 +104,7 @@ class CCTestTools(unittest.TestCase):
         tf = ntf(prefix=case.tag, suffix='.cfg', dir=self.tempdir, delete=False)
         tf.close()
         with codecs.open(tf.name, 'w', encoding='utf-8') as f:
-          f.write(case.cfg)
+            f.write(case.cfg)
         case.configfile = tf.name
 
 

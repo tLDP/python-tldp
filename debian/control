@@ -34,8 +34,20 @@ Package: python3-tldp
 Architecture: all
 Depends: ${misc:Depends},
          ${python3:Depends},
-         python3,
-         python3-networkx
+         fop,
+         jing,
+         xsltproc,
+         docbook,
+         docbook5-xml,
+         docbook-xsl-ns,
+         htmldoc,
+         html2text,
+         sgml2x,
+         asciidoc,
+         linuxdoc-tools-latex,
+         linuxdoc-tools-text,
+         ldp-docbook-xsl,
+         ldp-docbook-dsssl
 Description: automatic publishing tool for DocBook, Linuxdoc and Asciidoc
  The Linux Documentation Project (TLDP) stores hundreds of documents in
  DocBook SGML, DocBook XML, Linuxdoc and Asciidoc formats.  This tool

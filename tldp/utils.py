@@ -1,5 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
+#
+# Copyright (c) 2016 Linux Documentation Project
 
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
@@ -9,7 +11,6 @@ import time
 import errno
 import codecs
 import hashlib
-import operator
 import subprocess
 import functools
 from functools import wraps
@@ -285,6 +286,7 @@ def md5files(name, relative=None):
     '''get all of the MD5s for files from here downtree'''
     return fileinfo(name, relative=relative, func=md5file)
 
+
 def statfiles(name, relative=None):
     '''
     >>> statfiles('./docs/x509').keys()
@@ -295,6 +297,7 @@ def statfiles(name, relative=None):
     ['index.rst', 'tutorial.rst', 'reference.rst']
     '''
     return fileinfo(name, relative=relative, func=statfile)
+
 
 def fileinfo(name, relative=None, func=statfile):
     '''return a dict() with keys being filenames and posix.stat_result values

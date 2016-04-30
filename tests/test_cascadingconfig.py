@@ -1,3 +1,6 @@
+# -*- coding: utf8 -*-
+#
+# Copyright (c) 2016 Linux Documentation Project
 
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
@@ -80,14 +83,13 @@ class CascadingConfigBasicTest(CCTestTools):
         ap.add_argument('--size', default=9, type=int)
 
         c = Namespace(
-          tag='tag',
-          argparser=ap,
-          argv=''.split(),
-          env=dict(),
-          cfg='',
-          exp_config=Namespace(size=9),
-          exp_args=[],
-        )
+            tag='tag',
+            argparser=ap,
+            argv=''.split(),
+            env=dict(),
+            cfg='',
+            exp_config=Namespace(size=9),
+            exp_args=[],)
 
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
         config, args = cc.parse()
@@ -99,14 +101,13 @@ class CascadingConfigBasicTest(CCTestTools):
         ap.add_argument('--size', default=9, type=int)
 
         c = Namespace(
-          tag='tag',
-          argparser=ap,
-          argv=''.split(),
-          env=dict(),
-          cfg='[tag]\nsize = 8',
-          exp_config=Namespace(size=8),
-          exp_args=[],
-        )
+            tag='tag',
+            argparser=ap,
+            argv=''.split(),
+            env=dict(),
+            cfg='[tag]\nsize = 8',
+            exp_config=Namespace(size=8),
+            exp_args=[],)
 
         self.writeconfig(c)
         c.env.setdefault('TAG_CONFIGFILE', c.configfile)
@@ -122,14 +123,13 @@ class CascadingConfigBasicTest(CCTestTools):
         import logging
         logging.getLogger().setLevel(logging.DEBUG)
         c = Namespace(
-          tag='tag',
-          argparser=ap,
-          argv=''.split(),
-          env=dict(),
-          cfg='[tag]\nsize = 8',
-          exp_config=Namespace(size=8),
-          exp_args=[],
-        )
+            tag='tag',
+            argparser=ap,
+            argv=''.split(),
+            env=dict(),
+            cfg='[tag]\nsize = 8',
+            exp_config=Namespace(size=8),
+            exp_args=[],)
         self.writeconfig(c)
         c.argv.extend(['--configfile', c.configfile])
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
@@ -144,14 +144,13 @@ class CascadingConfigBasicTest(CCTestTools):
         import logging
         logging.getLogger().setLevel(logging.DEBUG)
         c = Namespace(
-          tag='tag',
-          argparser=ap,
-          argv=''.split(),
-          env=dict(TAG_SIZE=7, ),
-          cfg='[tag]\nsize = 8',
-          exp_config=Namespace(size=7),
-          exp_args=[],
-        )
+            tag='tag',
+            argparser=ap,
+            argv=''.split(),
+            env=dict(TAG_SIZE=7, ),
+            cfg='[tag]\nsize = 8',
+            exp_config=Namespace(size=7),
+            exp_args=[],)
         self.writeconfig(c)
         c.argv.extend(['--configfile', c.configfile])
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
@@ -166,14 +165,13 @@ class CascadingConfigBasicTest(CCTestTools):
         import logging
         logging.getLogger().setLevel(logging.DEBUG)
         c = Namespace(
-          tag='tag',
-          argparser=ap,
-          argv='--size 6'.split(),
-          env=dict(TAG_SIZE=7, ),
-          cfg='[tag]\nsize = 8',
-          exp_config=Namespace(size=6),
-          exp_args=[],
-        )
+            tag='tag',
+            argparser=ap,
+            argv='--size 6'.split(),
+            env=dict(TAG_SIZE=7, ),
+            cfg='[tag]\nsize = 8',
+            exp_config=Namespace(size=6),
+            exp_args=[],)
         self.writeconfig(c)
         c.argv.extend(['--configfile', c.configfile])
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
@@ -185,14 +183,13 @@ class CascadingConfigBasicTest(CCTestTools):
         ap.add_argument('--source', default='', action='append', type=str)
 
         c = Namespace(
-          tag='tag',
-          argparser=ap,
-          argv=''.split(),
-          env=dict(),
-          cfg='',
-          exp_config=Namespace(source=''),
-          exp_args=[],
-        )
+            tag='tag',
+            argparser=ap,
+            argv=''.split(),
+            env=dict(),
+            cfg='',
+            exp_config=Namespace(source=''),
+            exp_args=[],)
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
         config, args = cc.parse()
         self.assertEqual(c.exp_config, config)
@@ -203,14 +200,13 @@ class CascadingConfigBasicTest(CCTestTools):
         ap.add_argument('--source', default='', action='append', type=str)
 
         c = Namespace(
-          tag='tag',
-          argparser=ap,
-          argv='--source /some/path'.split(),
-          env=dict(),
-          cfg='',
-          exp_config=Namespace(source=['/some/path']),
-          exp_args=[],
-        )
+            tag='tag',
+            argparser=ap,
+            argv='--source /some/path'.split(),
+            env=dict(),
+            cfg='',
+            exp_config=Namespace(source=['/some/path']),
+            exp_args=[],)
         cc = CascadingConfig(c.tag, c.argparser, argv=c.argv, env=c.env)
         config, args = cc.parse()
         self.assertEqual(c.exp_config, config)

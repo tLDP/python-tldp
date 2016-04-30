@@ -1,5 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf8 -*-
+#
+# Copyright (c) 2016 Linux Documentation Project
 
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
@@ -71,8 +73,7 @@ class Inventory(object):
                len(self.orphan),
                len(self.new),
                len(self.stale),
-               len(self.broken),
-               )
+               len(self.broken),)
 
     def __init__(self, pubdir, sourcedirs):
         '''construct an Inventory
