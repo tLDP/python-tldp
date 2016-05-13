@@ -50,7 +50,10 @@ class Test_isreadablefile_and_friends(unittest.TestCase):
         self.assertTrue(isreadablefile(f.name))
         mode = os.stat(f.name).st_mode
         os.chmod(f.name, 0)
-        self.assertFalse(isreadablefile(f.name))
+        if 0 == os.getuid():
+            self.assertTrue(isreadablefile(f.name))
+        else:
+            self.assertFalse(isreadablefile(f.name))
         os.chmod(f.name, mode)
 
     def test_arg_isreadablefile(self):
@@ -58,7 +61,10 @@ class Test_isreadablefile_and_friends(unittest.TestCase):
         self.assertEqual(f.name, arg_isreadablefile(f.name))
         mode = os.stat(f.name).st_mode
         os.chmod(f.name, 0)
-        self.assertIsNone(arg_isreadablefile(f.name))
+        if 0 == os.getuid():
+            self.assertEqual(f.name, arg_isreadablefile(f.name))
+        else:
+            self.assertIsNone(arg_isreadablefile(f.name))
         os.chmod(f.name, mode)
 
 
@@ -210,11 +216,12 @@ class Test_statfile(TestToolsFilesystem):
         f = ntf(dir=self.tempdir)
         omode = os.stat(self.tempdir).st_mode
         os.chmod(self.tempdir, 0)
-        with self.assertRaises(Exception) as ecm:
-            statfile(f.name)
-        e = ecm.exception
-        self.assertIn(e.errno, (errno.EPERM, errno.EACCES))
-        os.chmod(self.tempdir, omode)
+        if 0 != os.getuid():
+            with self.assertRaises(Exception) as ecm:
+                statfile(f.name)
+            e = ecm.exception
+            self.assertIn(e.errno, (errno.EPERM, errno.EACCES))
+            os.chmod(self.tempdir, omode)
         stbuf = statfile(f.name)
         self.assertIsInstance(stbuf, posix.stat_result)
 
