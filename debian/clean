@@ -1,2 +1,4 @@
 tldp.egg-info/
 docs/_build/
+.coverage/
+.tox/
