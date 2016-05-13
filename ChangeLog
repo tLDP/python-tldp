@@ -1,4 +1,8 @@
 
+2016-05-13 Martin A. Brown <martin@linux-ip.net>
+  * bumping version to tldp-0.7.13
+  * accommodate root-run tests (used by Deb-O-Matic)
+
 2016-04-30 Martin A. Brown <martin@linux-ip.net>
   * bumping version to tldp-0.7.12
   * adding ChangeLog (this file)
