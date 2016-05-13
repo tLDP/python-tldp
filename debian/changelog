@@ -1,5 +1,11 @@
 tldp (0.7.13-1) unstable; urgency=low
 
+  * Fix testsuite when run as root (Closes: #824201).
+
+ -- Martin A. Brown <martin@linux-ip.net>  Fri, 13 May 2016 16:28:22 +0000
+
+tldp (0.7.12-1) unstable; urgency=low
+
   * Initial release (Closes: #822181)
 
- -- Martin A. Brown <martin@linux-ip.net>  Wed, 13 May 2016 16:28:22 +0000
+ -- Martin A. Brown <martin@linux-ip.net>  Wed, 27 Apr 2016 17:09:56 +0000
