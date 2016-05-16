@@ -14,7 +14,8 @@ Description
 
 :program:`ldptool` creates chunked HTML, single-page HTML, PDF and plain text
 outputs for each source document it is passed as a *pathname*.  See
-`Source document discovery`_.
+`Source document discovery`_.  It will compare the source document and output
+document and rebuild an output only if the content has changed.
 
 If it is not passed any arguments, `ldptool` will collect all of the
 directories specified with the --sourcedir option and scan through these
@@ -46,6 +47,9 @@ Action options
 --------------
 -h, --help
    show a help message and exit
+
+-V, --version
+   print out the version number
 
 -b, --build
    Build LDP documentation into the `--builddir` and exit.
@@ -166,14 +170,15 @@ span multiple files.  Although more than half of the LDP document collection
 consists of single-file HOWTO contributions, there are a number of documents
 that are composed of dozens, even hundreds of files.  In order to accommodate
 both the simple documents and these much more complex documents, LDP adopted a
-simple (unoriginal) naming strategy to allow a single document to span
+simple (though not unique) naming strategy to allow a single document to span
 multiple files::
 
-  Each document is referred to by a stem, which is the filename without any
-  extension.  A single file document is simple STEM.EXT.  A document that
-  requires many files must be contained in a directory with the STEM name.
-  Therefore, the primary source document will always be called either STEM.EXT
-  or STEM/STEM.EXT.
+  Each document is referred to by a stem, which is the filename
+  without any extension.  A single file document is simple
+  STEM.EXT.  A document that requires many files must be contained
+  in a directory with the STEM name.  Therefore, the primary
+  source document will always be called either STEM.EXT or
+  STEM/STEM.EXT.
 
 (If there is a STEM/STEM.xml and STEM/STEM.sgml in the same directory, that is
 an error, and `ldptool` will freak out and shoot pigeons.)
