@@ -3,6 +3,7 @@
 # Copyright (c) 2016 Linux Documentation Project
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
 
 import tldp.config
 import tldp.outputs
