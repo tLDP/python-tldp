@@ -12,6 +12,7 @@ import uuid
 import errno
 import codecs
 import random
+import unittest
 from tempfile import NamedTemporaryFile as ntf
 from argparse import Namespace
 
@@ -20,6 +21,7 @@ from tldp.typeguesser import knowndoctypes
 from tldp.inventory import stypes, status_types
 from tldp.sources import SourceDocument
 from tldp.outputs import OutputDirectory
+from tldp import VERSION
 
 # -- Test Data
 import example
@@ -124,6 +126,22 @@ class TestDriverShowStatustypes(TestToolsFilesystem):
 
     def test_run_statustypes(self):
         exitcode = tldp.driver.run(['--statustypes'])
+        self.assertEqual(exitcode, os.EX_OK)
+
+
+class TestDriverShowVersion(unittest.TestCase):
+
+    def test_show_version(self):
+        stdout = io.StringIO()
+        result = tldp.driver.show_version(Namespace(), file=stdout)
+        self.assertEqual(result, os.EX_OK)
+        stdout.seek(0)
+        data = stdout.read().strip()
+        for status in status_types:
+            self.assertEqual(VERSION, data)
+
+    def test_run_statustypes(self):
+        exitcode = tldp.driver.run(['--version'])
         self.assertEqual(exitcode, os.EX_OK)
 
 
