@@ -24,6 +24,7 @@ from tldp.config import collectconfiguration
 from tldp.utils import arg_isloglevel, arg_isdirectory
 from tldp.utils import swapdirs, sameFilesystem
 from tldp.doctypes.common import preamble, postamble
+from tldp import VERSION
 
 # -- Don't freak out with IOError when our STDOUT, handled with
 #    head, sed, awk, grep, etc; and, also deal with a user's ctrl-C
@@ -51,6 +52,11 @@ ERR_NEEDSOURCEDIR = "Option --sourcedir (and --pubdir) required "
 ERR_UNKNOWNARGS = "Unknown arguments received: "
 ERR_EXTRAARGS = "Extra arguments received: "
 
+
+def show_version(config, *args, **kwargs):
+    file = kwargs.get('file', sys.stdout)
+    print(VERSION, file=file)
+    return os.EX_OK
 
 def show_doctypes(config, *args, **kwargs):
     if args:
@@ -507,6 +513,9 @@ def collectWorkset(config, args):
 
 
 def handleArgs(config, args):
+
+    if config.version:
+        return show_version(config, *args)
 
     if config.doctypes:
         return show_doctypes(config, *args)
