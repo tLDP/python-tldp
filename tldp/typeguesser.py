@@ -57,7 +57,7 @@ def guess(fname):
     '''
     try:
         stem, ext = os.path.splitext(fname)
-    except AttributeError:
+    except (AttributeError, TypeError):
         return None
 
     if not ext:
