@@ -5,10 +5,15 @@
 
 from __future__ import absolute_import, division, print_function
 
-import collections
+import sys
+
+if sys.version_info[:2] >= (3, 8):  # pragma: no cover
+    from collections.abc import MutableMapping
+else:  # pragma: no cover
+    from collections import MutableMapping
 
 
-class LDPDocumentCollection(collections.MutableMapping):
+class LDPDocumentCollection(MutableMapping):
     '''a dict-like container for DocumentCollection objects
 
     Intended to be subclassed.
