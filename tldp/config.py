@@ -8,7 +8,6 @@ from __future__ import unicode_literals
 
 import os
 import argparse
-import copy as _copy
 
 import logging
 
@@ -30,7 +29,7 @@ class DirectoriesExist(argparse._AppendAction):
             message = message % (values, option_string)
             logger.critical(message)
             raise ValueError(message)
-        items = _copy.copy(argparse._ensure_value(namespace, self.dest, []))
+        items = getattr(namespace, self.dest, [])
         items.append(values)
         setattr(namespace, self.dest, items)
 
