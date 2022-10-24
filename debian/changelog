@@ -1,3 +1,7 @@
+tldp (0.7.15-1) unstable; urgency=low
+
+  * support Python3.8+: fix import for MutableMapping and other minor fixes
+
 tldp (0.7.14-1) unstable; urgency=low
 
   * Add --version option.
