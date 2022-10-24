@@ -146,6 +146,11 @@ def collectconfiguration(tag, argv):
                    action='store_true', default=False,
                    help='show status types and classes [%(default)s]')
 
+    g.add_argument('--version',
+                   '-V',
+                   action='store_true', default=False,
+                   help='print out the version number [%(default)s]')
+
     # -- collect up the distributed configuration fragments
     #
     for cls in tldp.typeguesser.knowndoctypes:

@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "LDPTOOL" "1" "2016-04-21" "1.9.2" "ldptool"
+.TH "LDPTOOL" "1" "May 16, 2016" "1.9.2" "ldptool"
 .SH NAME
 ldptool \- DocBook, Linuxdoc and Asciidoc build/publishing tool.
 .
@@ -37,7 +37,8 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .sp
 \fBldptool\fP creates chunked HTML, single\-page HTML, PDF and plain text
 outputs for each source document it is passed as a \fIpathname\fP\&.  See
-\fI\%Source document discovery\fP\&.
+\fI\%Source document discovery\fP\&.  It will compare the source document and output
+document and rebuild an output only if the content has changed.
 .sp
 If it is not passed any arguments, \fIldptool\fP will collect all of the
 directories specified with the \-\-sourcedir option and scan through these
@@ -80,6 +81,9 @@ generate configuration files that it can then take as input
 .TP
 .B \-h\fP,\fB  \-\-help
 show a help message and exit
+.TP
+.B \-V\fP,\fB  \-\-version
+print out the version number
 .TP
 .B \-b\fP,\fB  \-\-build
 Build LDP documentation into the \fI\-\-builddir\fP and exit.
@@ -204,18 +208,19 @@ span multiple files.  Although more than half of the LDP document collection
 consists of single\-file HOWTO contributions, there are a number of documents
 that are composed of dozens, even hundreds of files.  In order to accommodate
 both the simple documents and these much more complex documents, LDP adopted a
-simple (unoriginal) naming strategy to allow a single document to span
+simple (though not unique) naming strategy to allow a single document to span
 multiple files:
 .INDENT 0.0
 .INDENT 3.5
 .sp
 .nf
 .ft C
-Each document is referred to by a stem, which is the filename without any
-extension.  A single file document is simple STEM.EXT.  A document that
-requires many files must be contained in a directory with the STEM name.
-Therefore, the primary source document will always be called either STEM.EXT
-or STEM/STEM.EXT.
+Each document is referred to by a stem, which is the filename
+without any extension.  A single file document is simple
+STEM.EXT.  A document that requires many files must be contained
+in a directory with the STEM name.  Therefore, the primary
+source document will always be called either STEM.EXT or
+STEM/STEM.EXT.
 .ft P
 .fi
 .UNINDENT
