@@ -14,6 +14,7 @@ import shutil
 import logging
 import inspect
 import collections
+import json
 from argparse import Namespace
 
 from tldp.typeguesser import knowndoctypes
@@ -33,8 +34,9 @@ from tldp import VERSION
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-logformat = '%(levelname)-9s %(name)s %(filename)s#%(lineno)s ' \
-    + '%(funcName)s %(message)s'
+logformat = (
+    "%(levelname)-9s %(name)s %(filename)s#%(lineno)s " + "%(funcName)s %(message)s"
+)
 logging.basicConfig(stream=sys.stderr, format=logformat, level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
@@ -54,119 +56,174 @@ ERR_EXTRAARGS = "Extra arguments received: "
 
 
 def show_version(config, *args, **kwargs):
-    file = kwargs.get('file', sys.stdout)
+    file = kwargs.get("file", sys.stdout)
     print(VERSION, file=file)
     return os.EX_OK
 
+
 def show_doctypes(config, *args, **kwargs):
     if args:
-        return ERR_EXTRAARGS + ' '.join(args)
-    file = kwargs.get('file', sys.stdout)
+        return ERR_EXTRAARGS + " ".join(args)
+    file = kwargs.get("file", sys.stdout)
     print("Supported source document types:", file=file)
-    print('', file=file)
+    print("", file=file)
     for doctype in knowndoctypes:
         classname = doctype.__name__
         fname = os.path.abspath(inspect.getmodule(doctype).__file__)
-        extensions = ', '.join(doctype.extensions)
-        print('{}'.format(classname), file=file)
-        print('      format name: {}'.format(doctype.formatname), file=file)
-        print('    code location: {}'.format(fname), file=file)
-        print('  file extensions: {}'.format(extensions), file=file)
+        extensions = ", ".join(doctype.extensions)
+        print("{}".format(classname), file=file)
+        print("      format name: {}".format(doctype.formatname), file=file)
+        print("    code location: {}".format(fname), file=file)
+        print("  file extensions: {}".format(extensions), file=file)
         for signature in doctype.signatures:
-            print('        signature: {}'.format(signature), file=file)
-        print('', file=file)
-    print('', file=file)
+            print("        signature: {}".format(signature), file=file)
+        print("", file=file)
+    print("", file=file)
     return os.EX_OK
 
 
 def show_statustypes(config, *args, **kwargs):
     if args:
-        return ERR_EXTRAARGS + ' '.join(args)
-    file = kwargs.get('file', sys.stdout)
+        return ERR_EXTRAARGS + " ".join(args)
+    file = kwargs.get("file", sys.stdout)
     width = 2 + max([len(x) for x in status_types])
     print("Basic status types:", file=file)
-    print('', file=file)
+    print("", file=file)
     for status, descrip in stypes.items():
-        fmt = '{status:>{width}}:  {descrip}'
+        fmt = "{status:>{width}}:  {descrip}"
         text = fmt.format(status=status, descrip=descrip, width=width)
         print(text, file=file)
-    print('', file=file)
+    print("", file=file)
     print("Synonyms and groups:", file=file)
-    print('', file=file)
+    print("", file=file)
     for status, descrip in status_classes.items():
-        fmt = '{status:>{width}}:  {descrip}'
-        descrip = ', '.join(descrip)
+        fmt = "{status:>{width}}:  {descrip}"
+        descrip = ", ".join(descrip)
         text = fmt.format(status=status, descrip=descrip, width=width)
         print(text, file=file)
-    print('', file=file)
+    print("", file=file)
+    return os.EX_OK
+
+
+def output_json(config, *args, **kwargs):
+    if args:
+        return ERR_EXTRAARGS + " ".join(args)
+    if not config.pubdir:
+        return ERR_NEEDPUBDIR + "for --json"
+    if not config.sourcedir:
+        return ERR_NEEDSOURCEDIR + "for --json"
+    inv = Inventory(config.pubdir, config.sourcedir)
+    howto_dirs = []
+    guide_dirs = []
+    faq_dirs = []
+    for stem in sorted(inv.all.keys()):
+        doc = inv.all[stem]
+        parent = os.path.basename(os.path.dirname(doc.dirname))
+        if parent in ("howto", "guide", "faq"):
+            if parent == "howto":
+                howto_dirs.append(stem)
+            elif parent == "guide":
+                guide_dirs.append(stem)
+            else:
+                faq_dirs.append(stem)
+        else:
+            grandparent = os.path.basename(
+                os.path.dirname(os.path.dirname(doc.dirname))
+            )
+            if grandparent in ("howto", "guide", "faq"):
+                if grandparent == "howto":
+                    howto_dirs.append(stem)
+                elif grandparent == "guide":
+                    guide_dirs.append(stem)
+                else:
+                    faq_dirs.append(stem)
+    result = {"HOWTO": howto_dirs, "Guides": guide_dirs, "FAQs": faq_dirs}
+    if config.json:
+        json_path = os.path.join(config.pubdir, config.json)
+        with open(json_path, "w") as f:
+            json.dump(result, f, indent=2)
+        print(f"JSON output written to: {json_path}")
+    else:
+        file = kwargs.get("file", sys.stdout)
+        json.dump(result, file, indent=2)
+        print("", file=file)
     return os.EX_OK
 
 
 def summary(config, *args, **kwargs):
     if args:
-        return ERR_EXTRAARGS + ' '.join(args)
+        return ERR_EXTRAARGS + " ".join(args)
     if not config.pubdir:
         return ERR_NEEDPUBDIR + "for --summary"
     if not config.sourcedir:
         return ERR_NEEDSOURCEDIR + "for --summary"
-    file = kwargs.get('file', sys.stdout)
-    inv = kwargs.get('inv', None)
+    file = kwargs.get("file", sys.stdout)
+    inv = kwargs.get("inv", None)
     if inv is None:
         inv = Inventory(config.pubdir, config.sourcedir)
     width = Namespace()
     width.doctype = max([len(x.__name__) for x in knowndoctypes])
     width.status = max([len(x) for x in status_types])
     width.count = len(str(len(inv.source.keys())))
-    print('By Document Status (STATUS)', '---------------------------',
-          sep='\n', file=file)
+    print(
+        "By Document Status (STATUS)",
+        "---------------------------",
+        sep="\n",
+        file=file,
+    )
     for status in status_types:
         count = len(getattr(inv, status, 0))
-        s = '{0:{w.status}}  {1:{w.count}}  '.format(status, count, w=width)
+        s = "{0:{w.status}}  {1:{w.count}}  ".format(status, count, w=width)
         print(s, end="", file=file)
         if config.verbose:
-            print(', '.join(getattr(inv, status).keys()), file=file)
+            print(", ".join(getattr(inv, status).keys()), file=file)
         else:
             abbrev = getattr(inv, status).keys()
-            s = ''
+            s = ""
             if abbrev:
                 s = s + abbrev.pop(0)
                 while abbrev:
                     if (len(s) + len(abbrev[0])) > 48:
                         break
-                    s = s + ', ' + abbrev.pop(0)
+                    s = s + ", " + abbrev.pop(0)
                 if abbrev:
-                    s = s + ', and %d more ...' % (len(abbrev))
+                    s = s + ", and %d more ..." % (len(abbrev))
             print(s, file=file)
-    print('', 'By Document Type (DOCTYPE)', '--------------------------',
-          sep='\n', file=file)
+    print(
+        "",
+        "By Document Type (DOCTYPE)",
+        "--------------------------",
+        sep="\n",
+        file=file,
+    )
     summarybytype = collections.defaultdict(list)
     for doc in inv.source.values():
         name = doc.doctype.__name__
         summarybytype[name].append(doc.stem)
     for doctype, docs in summarybytype.items():
         count = len(docs)
-        s = '{0:{w.doctype}}  {1:{w.count}}  '.format(doctype, count, w=width)
+        s = "{0:{w.doctype}}  {1:{w.count}}  ".format(doctype, count, w=width)
         print(s, end="", file=file)
         if config.verbose:
-            print(', '.join(docs), file=file)
+            print(", ".join(docs), file=file)
         else:
             abbrev = docs
-            s = ''
+            s = ""
             if abbrev:
                 s = s + abbrev.pop(0)
                 while abbrev:
                     if (len(s) + len(abbrev[0])) > 36:
                         break
-                    s = s + ', ' + abbrev.pop(0)
+                    s = s + ", " + abbrev.pop(0)
                 if abbrev:
-                    s = s + ', and %d more ...' % (len(abbrev))
+                    s = s + ", and %d more ..." % (len(abbrev))
             print(s, file=file)
-    print('', file=file)
+    print("", file=file)
     return os.EX_OK
 
 
 def detail(config, docs, **kwargs):
-    file = kwargs.get('file', sys.stdout)
+    file = kwargs.get("file", sys.stdout)
     width = Namespace()
     width.doctype = max([len(x.__name__) for x in knowndoctypes])
     width.status = max([len(x) for x in status_types])
@@ -184,8 +241,9 @@ def removeOrphans(docs):
     sources = list()
     for x, doc in enumerate(docs, 1):
         if not isinstance(doc, SourceDocument):
-            logger.info("%s (%d of %d) removing:  no source for orphan",
-                        doc.stem, x, len(docs))
+            logger.info(
+                "%s (%d of %d) removing:  no source for orphan", doc.stem, x, len(docs)
+            )
             continue
         sources.append(doc)
     return sources
@@ -195,8 +253,9 @@ def removeUnknownDoctypes(docs):
     sources = list()
     for x, doc in enumerate(docs, 1):
         if not doc.doctype:
-            logger.info("%s (%d of %d) removing:  unknown doctype",
-                        doc.stem, x, len(docs))
+            logger.info(
+                "%s (%d of %d) removing:  unknown doctype", doc.stem, x, len(docs)
+            )
             continue
         sources.append(doc)
     return sources
@@ -214,9 +273,9 @@ def createBuildDirectory(d):
 
 
 def builddir_setup(config):
-    '''create --builddir; ensure it shares a filesystem with --pubdir'''
+    """create --builddir; ensure it shares a filesystem with --pubdir"""
     if not config.builddir:
-        builddir = opj(opd(opa(config.pubdir)), 'ldptool-build')
+        builddir = opj(opd(opa(config.pubdir)), "ldptool-build")
         ready, error = createBuildDirectory(builddir)
         if not ready:
             return ready, error
@@ -239,7 +298,7 @@ def create_dtworkingdir(config, docs):
 
 
 def post_publish_cleanup(workingdirs):
-    '''clean up empty directories left under --builddir'''
+    """clean up empty directories left under --builddir"""
     for d in workingdirs:
         if os.path.isdir(d):
             try:
@@ -282,10 +341,14 @@ def docbuild(config, docs, **kwargs):
     for x, source in enumerate(docs, 1):
         working = source.working
         runner = source.doctype(source=source, output=working, config=config)
-        status = 'progress, %d failures, %d successes'
-        status = status % (result.count(False), result.count(True),)
-        logger.info("%s (%d of %d) initiating build [%s]",
-                    source.stem, x, len(docs), status)
+        status = "progress, %d failures, %d successes"
+        status = status % (
+            result.count(False),
+            result.count(True),
+        )
+        logger.info(
+            "%s (%d of %d) initiating build [%s]", source.stem, x, len(docs), status
+        )
         result.append(runner.generate(**kwargs))
     if all(result):
         buildsuccess = True
@@ -296,7 +359,7 @@ def script(config, docs, **kwargs):
     ready, error = prepare_docs_script_mode(config, docs)
     if not ready:
         return error
-    file = kwargs.get('file', sys.stdout)
+    file = kwargs.get("file", sys.stdout)
     print(preamble, file=file)
     buildsuccess, results = docbuild(config, docs, **kwargs)
     print(postamble, file=file)
@@ -321,11 +384,19 @@ def build(config, docs, **kwargs):
     buildsuccess, results = docbuild(config, docs, **kwargs)
     for x, (buildcode, source) in enumerate(results, 1):
         if buildcode:
-            logger.info("success (%d of %d) available in %s",
-                        x, len(results), source.working.dirname)
+            logger.info(
+                "success (%d of %d) available in %s",
+                x,
+                len(results),
+                source.working.dirname,
+            )
         else:
-            logger.info("FAILURE (%d of %d) available in %s",
-                        x, len(results), source.working.dirname)
+            logger.info(
+                "FAILURE (%d of %d) available in %s",
+                x,
+                len(results),
+                source.working.dirname,
+            )
     if buildsuccess:
         return os.EX_OK
     else:
@@ -338,14 +409,14 @@ def publish(config, docs, **kwargs):
     if result != os.EX_OK:
         return result
     for x, source in enumerate(docs, 1):
-        logger.info("Publishing (%d of %d) to %s.",
-                    x, len(docs), source.output.dirname)
+        logger.info("Publishing (%d of %d) to %s.", x, len(docs), source.output.dirname)
         # -- swapdirs must raise an error if there are problems
         #
         swapdirs(source.working.dirname, source.output.dirname)
         if os.path.isdir(source.working.dirname):
-            logger.debug("%s removing old directory %s",
-                         source.stem, source.working.dirname)
+            logger.debug(
+                "%s removing old directory %s", source.stem, source.working.dirname
+            )
             shutil.rmtree(source.working.dirname)
     workingdirs = list(set([x.dtworkingdir for x in docs]))
     workingdirs.append(config.builddir)
@@ -416,7 +487,7 @@ def processSkips(config, docs):
     skip_doctypes, skip_stems = getDocumentClasses(remainder)
     for doc in docs:
         stem = doc.stem
-        if hasattr(doc, 'doctype'):
+        if hasattr(doc, "doctype"):
             if doc.doctype in skip_doctypes:
                 logger.info("%s skipping doctype %s", stem, doc.doctype)
                 excluded.add(doc)
@@ -436,8 +507,7 @@ def processSkips(config, docs):
 def extractExplicitDocumentArgs(config, args):
     docs = set()
     rawdocs, remainder = getDocumentNames(args)
-    logger.debug("args included %d documents in filesystem: %r",
-                 len(rawdocs), rawdocs)
+    logger.debug("args included %d documents in filesystem: %r", len(rawdocs), rawdocs)
     for doc in rawdocs:
         docs.add(SourceDocument(doc))
     return docs, remainder
@@ -475,8 +545,11 @@ def collectWorkset(config, args):
         if not config.sourcedir:
             return None, ERR_NEEDSOURCEDIR + "for inventory"
         inv = Inventory(config.pubdir, config.sourcedir)
-        logger.info("Inventory contains %s source and %s output documents.",
-                    len(inv.source.keys()), len(inv.output.keys()))
+        logger.info(
+            "Inventory contains %s source and %s output documents.",
+            len(inv.source.keys()),
+            len(inv.output.keys()),
+        )
     else:
         inv = None
 
@@ -493,7 +566,7 @@ def collectWorkset(config, args):
         logger.info("Added %d docs, found by stem name.", len(docs))
 
     if unknownargs:
-        return None, ERR_UNKNOWNARGS + ' '.join(unknownargs)
+        return None, ERR_UNKNOWNARGS + " ".join(unknownargs)
 
     # -- without any arguments (no files, no stems, no status_classes), the
     #    default behaviour is to either --build, --list or --script any
@@ -522,6 +595,9 @@ def handleArgs(config, args):
 
     if config.statustypes:
         return show_statustypes(config, *args)
+
+    if config.json:
+        return output_json(config, *args)
 
     if config.summary:
         return summary(config, *args)
@@ -562,15 +638,15 @@ def handleArgs(config, args):
 def run(argv):
     # -- may want to see option parsing, so set --loglevel as
     #    soon as possible
-    if '--loglevel' in argv:
-        levelarg = 1 + argv.index('--loglevel')
+    if "--loglevel" in argv:
+        levelarg = 1 + argv.index("--loglevel")
         level = arg_isloglevel(argv[levelarg])
         # -- set the root logger's level
         logging.getLogger().setLevel(level)
 
     # -- produce a configuration from CLI, ENV and CFG
     #
-    tag = 'ldptool'
+    tag = "ldptool"
     config, args = collectconfiguration(tag, argv)
 
     # -- and reset the loglevel (after reading envar, and config)
@@ -588,7 +664,8 @@ def run(argv):
 def main():
     sys.exit(run(sys.argv[1:]))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
 
 #
