@@ -213,19 +213,19 @@ def collectconfiguration(tag, argv):
     )
 
     g.add_argument(
-        "--json",
-        nargs="?",
-        const="ldptool-inventory.json",
-        default=False,
-        help="output directory list as JSON grouped by HOWTO/Guides [default: ldptool-inventory.json]",
-    )
-
-    g.add_argument(
         "--version",
         "-V",
         action="store_true",
         default=False,
         help="print out the version number [%(default)s]",
+    )
+
+    ap.add_argument(
+        "--json",
+        nargs="?",
+        const="ldptool-inventory.json",
+        default=False,
+        help="output directory list as JSON grouped by HOWTO/Guides [default: ldptool-inventory.json]",
     )
 
     # -- collect up the distributed configuration fragments
