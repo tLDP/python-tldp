@@ -597,7 +597,9 @@ def handleArgs(config, args):
         return show_statustypes(config, *args)
 
     if config.json:
-        return output_json(config, *args)
+        result = output_json(config, *args)
+        if not config.publish:
+            return result
 
     if config.summary:
         return summary(config, *args)
