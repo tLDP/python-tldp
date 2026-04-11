@@ -355,7 +355,7 @@ tidbits.
 
 Build an RPM::
 
-  VERSION=1 python setup.py sdist && rpmbuild -ta ./dist/python-tldp-${VERSION}.tar.gz
+  VERSION=0.7.15 && python setup.py sdist && rpmbuild -ta ./dist/tldp-${VERSION}.tar.gz
 
 There's a generated file, `contrib/tldp.spec`, which makes a few changes to the
 setuptools stock-generated specfile.  It adds the dependencies, marks the
