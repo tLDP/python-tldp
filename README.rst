@@ -353,7 +353,7 @@ requires a large number of other packages, most of which are outside of the
 Python ecosystem.  There's room for improvement here, but here are a few
 tidbits.
 
-Build an RPM::
+Build an RPM (binary is outputted in `$HOME/rpmbuild/RPMS/noarch` directory)::
 
   VERSION=0.7.15 && python setup.py sdist && rpmbuild -ta ./dist/tldp-${VERSION}.tar.gz
 
